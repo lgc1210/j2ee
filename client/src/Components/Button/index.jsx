@@ -1,0 +1,56 @@
+import React from "react";
+
+const Button = ({
+  bgColor = "",
+  text = "",
+  Icon,
+  iconSize = 20,
+  buttonStyle = "",
+  iconStyle = "",
+  textStyle = "",
+}) => {
+  return (
+    <button
+      className={`
+        flex items-center 
+        py-4 px-10 
+        border border-black 
+        uppercase text-sm font-semibold tracking-widest 
+        relative 
+        group 
+        overflow-hidden 
+        transition-all duration-700 ease-linear
+        ${buttonStyle}`}>
+      <p
+        className={`
+        relative z-10 text-black group-hover:text-white 
+        transition-all duration-700 ease-linear
+        ${textStyle}`}>
+        {text}
+      </p>
+      <Icon
+        size={iconSize}
+        className={`
+        relative z-10 text-black group-hover:text-white 
+        transition-all duration-700 ease-linear
+        ${iconStyle}`}
+      />
+      <span
+        className='
+        absolute 
+        top-0 bottom-0 right-0 left-0 
+        bg-black 
+        transition-all duration-700 ease-linear 
+        -translate-x-full group-hover:translate-x-0 '></span>
+      <span
+        className='
+        absolute 
+        top-0 bottom-0 right-0 left-0 
+        bg-black 
+        transition-all duration-700 ease-linear 
+        translate-x-full group-hover:translate-x-0 '></span>
+    </button>
+  );
+};
+
+export default Button;

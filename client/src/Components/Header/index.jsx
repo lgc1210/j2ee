@@ -24,7 +24,7 @@ const Header = () => {
         {/* Small screens */}
         <HiOutlineBars3
           size={30}
-          className='md:hidden block'
+          className='md:hidden block cursor-pointer'
           onClick={() => setToggleNav(!toggleNav)}
         />
 
@@ -39,7 +39,7 @@ const Header = () => {
         </div>
 
         <nav
-          className={`transition-all durtaion-500 md:py-0 py-8 bg-white lg:order-2 md:order-3 order-1 md:flex-row md:relative md:top-0 absolute z-10 top-full right-0 left-0 flex-col items-center justify-center xl:gap-16 gap-4 xl:px-0 px-8 ${
+          className={`transition-all durtaion-500 md:py-0 py-8 bg-white lg:order-2 md:order-3 order-1 md:flex-row md:relative md:top-0 absolute z-20 top-full right-0 left-0 flex-col items-center justify-center xl:gap-16 gap-4 xl:px-0 px-8 ${
             toggleNav ? "flex" : "hidden"
           }`}>
           {navItems.map((item, index) => {
