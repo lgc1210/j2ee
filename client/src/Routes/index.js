@@ -15,6 +15,7 @@ const NotFound = lazy(() => import("../Pages/NotFound"));
 const Profile = lazy(() => import("../Pages/Profile"));
 const Contact = lazy(() => import("../Pages/Contact"));
 const ProductDetails = lazy(() => import("../Pages/ProductDetails"));
+const Cart = lazy(() => import("../Pages/Cart"));
 
 // Admin Pages
 const Admin = lazy(() => import("../Pages/Admin"));
@@ -67,6 +68,12 @@ const routes = {
     url: paths.productDetails,
     Layout: CustomerLayout,
     Page: ProductDetails,
+  },
+  cart: {
+    isPublic: true,
+    url: paths.cart,
+    Layout: CustomerLayout,
+    Page: Cart,
   },
   admin: {
     isPublic: false,
