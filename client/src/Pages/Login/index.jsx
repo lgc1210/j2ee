@@ -1,8 +1,35 @@
 import { useState } from "react";
+import paths from "../../Constants/paths";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [fields, setFields] = useState({ email: "", password: "" });
+  const [errors, setErrors] = useState({ email: "", password: "" });
+
+  const handleFieldsChange = (key, value) => {
+    setFields((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleFieldsType = (key) => {
+    setErrors((prev) => ({ ...prev, [key]: "" }));
+  };
+
+  const handelFieldsBlur = (key, message) => {
+    setErrors((prev) => ({ ...prev, [key]: message }));
+  };
+
+  const validateFields = () => {
+    const errs = {};
+
+    setErrors(errs);
+
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!validateFields()) return;
+  };
 
   return (
     <div className='flex min-h-full flex-1 flex-col items-center justify-center px-6 py-12 lg:px-8'>
@@ -34,6 +61,10 @@ export default function Login() {
                   required
                   autoComplete='email'
                   className='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6'
+                  value={fields.email}
+                  onChange={(event) =>
+                    handleFieldsChange("email", event.target.value)
+                  }
                 />
               </div>
             </div>
@@ -47,7 +78,7 @@ export default function Login() {
                 </label>
                 <div className='text-sm'>
                   <a
-                    href='#'
+                    href='/'
                     className='font-semibold text-indigo-600 hover:text-indigo-500'>
                     Forgot password?
                   </a>
@@ -61,6 +92,10 @@ export default function Login() {
                   required
                   autoComplete='current-password'
                   className='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6'
+                  value={fields.password}
+                  onChange={(event) =>
+                    handleFieldsChange("password", event.target.value)
+                  }
                 />
               </div>
             </div>
@@ -77,7 +112,7 @@ export default function Login() {
           <p className='mt-10 text-center text-sm/6 text-gray-500'>
             Don't you have an account?{" "}
             <a
-              href='#'
+              href={paths.register}
               className='font-semibold text-indigo-600 hover:text-indigo-500'>
               Register
             </a>

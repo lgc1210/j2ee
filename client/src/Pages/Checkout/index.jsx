@@ -1,7 +1,7 @@
 import React from "react";
 
-const ProtectedRoute = () => {
+const Checkout = () => {
   return <section></section>;
 };
 
-export default ProtectedRoute;
+export default Checkout;

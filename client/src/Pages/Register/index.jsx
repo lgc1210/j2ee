@@ -1,12 +1,41 @@
 import { useState } from "react";
+import paths from "../../Constants/paths";
 
 export default function Register() {
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [fields, setFields] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+  });
   const [errors, setErrors] = useState({});
+
+  const handleFieldsChange = (key, value) => {
+    setFields((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleFieldsType = (key) => {
+    setErrors((prev) => ({ ...prev, [key]: "" }));
+  };
+
+  const handleFieldsBlur = (key, message) => {
+    setErrors((prev) => ({ ...prev, [key]: message }));
+  };
+
+  const validateFields = () => {
+    const errs = {};
+
+    setErrors(errs);
+
+    return Object.keys(errs).length === 0;
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!validateFields()) return;
+  };
 
   return (
     <>
@@ -39,6 +68,10 @@ export default function Register() {
                     required
                     autoComplete='fullName'
                     className='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6'
+                    value={fields.fullName}
+                    onChange={(event) =>
+                      handleFieldsChange("fullName", event.target.value)
+                    }
                   />
                 </div>
               </div>
@@ -57,6 +90,32 @@ export default function Register() {
                     required
                     autoComplete='email'
                     className='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6'
+                    value={fields.email}
+                    onChange={(event) =>
+                      handleFieldsChange("email", event.target.value)
+                    }
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor='phone'
+                  className='block text-sm/6 font-medium text-gray-900'>
+                  Phone number
+                </label>
+                <div className='mt-2'>
+                  <input
+                    id='phone'
+                    name='phone'
+                    type='phone'
+                    required
+                    autoComplete='phone'
+                    className='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6'
+                    value={fields.phone}
+                    onChange={(event) =>
+                      handleFieldsChange("phone", event.target.value)
+                    }
                   />
                 </div>
               </div>
@@ -77,6 +136,10 @@ export default function Register() {
                     required
                     autoComplete='current-password'
                     className='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6'
+                    value={fields.password}
+                    onChange={(event) =>
+                      handleFieldsChange("password", event.target.value)
+                    }
                   />
                 </div>
               </div>
@@ -97,6 +160,10 @@ export default function Register() {
                     required
                     autoComplete='current-password'
                     className='block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6'
+                    value={fields.confirmPassword}
+                    onChange={(event) =>
+                      handleFieldsChange("confirmPassword", event.target.value)
+                    }
                   />
                 </div>
               </div>
@@ -113,7 +180,7 @@ export default function Register() {
             <p className='mt-10 text-center text-sm/6 text-gray-500'>
               Already have an account?{" "}
               <a
-                href='#'
+                href={paths.login}
                 className='font-semibold text-indigo-600 hover:text-indigo-500'>
                 Login
               </a>

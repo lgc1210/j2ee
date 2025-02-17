@@ -1,7 +1,13 @@
-import Login from "./Authentication/Login";
-import Register from "./Authentication/Register";
-import NotFound from "./Components/NotFound";
+import { BrowserRouter as Router } from "react-router-dom";
+import AppRoutes from "./Routes/AppRoutes";
+import Auth from "./Contexts/Auth";
 
 export default function App() {
-  return <main></main>;
+  return (
+    <Auth>
+      <Router>
+        <AppRoutes />
+      </Router>
+    </Auth>
+  );
 }
