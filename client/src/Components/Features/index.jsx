@@ -36,7 +36,9 @@ const Features = () => {
           <div className='grid md:grid-cols-2 gap-x-20 gap-y-10 mt-16'>
             {featuresItems.map((item, index) => {
               return (
-                <div className='py-10 flex items-center gap-4 border-t border-t-gray-200 hover:border-t-black transition-all duration-700'>
+                <div
+                  key={index}
+                  className='py-10 flex items-center gap-4 border-t border-t-gray-200 hover:border-t-black transition-all duration-700'>
                   <div className='rounded-full p-5 bg-[#f6e9e4]'>
                     <GiLaserBurst size={36} className='' />
                   </div>

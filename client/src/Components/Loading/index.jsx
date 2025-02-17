@@ -2,7 +2,7 @@ import React from "react";
 
 const Loading = ({
   size = "h-8 w-8",
-  color = "fill-blue-600",
+  color = "fill-[#799aa1]",
   customStyle = "mx-auto",
 }) => {
   return (
@@ -23,7 +23,7 @@ const Loading = ({
         />
       </svg>
       <span className='sr-only'>Loading...</span>
-      <p className='text-lg font-sans mt-2'>Loading ...</p>
+      <p className='text-xl font-serif mt-2'>Loading ...</p>
     </div>
   );
 };
