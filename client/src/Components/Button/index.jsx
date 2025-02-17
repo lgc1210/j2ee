@@ -23,32 +23,37 @@ const Button = ({
         ${buttonStyle}`}>
       <p
         className={`
-        relative z-10 text-black group-hover:text-white 
+        relative z-10 
         transition-all duration-700 ease-linear
+        text-black group-hover:text-white
         ${textStyle}`}>
         {text}
       </p>
       <Icon
         size={iconSize}
         className={`
-        relative z-10 text-black group-hover:text-white 
+        relative z-10 
         transition-all duration-700 ease-linear
+        text-black group-hover:text-white
+        
         ${iconStyle}`}
       />
       <span
-        className='
+        className={`
         absolute 
         top-0 bottom-0 right-0 left-0 
-        bg-black 
         transition-all duration-700 ease-linear 
-        -translate-x-full group-hover:translate-x-0 '></span>
+        bg-black
+        -translate-x-full group-hover:translate-x-0
+        `}></span>
       <span
-        className='
+        className={`
         absolute 
         top-0 bottom-0 right-0 left-0 
-        bg-black 
         transition-all duration-700 ease-linear 
-        translate-x-full group-hover:translate-x-0 '></span>
+        bg-black
+        translate-x-full group-hover:translate-x-0
+        `}></span>
     </button>
   );
 };

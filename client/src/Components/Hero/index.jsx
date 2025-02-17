@@ -13,7 +13,7 @@ const Hero = () => {
             <p className='capitalize md:text-8xl text-5xl font-serif max-w-full md:w-2/3'>
               Health Care & Beauty Salon
             </p>
-            <p className='absolute -z-10 bottom-20 left-0 text-center text-8xl sm:text-9xl md:text-[250px] text-[rgba(0,0,0,.04)] capitalize font-bold'>
+            <p className='absolute -z-10 bottom-20 left-0 text-center text-7xl md:text-9xl lg:text-[250px] text-[rgba(0,0,0,.04)] capitalize font-bold'>
               Beauty
             </p>
           </div>
