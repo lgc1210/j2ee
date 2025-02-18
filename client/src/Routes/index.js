@@ -34,7 +34,7 @@ const routes = {
     Page: Login,
   },
   register: {
-    isPublic: false,
+    isPublic: true,
     url: paths.register,
     Layout: null,
     Page: Register,

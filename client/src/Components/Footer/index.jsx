@@ -80,7 +80,7 @@ const Footer = () => {
             <FormControl
               placeHolder='Enter Email'
               wrapInputStyle='md:mb-20 mb-8'
-              inputStyle='placeholder:text-white placeholder:text-lg flex-1'
+              inputStyle='placeholder:text-white text-white placeholder:text-lg flex-1'
               iconStyle='text-white'
               buttonStyle='bg-[#799aa1] p-2 me-1'
               iconSize={30}
