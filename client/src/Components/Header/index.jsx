@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "../../assets/images/header/lesya-logo.png";
 import navItems from "./navItems";
@@ -13,13 +13,32 @@ import { HiOutlineBars3 } from "react-icons/hi2";
 const Header = () => {
   const navigate = useNavigate();
   const [toggleNav, setToggleNav] = useState(true);
+  const [isSticky, setIsSticky] = useState(false);
+  const headerRef = useRef(null);
+
+  useEffect(() => {
+    const header = headerRef.current;
+    const sticky = header.offsetHeight;
+
+    const handleScroll = () => {
+      setIsSticky(window.pageYOffset > sticky);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleNavigation = (path, haveChidlren = false) => {
     if (!haveChidlren) navigate(path);
   };
 
   return (
-    <header className='md:px-14 px-6 shadow w-full h-24 relative'>
+    <header
+      className={`md:px-14 px-6 shadow w-full h-24 z-30 bg-white ${
+        isSticky ? "sticky top-0 right-0 left-0" : "relative"
+      }`}
+      ref={headerRef}>
       <div className='h-full flex items-center justify-between md:flex-wrap flex-nowrap'>
         {/* Small screens */}
         <HiOutlineBars3
