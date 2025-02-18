@@ -2,6 +2,15 @@ import React from "react";
 import aboutItems from "./aboutItems";
 import serviceItems from "./serviceItems";
 import contactItems from "./contactItem";
+import FormControl from "../FormControl";
+
+import {
+  FaXTwitter,
+  FaFacebookF,
+  FaInstagram,
+  FaPinterestP,
+} from "react-icons/fa6";
+import { MdOutlineArrowRightAlt } from "react-icons/md";
 
 const Footer = () => {
   return (
@@ -66,7 +75,45 @@ const Footer = () => {
               })}
             </ul>
           </div>
-          <div></div>
+          <div className=''>
+            <p className='text-2xl text-white font-serif mb-8'>Newsletter</p>
+            <FormControl
+              placeHolder='Enter Email'
+              wrapInputStyle='md:mb-20 mb-8'
+              inputStyle='placeholder:text-white placeholder:text-lg flex-1'
+              iconStyle='text-white'
+              buttonStyle='bg-[#799aa1] p-2 me-1'
+              iconSize={30}
+              Icon={MdOutlineArrowRightAlt}
+              hasButton
+            />
+            <div className='flex items-center justify-start gap-2'>
+              <span className='p-4 rounded-full cursor-pointer border border-zinc-500 bg-transparent hover:bg-[#799aa1] group transition-all duration-700'>
+                <FaXTwitter
+                  size={18}
+                  className='text-zinc-500 group-hover:text-white transition-all duration-700'
+                />
+              </span>
+              <span className='p-4 rounded-full cursor-pointer border border-zinc-500 bg-transparent hover:bg-[#799aa1] group transition-all duration-700'>
+                <FaFacebookF
+                  size={18}
+                  className='text-zinc-500 group-hover:text-white transition-all duration-700'
+                />
+              </span>
+              <span className='p-4 rounded-full cursor-pointer border border-zinc-500 bg-transparent hover:bg-[#799aa1] group transition-all duration-700'>
+                <FaInstagram
+                  size={18}
+                  className='text-zinc-500 group-hover:text-white transition-all duration-700'
+                />
+              </span>
+              <span className='p-4 rounded-full cursor-pointer border border-zinc-500 bg-transparent hover:bg-[#799aa1] group transition-all duration-700'>
+                <FaPinterestP
+                  size={18}
+                  className='text-zinc-500 group-hover:text-white transition-all duration-700'
+                />
+              </span>
+            </div>
+          </div>
         </div>
       </div>
       <div className='border-t border-zinc-600 py-10 md:px-0 px-6'>
