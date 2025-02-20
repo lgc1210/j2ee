@@ -1,5 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import paths from "../../Constants/paths";
+
 const Banner = ({ imageBanner, titleBanner, pathBanner }) => {
   const navigate = useNavigate();
 
@@ -14,7 +16,9 @@ const Banner = ({ imageBanner, titleBanner, pathBanner }) => {
               {titleBanner}
             </p>
             <p className='mt-6 text-white w-full text-center flex items-center justify-center gap-3 text-xl font-sans'>
-              <span className='cursor-pointer transition-all duration-700 hover:text-black'>
+              <span
+                className='cursor-pointer transition-all duration-700 hover:text-black'
+                onClick={() => navigate(paths.home)}>
                 Home
               </span>
               <span className='text-3xl'>&#8226;</span>
