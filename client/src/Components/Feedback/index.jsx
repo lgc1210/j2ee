@@ -31,7 +31,7 @@ const Feedback = () => {
                 <div className='overflow-hidden'>
                   <div className='transition-all duration-1000 ease-in-out'>
                     <div className='flex flex-col items-center justify-center max-w-2xl m-auto'>
-                      <p className='text-xl md:text-2xl font-serif mb-8 text-center'>
+                      <p className='text-xl md:text-2xl font-serif mb-8 text-center leading-loose tracking-wider'>
                         {slideItems[currentSlide].content}
                       </p>
                       <div>

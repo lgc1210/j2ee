@@ -16,6 +16,7 @@ const Profile = lazy(() => import("../Pages/Profile"));
 const Contact = lazy(() => import("../Pages/Contact"));
 const ProductDetails = lazy(() => import("../Pages/ProductDetails"));
 const Cart = lazy(() => import("../Pages/Cart"));
+const Service = lazy(() => import("../Pages/Service"));
 
 // Admin Pages
 const Admin = lazy(() => import("../Pages/Admin"));
@@ -74,6 +75,12 @@ const routes = {
     url: paths.cart,
     Layout: CustomerLayout,
     Page: Cart,
+  },
+  service: {
+    isPublic: true,
+    url: paths.service,
+    Layout: CustomerLayout,
+    Page: Service,
   },
   admin: {
     isPublic: false,

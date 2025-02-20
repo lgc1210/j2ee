@@ -24,6 +24,7 @@ const navItems = [
     children: [
       { name: "Login", path: paths.login },
       { name: "Register", path: paths.register },
+      { name: "Services", path: paths.service },
     ],
   },
   {

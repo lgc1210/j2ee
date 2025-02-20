@@ -6,6 +6,7 @@ const paths = {
   checkout: "/checkout",
   contact: "/contact",
   profile: "/profile",
+  service: "/service",
   cart: "/cart",
   about: "/about",
   appointment: "/appointment",
