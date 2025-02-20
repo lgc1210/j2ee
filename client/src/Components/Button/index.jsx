@@ -1,13 +1,13 @@
 import React from "react";
 
 const Button = ({
-  bgColor = "",
   text = "",
   Icon,
   iconSize = 20,
   buttonStyle = "",
   iconStyle = "",
   textStyle = "",
+  onClick,
 }) => {
   return (
     <button
@@ -20,7 +20,8 @@ const Button = ({
         group 
         overflow-hidden 
         transition-all duration-700 ease-linear
-        ${buttonStyle}`}>
+        ${buttonStyle}`}
+      onClick={onClick}>
       <p
         className={`
         relative z-10 
