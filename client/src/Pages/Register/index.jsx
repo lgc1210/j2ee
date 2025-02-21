@@ -58,60 +58,70 @@ export default function Register() {
 
           <div className='mt-10 sm:mx-auto sm:w-full sm:max-w-sm'>
             <form className='space-y-6' onSubmit={handleSubmit}>
-              <FormControl
-                type='text'
-                placeHolder='Enter Full Name'
-                wrapInputStyle=''
-                inputStyle='placeholder:text-lg text-black placeholder:font-serif'
-                hasLabel
-                label='Enter fullname'
-                id='fullname'
-                labelStyle='mb-1 font-serif'
-              />
+              <div>
+                <FormControl
+                  type='text'
+                  placeHolder='Enter Full Name'
+                  wrapInputStyle=''
+                  inputStyle='placeholder:text-lg text-black placeholder:font-serif'
+                  hasLabel
+                  label='Enter fullname'
+                  id='fullname'
+                  labelStyle='mb-1 font-serif'
+                />
+              </div>
 
-              <FormControl
-                type='text'
-                placeHolder='Enter Email'
-                wrapInputStyle=''
-                inputStyle='placeholder:text-lg text-black placeholder:font-serif'
-                hasLabel
-                label='Enter email'
-                id='email'
-                labelStyle='mb-1 font-serif'
-              />
+              <div>
+                <FormControl
+                  type='text'
+                  placeHolder='Enter Email'
+                  wrapInputStyle=''
+                  inputStyle='placeholder:text-lg text-black placeholder:font-serif'
+                  hasLabel
+                  label='Enter email'
+                  id='email'
+                  labelStyle='mb-1 font-serif'
+                />
+              </div>
 
-              <FormControl
-                type='text'
-                placeHolder='Enter Phone Number'
-                wrapInputStyle=''
-                inputStyle='placeholder:text-lg text-black placeholder:font-serif'
-                hasLabel
-                label='Enter phone'
-                id='phone'
-                labelStyle='mb-1 font-serif'
-              />
+              <div>
+                <FormControl
+                  type='text'
+                  placeHolder='Enter Phone Number'
+                  wrapInputStyle=''
+                  inputStyle='placeholder:text-lg text-black placeholder:font-serif'
+                  hasLabel
+                  label='Enter phone'
+                  id='phone'
+                  labelStyle='mb-1 font-serif'
+                />
+              </div>
 
-              <FormControl
-                type='password'
-                placeHolder='Enter Password'
-                wrapInputStyle=''
-                inputStyle='placeholder:text-lg text-black placeholder:font-serif'
-                hasLabel
-                id='password'
-                label='Enter password'
-                labelStyle='mb-1 font-serif'
-              />
+              <div>
+                <FormControl
+                  type='password'
+                  placeHolder='Enter Password'
+                  wrapInputStyle=''
+                  inputStyle='placeholder:text-lg text-black placeholder:font-serif'
+                  hasLabel
+                  id='password'
+                  label='Enter password'
+                  labelStyle='mb-1 font-serif'
+                />
+              </div>
 
-              <FormControl
-                type='password'
-                placeHolder='Enter Confirm Password'
-                wrapInputStyle=''
-                inputStyle='placeholder:text-lg text-black placeholder:font-serif'
-                hasLabel
-                id='confirm-password'
-                label='Enter confirm password'
-                labelStyle='mb-1 font-serif'
-              />
+              <div>
+                <FormControl
+                  type='password'
+                  placeHolder='Enter Confirm Password'
+                  wrapInputStyle=''
+                  inputStyle='placeholder:text-lg text-black placeholder:font-serif'
+                  hasLabel
+                  id='confirm-password'
+                  label='Enter confirm password'
+                  labelStyle='mb-1 font-serif'
+                />
+              </div>
 
               <button
                 type='submit'

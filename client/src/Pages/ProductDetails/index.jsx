@@ -5,12 +5,16 @@ import ShopImageBanner from "../../assets/images/banner/uby-yanes-0ABufdkXgPI-un
 import FormControl from "../../Components/FormControl";
 import Button from "../../Components/Button";
 import { BsCartPlus } from "react-icons/bs";
+import ProductDescription from "./ProductDescription";
 
 const ProductDetails = () => {
   const productId = useLocation()?.state?.productId;
   const [quantity, setQuantity] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0, scale: 1 });
   const imageRef = useRef(null);
+  const [mainImage, setMainImage] = useState(
+    "https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod2.jpg"
+  );
 
   const handleMouseMove = (event) => {
     const image = imageRef.current;
@@ -38,18 +42,19 @@ const ProductDetails = () => {
 
       <div className='md:py-36 py-28 md:px-0 px-6'>
         <div className='container mx-auto'>
+          {/* Product */}
           <div className='grid md:grid-cols-2 gap-20'>
             {/* Product Image */}
-            <div className='w-full aspect-square'>
+            <div className=''>
               <div
-                className='relative w-full h-full overflow-hidden'
+                className='overflow-hidden'
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}>
                 <img
                   ref={imageRef}
-                  src='https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod2.jpg'
+                  src={mainImage}
                   alt='Product Detail Name'
-                  className='absolute top-0 left-0 transition-transform duration-700 w-full h-full object-cover'
+                  className='transition-transform duration-700 w-full h-full object-cover'
                   style={{
                     transformOrigin: `${position.x}% ${position.y}%`,
                     transform: `scale(${position.scale})`,
@@ -58,21 +63,39 @@ const ProductDetails = () => {
               </div>
               {/* Another Product Images */}
               <div className='flex items-center justify-start gap-4 mt-14'>
-                <div className=''>
+                <div
+                  className=''
+                  onClick={() =>
+                    setMainImage(
+                      "https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod2-1000x1000.jpg"
+                    )
+                  }>
                   <img
                     src='https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod2-1000x1000.jpg'
                     alt='Another Product'
                     className='max-w-36 w-full h-full object-center object-cover'
                   />
                 </div>
-                <div className='opacity-50 hover:opacity-100 cursor-pointer'>
+                <div
+                  className='opacity-50 hover:opacity-100 cursor-pointer'
+                  onClick={() =>
+                    setMainImage(
+                      "https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod4-1000x1000.jpg"
+                    )
+                  }>
                   <img
                     src='https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod4-1000x1000.jpg'
                     alt='Another Product'
                     className='max-w-36 w-full h-full object-center object-cover'
                   />
                 </div>
-                <div className='opacity-50 hover:opacity-100 cursor-pointer'>
+                <div
+                  className='opacity-50 hover:opacity-100 cursor-pointer'
+                  onClick={() =>
+                    setMainImage(
+                      "https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod1-800x800.jpg"
+                    )
+                  }>
                   <img
                     src='https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod1-800x800.jpg'
                     alt='Another Product'
@@ -108,7 +131,7 @@ const ProductDetails = () => {
                   text='Add To Cart'
                   Icon={BsCartPlus}
                   iconStyle='text-white [&]:group-hover:text-black'
-                  buttonStyle='[&]:py-4.5 bg-[#779AA1] border-[#779AA1] [&]:hover:border-black'
+                  buttonStyle='[&]:py-4.5 bg-[#779AA1] [&]:border-[#779AA1] [&]:hover:border-black'
                   textStyle='text-white me-2 [&]:group-hover:text-black'
                   hoverStyle='[&]:bg-white'
                 />
@@ -134,6 +157,8 @@ const ProductDetails = () => {
               </div>
             </div>
           </div>
+          {/* Description */}
+          <ProductDescription />
         </div>
       </div>
     </section>

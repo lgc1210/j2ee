@@ -51,27 +51,31 @@ export default function Login() {
 
         <div className='mt-10 sm:mx-auto sm:w-full sm:max-w-sm'>
           <form className='space-y-6' onSubmit={handleSubmit}>
-            <FormControl
-              type='email'
-              placeHolder='Enter Email'
-              wrapInputStyle=''
-              inputStyle='placeholder:text-lg text-black placeholder:font-serif'
-              hasLabel
-              label='Enter email'
-              id='email'
-              labelStyle='mb-1 font-serif'
-            />
+            <div>
+              <FormControl
+                type='email'
+                placeHolder='Enter Email'
+                wrapInputStyle=''
+                inputStyle='placeholder:text-lg text-black placeholder:font-serif'
+                hasLabel
+                label='Enter email'
+                id='email'
+                labelStyle='mb-1 font-serif'
+              />
+            </div>
 
-            <FormControl
-              type='password'
-              placeHolder='Enter Password'
-              wrapInputStyle=''
-              inputStyle='placeholder:text-lg text-black placeholder:font-serif'
-              hasLabel
-              id='password'
-              label='Enter password'
-              labelStyle='mb-1 font-serif'
-            />
+            <div>
+              <FormControl
+                type='password'
+                placeHolder='Enter Password'
+                wrapInputStyle=''
+                inputStyle='placeholder:text-lg text-black placeholder:font-serif'
+                hasLabel
+                id='password'
+                label='Enter password'
+                labelStyle='mb-1 font-serif'
+              />
+            </div>
 
             <button
               type='submit'
