@@ -11,7 +11,7 @@ const paths = {
   about: "/about",
   appointment: "/appointment",
   bookingCalendar: "/booking/calendar",
-  productDetails: "/shop/products/details/:id",
+  productDetails: "/shop/products/details",
   notFound: "*",
   admin: "/admin",
 };

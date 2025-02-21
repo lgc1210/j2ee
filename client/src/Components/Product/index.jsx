@@ -1,10 +1,21 @@
 import React from "react";
 import { BsCartPlus } from "react-icons/bs";
+import { useNavigate } from "react-router-dom";
+import paths from "../../Constants/paths";
 
 const Product = ({ product }) => {
+  const navigate = useNavigate();
+
+  const handleNavigateToProductDetails = (productId, event) => {
+    event.stopPropagation();
+    navigate(paths.productDetails, { state: { productId } });
+  };
+
   return (
     <li key={product?.id}>
-      <div className='cursor-pointer relative group mb-6'>
+      <div
+        className='cursor-pointer relative group mb-6'
+        onClick={(event) => handleNavigateToProductDetails(product?.id, event)}>
         <img
           src={product?.image}
           alt={product?.name}
@@ -13,7 +24,7 @@ const Product = ({ product }) => {
 
         {/* Sale */}
         {product?.isSale && (
-          <div className='absolute top-2 left-2'>
+          <div className='absolute top-4 left-4'>
             <p className='text-white bg-black px-2 py-3 text-center align-middle rounded-full'>
               Sale!
             </p>
@@ -27,7 +38,11 @@ const Product = ({ product }) => {
       </div>
 
       <div className='text-center'>
-        <p className='text-2xl mb-2 font-serif cursor-pointer hover:text-[#779AA1] transition-all duration-700'>
+        <p
+          className='text-2xl mb-2 font-serif cursor-pointer hover:text-[#779AA1] transition-all duration-700'
+          onClick={(event) =>
+            handleNavigateToProductDetails(product?.id, event)
+          }>
           {product?.name}
         </p>
         <span className='flex items-center justify-center gap-2'>

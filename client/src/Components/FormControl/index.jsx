@@ -21,9 +21,10 @@ const FormControl = ({
   onBlur,
   onType,
   onClick,
+  value,
 }) => {
   return (
-    <div>
+    <>
       {hasLabel && (
         <label
           htmlFor={id}
@@ -41,6 +42,7 @@ const FormControl = ({
           onChange={onChange}
           onBlur={onBlur}
           onInput={onType}
+          value={value}
         />
         {hasButton && (
           <button className={`${buttonStyle}`} onClick={onClick}>
@@ -52,7 +54,7 @@ const FormControl = ({
       {hasError && (
         <div className='text-red-600 text-sm font-sans'>{errorMessage}</div>
       )}
-    </div>
+    </>
   );
 };
 

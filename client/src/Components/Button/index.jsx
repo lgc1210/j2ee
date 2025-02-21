@@ -8,6 +8,7 @@ const Button = ({
   iconStyle = "",
   textStyle = "",
   onClick,
+  hoverStyle = "",
 }) => {
   return (
     <button
@@ -36,7 +37,6 @@ const Button = ({
         relative z-10 
         transition-all duration-700 ease-linear
         text-black group-hover:text-white
-        
         ${iconStyle}`}
       />
       <span
@@ -44,16 +44,18 @@ const Button = ({
         absolute 
         top-0 bottom-0 right-0 left-0 
         transition-all duration-700 ease-linear 
-        bg-black
         -translate-x-full group-hover:translate-x-0
+        bg-black
+        ${hoverStyle}
         `}></span>
       <span
         className={`
         absolute 
         top-0 bottom-0 right-0 left-0 
         transition-all duration-700 ease-linear 
-        bg-black
         translate-x-full group-hover:translate-x-0
+        bg-black
+        ${hoverStyle}
         `}></span>
     </button>
   );
