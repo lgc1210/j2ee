@@ -42,7 +42,8 @@ export default function Login() {
           <img
             alt="Company's Logo"
             src={LogoImage}
-            className='mx-auto h-auto w-1/2 object-contain object-center'
+            className='mx-auto h-auto w-1/2 object-contain object-center cursor-pointer'
+            onClick={() => navigate(paths.home)}
           />
           <h2 className='mt-10 text-center text-2xl font-bold font-serif tracking-tight text-gray-900'>
             Sign in to your account

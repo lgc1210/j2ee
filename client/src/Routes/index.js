@@ -83,7 +83,7 @@ const routes = {
     Page: Service,
   },
   admin: {
-    isPublic: false,
+    isPublic: true,
     url: paths.admin,
     Layout: AdminLayout,
     Page: Admin,
