@@ -1,12 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import DataTable from "react-data-table-component";
 import { LiaEdit } from "react-icons/lia";
-// import Button from "../../components/Button";
-import { useSelector, useDispatch } from "react-redux";
-// import { fetchUsers } from "../../redux/users/usersSlice";
-// import AdminSearchInput from "../../components/AdminSearchInput";
 
-const Admin = () => {
+const Dashboard = () => {
   const [searchInput, setSearchInput] = useState("");
   // const dispatch = useDispatch();
   // const { data: users, loading, error } = useSelector((state) => state.users);
@@ -88,4 +84,4 @@ const Admin = () => {
   );
 };
 
-export default Admin;
+export default Dashboard;

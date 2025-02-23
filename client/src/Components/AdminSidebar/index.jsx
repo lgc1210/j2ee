@@ -16,13 +16,13 @@ const AdminSidebar = () => {
 
   return (
     <section
-      className={`bg-[#274b60] flex flex-col transition-all duration-500 h-screen ${
+      className={`bg-[#435d63] flex flex-col transition-all duration-500 h-screen ${
         showItems ? "max-h-full" : "max-h-fit"
       }`}>
       <div className='p-8 flex-grow'>
         <div className='text-3xl font-semibold mb-4 text-white flex items-center justify-between'>
           <div>
-            <p>Fashion</p>
+            <p className='text-5xl font-serif tracking-widest'>Lesya</p>
           </div>
           <div
             className='md:hidden block cursor-pointer p-2 rounded-xl hover:bg-slate-500'
@@ -51,9 +51,9 @@ const AdminSidebar = () => {
         )}
       </div>
 
-      <div className='bg-slate-500 p-2 cursor-pointer mb-10 flex items-center justify-center gap-4'>
-        <PiSignOut size={20} className='text-white' />
-        <p className='text-center text-white' onClick={logout}>
+      <div className='bg-slate-300 p-2 cursor-pointer mb-10 flex items-center justify-center gap-4'>
+        <PiSignOut size={20} className='text-[#14373f]' />
+        <p className='text-center text-[#14373f]' onClick={logout}>
           Sign out
         </p>
       </div>

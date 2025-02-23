@@ -19,7 +19,14 @@ const Cart = lazy(() => import("../Pages/Cart"));
 const Service = lazy(() => import("../Pages/Service"));
 
 // Admin Pages
-const Admin = lazy(() => import("../Pages/Admin"));
+const Dashboard = lazy(() => import("../Pages/Dashboard"));
+const Users = lazy(() => import("../Pages/Users"));
+const Products = lazy(() => import("../Pages/Products"));
+const Categories = lazy(() => import("../Pages/Categories"));
+const Discounts = lazy(() => import("../Pages/Discounts"));
+const Contacts = lazy(() => import("../Pages/Contacts"));
+const Roles = lazy(() => import("../Pages/Roles"));
+const Statistic = lazy(() => import("../Pages/Statistic"));
 
 const routes = {
   home: {
@@ -82,11 +89,53 @@ const routes = {
     Layout: CustomerLayout,
     Page: Service,
   },
-  admin: {
+  adminDashboard: {
     isPublic: true,
-    url: paths.admin,
+    url: paths.dashboard,
     Layout: AdminLayout,
-    Page: Admin,
+    Page: Dashboard,
+  },
+  adminUsers: {
+    isPublic: true,
+    url: paths.users,
+    Layout: AdminLayout,
+    Page: Users,
+  },
+  adminProducts: {
+    isPublic: true,
+    url: paths.products,
+    Layout: AdminLayout,
+    Page: Products,
+  },
+  adminCategories: {
+    isPublic: true,
+    url: paths.categories,
+    Layout: AdminLayout,
+    Page: Categories,
+  },
+  adminDiscounts: {
+    isPublic: true,
+    url: paths.discounts,
+    Layout: AdminLayout,
+    Page: Discounts,
+  },
+  adminContacts: {
+    isPublic: true,
+    url: paths.contacts,
+    Layout: AdminLayout,
+    Page: Contacts,
+  },
+  adminRoles: {
+    isPublic: true,
+    url: paths.roles,
+    Layout: AdminLayout,
+    Page: Roles,
+  },
+  adminStatistic: {
+    isPublic: true,
+    url: paths.statistic,
+    Layout: AdminLayout,
+    Page: Statistic,
   },
 };
 export default routes;
