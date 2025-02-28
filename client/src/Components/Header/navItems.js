@@ -33,7 +33,7 @@ const navItems = [
   },
   {
     name: "Blog",
-    path: paths.shop,
+    path: paths.blog,
   },
   {
     name: "Contact",

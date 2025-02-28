@@ -9,6 +9,7 @@ const paths = {
   profile: "/profile",
   service: "/service",
   cart: "/cart",
+  blog: "/blog",
   about: "/about",
   appointment: "/appointment",
   bookingCalendar: "/booking/calendar",
