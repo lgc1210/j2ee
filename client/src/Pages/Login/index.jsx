@@ -3,11 +3,15 @@ import paths from "../../Constants/paths";
 import LogoImage from "../../assets/images/header/lesya-logo.png";
 import FormControl from "../../Components/FormControl";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../Contexts/Auth";
+import { isEmail, isEmpty } from "../../Utils/validation";
+import Loading from "../../Components/Loading";
 
 export default function Login() {
   const [fields, setFields] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({ email: "", password: "" });
   const navigate = useNavigate();
+  const { login, isPendingLogin } = useAuth();
 
   const handleFieldsChange = (key, value) => {
     setFields((prev) => ({ ...prev, [key]: value }));
@@ -24,15 +28,22 @@ export default function Login() {
   const validateFields = () => {
     const errs = {};
 
+    if (isEmpty(fields.email)) errs.email = "Email is required";
+    else if (!isEmail(fields.email)) errs.email = "Email is invalid";
+    if (isEmpty(fields.password)) errs.password = "Password is required";
+
     setErrors(errs);
 
-    return Object.keys(errors).length === 0;
+    return Object.keys(errs).length === 0;
   };
 
   const handleSubmit = async (event) => {
+    console.log("Clicked");
     event.preventDefault();
 
     if (!validateFields()) return;
+
+    await login(fields);
   };
 
   return (
@@ -54,7 +65,7 @@ export default function Login() {
           <form className='space-y-6' onSubmit={handleSubmit}>
             <div>
               <FormControl
-                type='email'
+                type='text'
                 placeHolder='Enter Email'
                 wrapInputStyle=''
                 inputStyle='placeholder:text-lg text-black placeholder:font-serif'
@@ -62,6 +73,18 @@ export default function Login() {
                 label='Enter email'
                 id='email'
                 labelStyle='mb-1 font-serif'
+                onChange={(event) =>
+                  handleFieldsChange("email", event.target.value)
+                }
+                onType={() => handleFieldsType("email")}
+                onBlur={() => {
+                  if (isEmpty(fields.email))
+                    handelFieldsBlur("email", "Email is required");
+                  else if (!isEmail(fields.email))
+                    handelFieldsBlur("email", "Email is invalid");
+                }}
+                hasError={errors?.email}
+                errorMessage={errors?.email}
               />
             </div>
 
@@ -75,13 +98,30 @@ export default function Login() {
                 id='password'
                 label='Enter password'
                 labelStyle='mb-1 font-serif'
+                onChange={(event) =>
+                  handleFieldsChange("password", event.target.value)
+                }
+                onType={() => handleFieldsType("password")}
+                onBlur={() =>
+                  isEmpty(fields.password) &&
+                  handelFieldsBlur("password", "Password is required")
+                }
+                hasError={errors?.password}
+                errorMessage={errors?.password}
               />
             </div>
 
             <button
               type='submit'
-              className='transition-all duration-700 hover:bg-black text-white bg-[#799aa1] w-full py-4 text-lg font-serif font-semibold'>
-              Sign in
+              className={`transition-all duration-700 hover:bg-black text-white bg-[#799aa1] w-full py-4 text-lg font-serif font-semibold ${
+                isPendingLogin ? "opacity-60 pointer-events-none" : ""
+              }`}
+              disabled={isPendingLogin}>
+              {isPendingLogin ? (
+                <Loading customStyle='flex items-center justify-center' />
+              ) : (
+                <p>Login</p>
+              )}
             </button>
           </form>
 

@@ -94,5 +94,4 @@ public class UserController {
             return ResponseEntity.internalServerError().build();
         }
     }
-
 }

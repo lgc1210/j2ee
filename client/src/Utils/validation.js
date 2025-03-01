@@ -1,7 +1,7 @@
 export const isEmail = (email) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
-export const isEmpty = (value) => !value.trim();
+export const isEmpty = (value) => !value?.trim();
 
 export const isPhone = (phone) => /^\d{10,12}$/.test(phone.trim());
 
@@ -13,7 +13,7 @@ export const isMinimumLength = (paswword) => paswword.trim().length >= 6;
 // Authorization
 
 const TOKEN_CONFIG = {
-  TOKEN_KEY: "token",
+  TOKEN_KEY: "access",
   REFRESH_TOKEN_KEY: "refresh",
 };
 

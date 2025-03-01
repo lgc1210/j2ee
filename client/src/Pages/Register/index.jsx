@@ -10,6 +10,7 @@ import {
   isPhone,
 } from "../../Utils/validation";
 import { useAuth } from "../../Contexts/Auth";
+import Loading from "../../Components/Loading";
 
 export default function Register() {
   const [fields, setFields] = useState({
@@ -21,7 +22,7 @@ export default function Register() {
   });
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const { register, isPendingRegister } = useAuth();
 
   const handleFieldsChange = (key, value) => {
     setFields((prev) => ({ ...prev, [key]: value }));
@@ -209,8 +210,15 @@ export default function Register() {
 
               <button
                 type='submit'
-                className='transition-all duration-700 hover:bg-black text-white bg-[#799aa1] w-full py-4 text-lg font-serif font-semibold'>
-                Register
+                className={`transition-all duration-700 hover:bg-black text-white bg-[#799aa1] w-full py-4 text-lg font-serif font-semibold ${
+                  isPendingRegister ? "opacity-60 pointer-events-none" : ""
+                }`}
+                disabled={isPendingRegister}>
+                {isPendingRegister ? (
+                  <Loading customStyle='flex items-center justify-center' />
+                ) : (
+                  <p>Register</p>
+                )}
               </button>
             </form>
 

@@ -1,6 +1,7 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import AdminSidebar from "../../Components/AdminSidebar";
+
 const AdminLayout = () => {
   return (
     <div className='grid lg:grid-cols-5 md:grid-cols-4'>

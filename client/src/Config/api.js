@@ -19,7 +19,6 @@ apiInstance.interceptors.request.use(
 
 apiInstance.interceptors.response.use(
   (response) => {
-    // Do something with response data
     return response;
   },
   (error) => {

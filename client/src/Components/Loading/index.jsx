@@ -1,9 +1,10 @@
 import React from "react";
 
 const Loading = ({
-  size = "h-8 w-8",
+  size = "h-7 w-7",
   color = "fill-[#799aa1]",
   customStyle = "mx-auto",
+  hasLoadingText = false,
 }) => {
   return (
     <div role='status' className={`${customStyle}`}>
@@ -23,7 +24,7 @@ const Loading = ({
         />
       </svg>
       <span className='sr-only'>Loading...</span>
-      <p className='text-xl font-serif mt-2'>Loading ...</p>
+      {hasLoadingText && <p className='text-xl font-serif mt-2'>Loading ...</p>}
     </div>
   );
 };
