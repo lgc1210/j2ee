@@ -4,23 +4,25 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
 public class UserController {
 
     @Autowired
     private UserService userService;
 
-    @GetMapping("/")
+    @GetMapping()
     public ResponseEntity<List<UserEntity>> getAll() {
         try {
             var userList = userService.getAll();
@@ -29,6 +31,7 @@ public class UserController {
 
             return ResponseEntity.ok(userList);
         } catch (Exception e) {
+            System.err.println("Internal Server Error: " + e.getMessage());
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -42,22 +45,54 @@ public class UserController {
 
             return ResponseEntity.ok(user);
         } catch (Exception e) {
+            System.err.println("Internal Server Error: " + e.getMessage());
             return ResponseEntity.internalServerError().build();
         }
     }
 
-    // @PostMapping("/")
-    // public ResponseEntity<String> create(@RequestBody UserEntity request) {
-    // try {
-    // // var createdUser =
-    // // URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
-    // // .path("/{id}")
-    // // .buildAndExpand(createdUser.getId())
-    // // .toUri();
+    @PostMapping()
+    public ResponseEntity<UserEntity> create(@RequestBody UserEntity user) {
+        try {
+            if (user == null)
+                return ResponseEntity.badRequest().build();
 
-    // // ResponseEntity.created(uri).body("User created successfully");
-    // } catch (Exception e) {
-    // return ResponseEntity.internalServerError().build();
-    // }
-    // }
+            System.out.println(user.toString());
+
+            Optional<UserEntity> doesEmailExist = userService.getByEmail(user.getEmail());
+            Optional<UserEntity> doesPhoneExist = userService.getByPhone(user.getPhone());
+            if (doesEmailExist.isPresent() || doesPhoneExist.isPresent())
+                return ResponseEntity.status(HttpStatus.CONFLICT).build();
+
+            UserEntity createdUser = userService.createOrUpdate(user);
+            URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
+                    .path("/{id}")
+                    .buildAndExpand(createdUser.getId())
+                    .toUri();
+
+            return ResponseEntity.created(uri).body(createdUser);
+        } catch (Exception e) {
+            System.err.println("Internal Server Error: " + e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserEntity> update(@PathVariable(name = "id") long id, @RequestBody UserEntity user) {
+        try {
+            if (user == null)
+                return ResponseEntity.badRequest().build();
+
+            Optional<UserEntity> userFromDb = userService.getById(id);
+            if (!userFromDb.isPresent())
+                return ResponseEntity.notFound().build();
+
+            UserEntity updatedUser = userService.createOrUpdate(user);
+
+            return ResponseEntity.ok(updatedUser);
+        } catch (Exception e) {
+            System.err.println("Internal Server Error: " + e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
 }

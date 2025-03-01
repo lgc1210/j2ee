@@ -3,10 +3,17 @@ import paths from "../../Constants/paths";
 import { useNavigate } from "react-router-dom";
 import LogoImage from "../../assets/images/header/lesya-logo.png";
 import FormControl from "../../Components/FormControl";
+import {
+  isConfirmPassword,
+  isEmail,
+  isEmpty,
+  isPhone,
+} from "../../Utils/validation";
+import { useAuth } from "../../Contexts/Auth";
 
 export default function Register() {
   const [fields, setFields] = useState({
-    fullName: "",
+    name: "",
     email: "",
     phone: "",
     password: "",
@@ -14,6 +21,7 @@ export default function Register() {
   });
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
+  const { register } = useAuth();
 
   const handleFieldsChange = (key, value) => {
     setFields((prev) => ({ ...prev, [key]: value }));
@@ -30,6 +38,18 @@ export default function Register() {
   const validateFields = () => {
     const errs = {};
 
+    if (isEmpty(fields.name)) errs.name = "Full name is required";
+    if (isEmpty(fields.email)) errs.email = "Email is required";
+    else if (!isEmail(fields.email)) errs.email = "Email is invalid";
+    if (isEmpty(fields.phone)) errs.phone = "Phone is required";
+    else if (!isPhone(fields.phone)) errs.phone = "Phone is invalid";
+    if (isEmpty(fields.password)) errs.password = "Password is required";
+    if (
+      !isEmpty(fields.password) &&
+      !isConfirmPassword(fields.password, fields.confirmPassword)
+    )
+      errs.confirmPassword = "Confirm password does not match.";
+
     setErrors(errs);
 
     return Object.keys(errs).length === 0;
@@ -39,6 +59,8 @@ export default function Register() {
     event.preventDefault();
 
     if (!validateFields()) return;
+
+    await register(fields);
   };
 
   return (
@@ -66,9 +88,19 @@ export default function Register() {
                   wrapInputStyle=''
                   inputStyle='placeholder:text-lg text-black placeholder:font-serif'
                   hasLabel
-                  label='Enter fullname'
-                  id='fullname'
+                  label='Enter full name'
+                  id='name'
                   labelStyle='mb-1 font-serif'
+                  onChange={(event) =>
+                    handleFieldsChange("name", event.target.value)
+                  }
+                  onType={() => handleFieldsType("name")}
+                  onBlur={() =>
+                    isEmpty(fields.name) &&
+                    handleFieldsBlur("name", "Full name is required")
+                  }
+                  hasError={errors?.name}
+                  errorMessage={errors?.name}
                 />
               </div>
 
@@ -82,6 +114,18 @@ export default function Register() {
                   label='Enter email'
                   id='email'
                   labelStyle='mb-1 font-serif'
+                  onChange={(event) =>
+                    handleFieldsChange("email", event.target.value)
+                  }
+                  onType={() => handleFieldsType("email")}
+                  onBlur={() => {
+                    if (isEmpty(fields.email))
+                      handleFieldsBlur("email", "Email is required");
+                    else if (!isEmail(fields.email))
+                      handleFieldsBlur("email", "Email is invalid");
+                  }}
+                  hasError={errors?.email}
+                  errorMessage={errors?.email}
                 />
               </div>
 
@@ -95,6 +139,18 @@ export default function Register() {
                   label='Enter phone'
                   id='phone'
                   labelStyle='mb-1 font-serif'
+                  onChange={(event) =>
+                    handleFieldsChange("phone", event.target.value)
+                  }
+                  onType={() => handleFieldsType("phone")}
+                  onBlur={() => {
+                    if (isEmpty(fields.phone))
+                      handleFieldsBlur("phone", "Phone is required");
+                    else if (!isPhone(fields.phone))
+                      handleFieldsBlur("phone", "Phone is invalid");
+                  }}
+                  hasError={errors?.phone}
+                  errorMessage={errors?.phone}
                 />
               </div>
 
@@ -108,6 +164,16 @@ export default function Register() {
                   id='password'
                   label='Enter password'
                   labelStyle='mb-1 font-serif'
+                  onChange={(event) =>
+                    handleFieldsChange("password", event.target.value)
+                  }
+                  onType={() => handleFieldsType("password")}
+                  onBlur={() =>
+                    isEmpty(fields.password) &&
+                    handleFieldsBlur("password", "Password is required")
+                  }
+                  hasError={errors?.password}
+                  errorMessage={errors?.password}
                 />
               </div>
 
@@ -121,6 +187,23 @@ export default function Register() {
                   id='confirm-password'
                   label='Enter confirm password'
                   labelStyle='mb-1 font-serif'
+                  onChange={(event) =>
+                    handleFieldsChange("confirmPassword", event.target.value)
+                  }
+                  onType={() => handleFieldsType("confirmPassword")}
+                  onBlur={() =>
+                    !isEmpty(fields.password) &&
+                    !isConfirmPassword(
+                      fields.password,
+                      fields.confirmPassword
+                    ) &&
+                    handleFieldsBlur(
+                      "confirmPassword",
+                      "Confirm password does not match"
+                    )
+                  }
+                  hasError={errors?.confirmPassword}
+                  errorMessage={errors?.confirmPassword}
                 />
               </div>
 
