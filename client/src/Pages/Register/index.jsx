@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import paths from "../../Constants/paths";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import LogoImage from "../../assets/images/header/lesya-logo.png";
 import FormControl from "../../Components/FormControl";
 import {
@@ -22,7 +22,12 @@ export default function Register() {
   });
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
-  const { register, isPendingRegister } = useAuth();
+  const { register, isPendingRegister, isAuthenticated, user } = useAuth();
+
+  if (isAuthenticated())
+    return (
+      <Navigate to={user?.role === 2 ? paths.home : paths.dashboard} replace />
+    );
 
   const handleFieldsChange = (key, value) => {
     setFields((prev) => ({ ...prev, [key]: value }));

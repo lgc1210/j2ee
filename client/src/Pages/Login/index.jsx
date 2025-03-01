@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import paths from "../../Constants/paths";
 import LogoImage from "../../assets/images/header/lesya-logo.png";
 import FormControl from "../../Components/FormControl";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../../Contexts/Auth";
 import { isEmail, isEmpty } from "../../Utils/validation";
 import Loading from "../../Components/Loading";
@@ -11,7 +11,12 @@ export default function Login() {
   const [fields, setFields] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({ email: "", password: "" });
   const navigate = useNavigate();
-  const { login, isPendingLogin } = useAuth();
+  const { login, isPendingLogin, isAuthenticated, user } = useAuth();
+
+  if (isAuthenticated())
+    return (
+      <Navigate to={user?.role === 2 ? paths.home : paths.dashboard} replace />
+    );
 
   const handleFieldsChange = (key, value) => {
     setFields((prev) => ({ ...prev, [key]: value }));

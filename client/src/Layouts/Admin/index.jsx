@@ -1,8 +1,15 @@
 import React from "react";
-import { Outlet } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import AdminSidebar from "../../Components/AdminSidebar";
+import { useAuth } from "../../Contexts/Auth";
+import paths from "../../Constants/paths";
 
 const AdminLayout = () => {
+  const { isAuthenticated, user } = useAuth();
+
+  if (!isAuthenticated() || (isAuthenticated() && user?.role === 2))
+    return <Navigate to={paths.home} replace />;
+
   return (
     <div className='grid lg:grid-cols-5 md:grid-cols-4'>
       <div className=''>

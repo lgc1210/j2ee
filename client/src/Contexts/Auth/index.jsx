@@ -26,14 +26,6 @@ const Auth = ({ children }) => {
     return () => {};
   }, []);
 
-  useEffect(() => {
-    !isEmpty(token) &&
-      user.role === 2 &&
-      navigate(
-        !isEmpty(token) && user.role === 2 ? paths.home : paths.dashboard
-      );
-  }, [navigate, user, token]);
-
   const login = async (payload) => {
     try {
       setIsPendingLogin(true);
@@ -41,11 +33,11 @@ const Auth = ({ children }) => {
       if (response.status === 200) {
         showToast("Login successfully");
         const token = response?.data?.token;
-        setToken(token);
         storeTokens(token);
         const decoded = jwtDecode(token);
-        setUser({ email: decoded.sub, role: decoded.role });
         navigate(decoded.role === 2 ? paths.home : paths.dashboard);
+        setUser({ email: decoded.sub, role: decoded.role });
+        setToken(token);
       }
     } catch (error) {
       if (error.response?.status === 404)
@@ -80,7 +72,7 @@ const Auth = ({ children }) => {
     }
   };
 
-  const logout = async (payload) => {};
+  const logout = async () => {};
 
   const isAuthenticated = () => {
     if (isEmpty(token)) return false;

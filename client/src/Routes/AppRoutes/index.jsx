@@ -23,7 +23,7 @@ const AppRoutes = () => {
             </ProtectedRoute>
           );
 
-          return Layout && isPublic ? (
+          return Layout ? (
             <Route key={index} path={url} element={<Layout />}>
               <Route index element={RenderPage} />
             </Route>
