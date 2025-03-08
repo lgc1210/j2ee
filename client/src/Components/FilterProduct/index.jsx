@@ -43,4 +43,4 @@ const FilterProduct = () => {
   );
 };
 
-export default FilterProduct;
+export default React.memo(FilterProduct);

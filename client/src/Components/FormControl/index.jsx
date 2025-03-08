@@ -23,7 +23,11 @@ const FormControl = ({
   onClick,
   value,
   rows = 6, // Default rows for text area
+  options = [], // Options for select input
 }) => {
+  const defaultFormControlStyle =
+    "w-full h-full py-4 px-6 bg-transparent outline-none";
+
   return (
     <>
       {hasLabel && (
@@ -39,18 +43,31 @@ const FormControl = ({
           <textarea
             id={id}
             placeholder={placeHolder}
-            className={`w-full h-full py-4 px-6 bg-transparent outline-none ${inputStyle}`}
+            className={`${defaultFormControlStyle} ${inputStyle}`}
             onChange={onChange}
             onBlur={onBlur}
             onInput={onType}
             value={value}
             rows={rows}></textarea>
+        ) : type === "select" ? (
+          <select
+            id={id}
+            className={`${defaultFormControlStyle} ${inputStyle}`}
+            onChange={onChange}
+            onBlur={onBlur}
+            value={value}>
+            {options.map((option, index) => (
+              <option key={index} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         ) : (
           <input
             type={type}
             id={id}
             placeholder={placeHolder}
-            className={`w-full h-full py-4 px-6 bg-transparent outline-none ${inputStyle}`}
+            className={`${defaultFormControlStyle} ${inputStyle}`}
             onChange={onChange}
             onBlur={onBlur}
             onInput={onType}

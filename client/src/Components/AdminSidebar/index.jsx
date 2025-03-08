@@ -4,13 +4,15 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { LuMenu } from "react-icons/lu";
 import { IoClose } from "react-icons/io5";
 import { PiSignOut } from "react-icons/pi";
-// import { useAuth } from "../../contexts/Auth";
+import { useAuth } from "../../Contexts/Auth";
 
 const AdminSidebar = () => {
   const navigate = useNavigate();
   const [showItems, setShowItems] = useState(true);
   const location = useLocation();
   // const { logout } = useAuth();
+
+  console.log("Admin Sidebar Mounted");
 
   const logout = () => {};
 
@@ -22,7 +24,7 @@ const AdminSidebar = () => {
       <div className='p-8 flex-grow'>
         <div className='text-3xl font-semibold mb-4 text-white flex items-center justify-between'>
           <div>
-            <p className='text-5xl font-serif tracking-widest'>Lesya</p>
+            <p className='text-5xl font-serif tracking-widest'>Booking</p>
           </div>
           <div
             className='md:hidden block cursor-pointer p-2 rounded-xl hover:bg-slate-500'

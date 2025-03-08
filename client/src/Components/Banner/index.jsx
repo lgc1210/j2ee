@@ -34,4 +34,4 @@ const Banner = ({ imageBanner, titleBanner, pathBanner }) => {
   );
 };
 
-export default Banner;
+export default React.memo(Banner);

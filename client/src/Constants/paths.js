@@ -10,6 +10,7 @@ const paths = {
   service: "/service",
   cart: "/cart",
   blog: "/blog",
+  booking: "/booking",
   about: "/about",
   appointment: "/appointment",
   bookingCalendar: "/booking/calendar",

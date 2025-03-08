@@ -12,9 +12,9 @@ const navItems = [
   },
   {
     name: "Booking",
-    path: paths.home,
+    path: paths.booking,
     children: [
-      { name: "Appointment Booking Calendar", path: paths.home },
+      { name: "Appointment Booking Calendar", path: paths.booking },
       { name: "Appointment Form", path: paths.home },
     ],
   },

@@ -1,5 +1,6 @@
 import paths from "../Constants/paths";
 import { lazy } from "react";
+import Booking from "../Pages/Booking";
 
 // Layouts
 const CustomerLayout = lazy(() => import("../Layouts/Customer"));
@@ -88,6 +89,12 @@ const routes = {
     url: paths.service,
     Layout: CustomerLayout,
     Page: Service,
+  },
+  booking: {
+    isPublic: true,
+    url: paths.booking,
+    Layout: CustomerLayout,
+    Page: Booking,
   },
   adminDashboard: {
     isPublic: false,

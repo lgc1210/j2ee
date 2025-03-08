@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import Logo from "../../assets/images/header/lesya-logo.png";
 import navItems from "./navItems";
 import paths from "../../Constants/paths";
-
 import { IoIosArrowDown } from "react-icons/io";
 import { FaCartShopping } from "react-icons/fa6";
 import { HiSearch } from "react-icons/hi";

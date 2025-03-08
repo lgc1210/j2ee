@@ -12,6 +12,7 @@ const Shop = () => {
         titleBanner='Shop'
         pathBanner='Shop'
       />
+
       <div className='md:py-36 py-28 md:px-0 px-6'>
         <div className='container mx-auto'>
           <div className='grid md:grid-cols-5 gap-16'>

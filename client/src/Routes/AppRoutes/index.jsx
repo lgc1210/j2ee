@@ -11,6 +11,7 @@ const AppRoutes = () => {
         <Loading
           size='h-16 w-16'
           customStyle='w-full h-screen flex flex-col items-center justify-center'
+          hasLoadingText
         />
       }>
       <Routes>
