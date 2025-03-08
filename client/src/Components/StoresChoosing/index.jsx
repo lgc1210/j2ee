@@ -1,5 +1,5 @@
 import React from "react";
-import BookingStore from "../BookingStore";
+import StoreChoosing from "../StoreChoosing";
 import Store1 from "../../assets/images/services/delfina-pan-scaled-900x1350.jpeg";
 import Store2 from "../../assets/images/services/giorgio-trovato-2-900x600.jpeg";
 import Store3 from "../../assets/images/services/service-color-leaf.png";
@@ -17,14 +17,16 @@ const stores = [
   { id: 6, name: "Store 6", serviceCount: 42, imageUrl: Store6 },
 ];
 
-const BookingStores = ({ onClick }) => {
+const StoresChoosing = ({ onClick }) => {
   return (
     <ul className='grid lg:grid-cols-3 gap-6 grid-flow-row'>
       {stores.map((store) => {
-        return <BookingStore key={store?.id} store={store} onClick={onClick} />;
+        return (
+          <StoreChoosing key={store?.id} store={store} onClick={onClick} />
+        );
       })}
     </ul>
   );
 };
 
-export default React.memo(BookingStores);
+export default React.memo(StoresChoosing);

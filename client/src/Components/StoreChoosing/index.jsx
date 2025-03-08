@@ -1,6 +1,6 @@
 import React from "react";
 
-const BookingStore = ({ store, onClick }) => {
+const StoreChoosing = ({ store, onClick }) => {
   return (
     <li>
       <div className='group' onClick={onClick}>
@@ -31,4 +31,4 @@ const BookingStore = ({ store, onClick }) => {
   );
 };
 
-export default BookingStore;
+export default React.memo(StoreChoosing);
