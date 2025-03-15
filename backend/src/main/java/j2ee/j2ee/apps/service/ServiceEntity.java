@@ -1,6 +1,6 @@
-package j2ee.j2ee.apps.product;
+package j2ee.j2ee.apps.service;
 
-import j2ee.j2ee.apps.category.CategoryEntity;
+import j2ee.j2ee.apps.category_of_service.CategoryOfServiceEntity;
 import j2ee.j2ee.apps.store.StoreEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -10,27 +10,21 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Data;
 
-@Entity(name = "products")
+@Entity(name = "services")
 @Data
-public class ProductEntity {
+public class ServiceEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
     private String name;
 
     private String description;
 
-    private boolean is_sale;
-
-    private Double old_price;
-
     private Double price;
 
-    private Integer stock_quantity;
-
-    private Boolean is_in_stock;
+    private Integer duration;
 
     private String status;
 
@@ -39,6 +33,6 @@ public class ProductEntity {
     private StoreEntity store;
 
     @ManyToOne
-    @JoinColumn(name = "category_id", referencedColumnName = "id")
-    private CategoryEntity category;
+    @JoinColumn(name = "category_of_service_id", referencedColumnName = "id")
+    private CategoryOfServiceEntity category_of_service;
 }

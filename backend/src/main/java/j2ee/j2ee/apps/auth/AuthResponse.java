@@ -1,6 +1,5 @@
 package j2ee.j2ee.apps.auth;
 
-import j2ee.j2ee.apps.user.UserEntity;
 import lombok.Data;
 
 @Data
