@@ -13,25 +13,22 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        // Skip filter for /login endpoint
-        if (request.getRequestURI().equals("/api/auth/login")) {
+        // Skip filter for /login
+        if (request.getRequestURI().equals("/api/auth/login")
+                || request.getRequestURI().equals("/api/auth/logout")
+                || request.getRequestURI().equals("/api/auth/register")) {
             filterChain.doFilter(request, response);
             return;
         }
 
+        // Look for token in header
         String header = request.getHeader("Authorization");
-
-        // Check if header is null or does not start with "Bearer "
-        if (header == null) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
-        }
-        if (!header.startsWith("Bearer ")) {
+        if (header == null || !header.startsWith("Bearer ")) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
-        // Validate token
+        // Get token (Skip Bearer)
         try {
             // Extract the token after "Bearer "
             String token = header.substring(7);

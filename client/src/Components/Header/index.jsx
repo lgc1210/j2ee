@@ -8,12 +8,14 @@ import { FaCartShopping } from "react-icons/fa6";
 import { HiSearch } from "react-icons/hi";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { HiOutlineBars3 } from "react-icons/hi2";
+import { useAuth } from "../../Contexts/Auth";
 
 const Header = () => {
   const navigate = useNavigate();
   const [toggleNav, setToggleNav] = useState(true);
   const [isSticky, setIsSticky] = useState(false);
   const headerRef = useRef(null);
+  const { logout, isAuthenticated } = useAuth();
 
   useEffect(() => {
     const header = headerRef.current;
@@ -24,12 +26,41 @@ const Header = () => {
     };
 
     window.addEventListener("scroll", handleScroll);
-
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleNavigation = (path, haveChidlren = false) => {
-    if (!haveChidlren) navigate(path);
+  const handleNavigation = (path, haveChildren = false) => {
+    if (!haveChildren) navigate(path);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
+  // Filter function to check if a nav item should be displayed
+  const shouldDisplayNavItem = (item) => {
+    // If item requires auth and user is not authenticated, don't show
+    if (item.requiresAuth && !isAuthenticated) {
+      return false;
+    }
+    // If item should be hidden when authenticated and user is authenticated, don't show
+    if (item.hideWhenAuth && isAuthenticated) {
+      return false;
+    }
+    return true;
+  };
+
+  // Filter function to check if a child item should be displayed
+  const shouldDisplayChildItem = (childItem) => {
+    // If child requires auth and user is not authenticated, don't show
+    if (childItem.requiresAuth && !isAuthenticated) {
+      return false;
+    }
+    // If child should be hidden when authenticated and user is authenticated, don't show
+    if (childItem.hideWhenAuth && isAuthenticated) {
+      return false;
+    }
+    return true;
   };
 
   return (
@@ -60,7 +91,7 @@ const Header = () => {
           className={`transition-all durtaion-500 md:py-0 py-8 bg-white lg:order-2 md:order-3 order-1 md:flex-row md:relative md:top-0 absolute z-20 top-full right-0 left-0 flex-col items-center justify-center xl:gap-16 gap-4 xl:px-0 px-8 ${
             toggleNav ? "flex" : "hidden"
           }`}>
-          {navItems.map((item, index) => {
+          {navItems.filter(shouldDisplayNavItem).map((item, index) => {
             return (
               <div
                 key={index}
@@ -74,21 +105,25 @@ const Header = () => {
                 {/* Sub nav */}
                 {item?.children && (
                   <div className='md:bg-white bg-gray-200 cursor-pointer text-md md:max-w-xl md:w-80 w-screen hidden md:absolute md:top-full shadow transition-all duration-500 group-hover:block'>
-                    {item.children.map((childItem, index) => {
-                      return (
-                        <div
-                          key={index}
-                          className='py-2 px-4 border-t hover:text-[#799AA1] transition-all duration-500 w-full'
-                          onClick={() =>
-                            handleNavigation(
-                              childItem?.path,
-                              childItem?.children
-                            )
-                          }>
-                          {childItem.name}
-                        </div>
-                      );
-                    })}
+                    {item.children
+                      .filter(shouldDisplayChildItem)
+                      .map((childItem, index) => {
+                        return (
+                          <div
+                            key={index}
+                            className='py-2 px-4 border-t hover:text-[#799AA1] transition-all duration-500 w-full'
+                            onClick={() =>
+                              childItem?.auth && isAuthenticated
+                                ? handleLogout()
+                                : handleNavigation(
+                                    childItem?.path,
+                                    childItem?.children
+                                  )
+                            }>
+                            {childItem.name}
+                          </div>
+                        );
+                      })}
                   </div>
                 )}
               </div>

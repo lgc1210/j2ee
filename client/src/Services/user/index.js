@@ -4,7 +4,7 @@ const baseURL = process.env.REACT_APP_API;
 
 class UserService {
   create = async (payload) => {
-    return await apiInstance.post(`${baseURL}/users`, payload);
+    // return await apiInstance.post(`${baseURL}/users`, payload);
   };
 }
 

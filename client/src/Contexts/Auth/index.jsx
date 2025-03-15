@@ -1,29 +1,50 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+} from "react";
 import AuthService from "../../Services/auth";
-import UserService from "../../Services/user";
 import paths from "../../Constants/paths";
 import { useNavigate } from "react-router-dom";
 import { showToast } from "../../Components/Toast";
 import { jwtDecode } from "jwt-decode";
-import { getStoredToken, isEmpty, storeTokens } from "../../Utils/validation";
+import {
+  clearTokens,
+  getStoredToken,
+  storeTokens,
+} from "../../Utils/validation";
+import { moveUserTo } from "../../Utils/moveUserTo";
 
 const AuthContext = createContext();
 
 const Auth = ({ children }) => {
-  const [user, setUser] = useState({});
-  const [token, setToken] = useState("");
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
   const [isPendingLogin, setIsPendingLogin] = useState(false);
   const [isPendingRegister, setIsPendingRegister] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedToken = getStoredToken();
-    if (storedToken) {
-      setToken(storedToken);
-      const decoded = jwtDecode(storedToken);
-      setUser({ email: decoded.sub, role: decoded.role });
-    }
-    return () => {};
+    const checkAuth = async () => {
+      const storedToken = getStoredToken();
+      if (storedToken) {
+        try {
+          const decoded = jwtDecode(storedToken);
+          if (decoded.exp * 1000 > Date.now()) {
+            setToken(storedToken);
+            setUser({ email: decoded?.sub, role: decoded?.role });
+          } else {
+            clearTokens();
+          }
+        } catch (error) {
+          clearTokens();
+        }
+      }
+    };
+
+    checkAuth();
   }, []);
 
   const login = async (payload) => {
@@ -32,10 +53,10 @@ const Auth = ({ children }) => {
       const response = await AuthService.login(payload);
       if (response.status === 200) {
         showToast("Login successfully");
-        const token = response?.data?.token;
-        storeTokens(token);
+        const token = response.data;
         const decoded = jwtDecode(token);
-        navigate(decoded.role === 2 ? paths.home : paths.dashboard);
+        storeTokens(token);
+        navigate(moveUserTo(decoded?.role));
         setUser({ email: decoded.sub, role: decoded.role });
         setToken(token);
       }
@@ -56,7 +77,7 @@ const Auth = ({ children }) => {
   const register = async (payload) => {
     try {
       setIsPendingRegister(true);
-      const response = await UserService.create(payload);
+      const response = await AuthService.register(payload);
       if (response.status === 201) {
         showToast("Register successfully");
         navigate(paths.login);
@@ -72,13 +93,16 @@ const Auth = ({ children }) => {
     }
   };
 
-  const logout = async () => {};
-
-  const isAuthenticated = () => {
-    if (isEmpty(token)) return false;
-    const decoded = jwtDecode(token);
-    return decoded.exp * 1000 > Date.now();
+  const logout = async () => {
+    await AuthService.logout();
+    showToast("Logged out successfully");
+    clearTokens();
+    navigate(paths.login);
+    setToken(null);
+    setUser(null);
   };
+
+  const isAuthenticated = useMemo(() => !!user, [user]);
 
   return (
     <AuthContext.Provider

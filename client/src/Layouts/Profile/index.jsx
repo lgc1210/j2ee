@@ -1,11 +1,10 @@
 import React from "react";
-import { Outlet } from "react-router-dom";
 
-const ProfileLayout = () => {
+const ProfileLayout = ({ children }) => {
   return (
     <div>
       <p>Profile Sidebar here</p>
-      <Outlet />
+      {children}
     </div>
   );
 };

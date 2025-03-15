@@ -1,6 +1,5 @@
 import paths from "../Constants/paths";
 import { lazy } from "react";
-import Booking from "../Pages/Booking";
 
 // Layouts
 const CustomerLayout = lazy(() => import("../Layouts/Customer"));
@@ -28,121 +27,132 @@ const Discounts = lazy(() => import("../Pages/Discounts"));
 const Contacts = lazy(() => import("../Pages/Contacts"));
 const Roles = lazy(() => import("../Pages/Roles"));
 const Statistic = lazy(() => import("../Pages/Statistic"));
+const Booking = lazy(() => import("../Pages/Booking"));
 
-const routes = {
-  home: {
+const routes = [
+  {
     isPublic: true,
     url: paths.home,
     Layout: CustomerLayout,
     Page: Home,
   },
-  login: {
+  {
     isPublic: true,
     url: paths.login,
     Layout: null,
     Page: Login,
+    restrictAuthenticated: true, // prevent logged-in users
   },
-  register: {
+  {
     isPublic: true,
     url: paths.register,
     Layout: null,
     Page: Register,
+    restrictAuthenticated: true, // prevent logged-in users
   },
-  shop: {
+  {
     isPublic: true,
     url: paths.shop,
     Layout: CustomerLayout,
     Page: Shop,
   },
-  notFound: {
+  {
     isPublic: true,
     url: paths.notFound,
     Layout: null,
     Page: NotFound,
   },
-  profile: {
+  {
     isPublic: false,
     url: paths.profile,
     Layout: ProfileLayout,
     Page: Profile,
   },
-  contact: {
+  {
     isPublic: true,
     url: paths.contact,
     Layout: CustomerLayout,
     Page: Contact,
   },
-  productDetails: {
+  {
     isPublic: true,
     url: paths.productDetails,
     Layout: CustomerLayout,
     Page: ProductDetails,
   },
-  cart: {
+  {
     isPublic: true,
     url: paths.cart,
     Layout: CustomerLayout,
     Page: Cart,
   },
-  service: {
+  {
     isPublic: true,
     url: paths.service,
     Layout: CustomerLayout,
     Page: Service,
   },
-  booking: {
+  {
     isPublic: true,
     url: paths.booking,
     Layout: CustomerLayout,
     Page: Booking,
   },
-  adminDashboard: {
+  {
     isPublic: false,
     url: paths.dashboard,
     Layout: AdminLayout,
     Page: Dashboard,
+    requiredRole: ["admin"],
   },
-  adminUsers: {
+  {
     isPublic: false,
     url: paths.users,
     Layout: AdminLayout,
     Page: Users,
+    requiredRole: ["admin"],
   },
-  adminProducts: {
+  {
     isPublic: false,
     url: paths.products,
     Layout: AdminLayout,
     Page: Products,
+    requiredRole: ["admin"],
   },
-  adminCategories: {
+  {
     isPublic: false,
     url: paths.categories,
     Layout: AdminLayout,
     Page: Categories,
+    requiredRole: ["admin"],
   },
-  adminDiscounts: {
+  {
     isPublic: false,
     url: paths.discounts,
     Layout: AdminLayout,
     Page: Discounts,
+    requiredRole: ["admin"],
   },
-  adminContacts: {
+  {
     isPublic: false,
     url: paths.contacts,
     Layout: AdminLayout,
     Page: Contacts,
+    requiredRole: ["admin"],
   },
-  adminRoles: {
+  {
     isPublic: false,
     url: paths.roles,
     Layout: AdminLayout,
     Page: Roles,
+    requiredRole: ["admin"],
   },
-  adminStatistic: {
+  {
     isPublic: false,
     url: paths.statistic,
     Layout: AdminLayout,
     Page: Statistic,
+    requiredRole: ["admin"],
   },
-};
+];
 export default routes;

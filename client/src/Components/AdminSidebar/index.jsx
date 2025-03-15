@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import items from "./items";
 import { useLocation, useNavigate } from "react-router-dom";
 import { LuMenu } from "react-icons/lu";
@@ -10,11 +10,11 @@ const AdminSidebar = () => {
   const navigate = useNavigate();
   const [showItems, setShowItems] = useState(true);
   const location = useLocation();
-  // const { logout } = useAuth();
+  const { logout } = useAuth();
 
-  console.log("Admin Sidebar Mounted");
-
-  const logout = () => {};
+  const handleLogout = async () => {
+    await logout();
+  };
 
   return (
     <section
@@ -55,7 +55,7 @@ const AdminSidebar = () => {
 
       <div className='bg-slate-300 p-2 cursor-pointer mb-10 flex items-center justify-center gap-4'>
         <PiSignOut size={20} className='text-[#14373f]' />
-        <p className='text-center text-[#14373f]' onClick={logout}>
+        <p className='text-center text-[#14373f]' onClick={handleLogout}>
           Sign out
         </p>
       </div>
