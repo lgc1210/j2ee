@@ -1,0 +1,15 @@
+.ant-picker-content th {
+    text-align: center !important;
+    padding: 8px 0 !important;
+    color: #fff !important;
+    background: #242424 !important;
+    text-transform: uppercase !important;
+}
+
+.ant-picker-body {
+    padding: 0 !important;
+}
+
+.ant-alert {
+    border-radius: 0 !important;
+}

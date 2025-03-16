@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import items from "./items";
 import { useLocation, useNavigate } from "react-router-dom";
 import { LuMenu } from "react-icons/lu";
@@ -6,60 +6,80 @@ import { IoClose } from "react-icons/io5";
 import { PiSignOut } from "react-icons/pi";
 import { useAuth } from "../../Contexts/Auth";
 
+const SidebarHeader = ({ toggleSidebar, isOpen }) => (
+  <div className='flex items-center justify-between p-8 text-white'>
+    <h1 className='text-5xl font-serif tracking-widest'>Booking</h1>
+    <button
+      className='md:hidden p-2 rounded-xl hover:bg-slate-500'
+      onClick={toggleSidebar}>
+      {isOpen ? <IoClose size={24} /> : <LuMenu size={22} />}
+    </button>
+  </div>
+);
+
+const SidebarItem = ({ item, isActive, onClick }) => (
+  <li
+    className={`cursor-pointer hover:bg-slate-500 rounded-xl p-4 ${
+      isActive ? "bg-slate-300 text-[#274b60]" : "text-white"
+    }`}
+    onClick={onClick}>
+    {item.name}
+  </li>
+);
+
+const SidebarFooter = ({ onLogout }) => (
+  <div
+    className='bg-slate-300 p-2 cursor-pointer mb-10 flex items-center justify-center gap-4 text-[#14373f]'
+    onClick={onLogout}>
+    <PiSignOut size={20} />
+    <span>Sign out</span>
+  </div>
+);
+
 const AdminSidebar = () => {
   const navigate = useNavigate();
-  const [showItems, setShowItems] = useState(true);
+  const [isOpen, setIsOpen] = useState(true);
   const location = useLocation();
-  const { logout } = useAuth();
+  const { logout, isAuthenticated, user } = useAuth();
 
-  const handleLogout = async () => {
-    await logout();
+  const filterSidebarItems = (items) => {
+    return items?.filter((item) => {
+      if (!isAuthenticated && item?.requiredAuth) {
+        return false;
+      }
+      if (
+        isAuthenticated &&
+        item?.requiredRole &&
+        !item?.requiredRole.includes(user?.role)
+      ) {
+        return false;
+      }
+      return true;
+    });
   };
 
   return (
-    <section
+    <aside
       className={`bg-[#435d63] flex flex-col transition-all duration-500 h-screen ${
-        showItems ? "max-h-full" : "max-h-fit"
+        isOpen ? "max-h-full" : "max-h-fit"
       }`}>
-      <div className='p-8 flex-grow'>
-        <div className='text-3xl font-semibold mb-4 text-white flex items-center justify-between'>
-          <div>
-            <p className='text-5xl font-serif tracking-widest'>Booking</p>
-          </div>
-          <div
-            className='md:hidden block cursor-pointer p-2 rounded-xl hover:bg-slate-500'
-            onClick={() => setShowItems(!showItems)}>
-            {showItems ? <IoClose /> : <LuMenu />}
-          </div>
-        </div>
+      <SidebarHeader toggleSidebar={() => setIsOpen(!isOpen)} isOpen={isOpen} />
 
-        {showItems && (
-          <ul>
-            {items?.map((item, index) => {
-              return (
-                <li
-                  key={index}
-                  className={`cursor-pointer hover:bg-slate-500 rounded-xl p-4 ${
-                    location.pathname === item.path
-                      ? "bg-slate-300 text-[#274b60]"
-                      : "text-white"
-                  }`}
-                  onClick={() => navigate(item?.path)}>
-                  {item?.name}
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </div>
+      {isOpen && (
+        <ul className='flex-grow p-8 pt-0'>
+          {filterSidebarItems(items).map((item) => (
+            <SidebarItem
+              key={item.path}
+              item={item}
+              isActive={location.pathname === item.path}
+              onClick={() => navigate(item.path)}
+            />
+          ))}
+        </ul>
+      )}
 
-      <div className='bg-slate-300 p-2 cursor-pointer mb-10 flex items-center justify-center gap-4'>
-        <PiSignOut size={20} className='text-[#14373f]' />
-        <p className='text-center text-[#14373f]' onClick={handleLogout}>
-          Sign out
-        </p>
-      </div>
-    </section>
+      <SidebarFooter onLogout={logout} />
+    </aside>
   );
 };
 
