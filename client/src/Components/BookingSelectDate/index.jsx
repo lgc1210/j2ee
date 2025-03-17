@@ -3,9 +3,10 @@ import { Alert, Calendar, ConfigProvider } from "antd";
 import dayjs from "dayjs";
 import { FaArrowRightLong } from "react-icons/fa6";
 import Button from "../Button";
+import moment from "moment";
 import "./index.css";
 
-const BookingForm = ({ handleSetStep }) => {
+const BookingSelectDate = ({ handleSetStep }) => {
   const [value, setValue] = useState(() => dayjs(Date.now()));
   const [selectedValue, setSelectedValue] = useState(() => dayjs(Date.now()));
 
@@ -16,6 +17,14 @@ const BookingForm = ({ handleSetStep }) => {
 
   const onPanelChange = (newValue) => {
     setValue(newValue);
+  };
+
+  const setStep = () => {
+    handleSetStep(3);
+  };
+
+  const disabledDate = (current) => {
+    return current && current.isBefore(moment(), "day");
   };
 
   const dateFullCellRender = (date) => {
@@ -129,6 +138,7 @@ const BookingForm = ({ handleSetStep }) => {
               onPanelChange={onPanelChange}
               fullCellRender={dateFullCellRender}
               headerRender={headerRender}
+              disabledDate={disabledDate}
               className='custom-calendar'
             />
           </ConfigProvider>
@@ -138,7 +148,7 @@ const BookingForm = ({ handleSetStep }) => {
             iconSize={14}
             buttonStyle='justify-center gap-2 mt-10 mx-auto lg:[&]:py-6 lg:[&]:px-16 lg:[&]:text-lg'
             iconStyle=''
-            onClick={handleSetStep}
+            onClick={setStep}
           />
         </div>
       </div>
@@ -146,4 +156,4 @@ const BookingForm = ({ handleSetStep }) => {
   );
 };
 
-export default React.memo(BookingForm);
+export default React.memo(BookingSelectDate);

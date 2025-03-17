@@ -1,7 +1,6 @@
 package j2ee.j2ee.apps.auth;
 
 import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +9,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import j2ee.j2ee.apps.user.UserController;
 import j2ee.j2ee.apps.user.UserEntity;
 import j2ee.j2ee.apps.user.UserService;
@@ -37,7 +35,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest credentials) {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest credentials) {
         try {
             if (credentials.getEmail() == null || credentials.getPassword() == null) {
                 return ResponseEntity.badRequest().build();
@@ -53,8 +51,9 @@ public class AuthController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
 
-            String token = JwtUtil.generateToken(user.get().getEmail(), user.get().getRole().getName());
-            return ResponseEntity.ok(token);
+            String token = JwtUtil.generateToken(user);
+            LoginResponse response = new LoginResponse(token);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             System.err.println("Internal Server Error: " + e.getMessage());
             return ResponseEntity.internalServerError().build();

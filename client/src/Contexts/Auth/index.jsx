@@ -34,7 +34,7 @@ const Auth = ({ children }) => {
           const decoded = jwtDecode(storedToken);
           if (decoded.exp * 1000 > Date.now()) {
             setToken(storedToken);
-            setUser({ email: decoded?.sub, role: decoded?.role });
+            setUser({ ...decoded });
           } else {
             clearTokens();
           }
@@ -53,11 +53,11 @@ const Auth = ({ children }) => {
       const response = await AuthService.login(payload);
       if (response.status === 200) {
         showToast("Login successfully");
-        const token = response.data;
+        const { token } = response.data;
         const decoded = jwtDecode(token);
         storeTokens(token);
         navigate(moveUserTo(decoded?.role));
-        setUser({ email: decoded.sub, role: decoded.role });
+        setUser({ ...decoded });
         setToken(token);
       }
     } catch (error) {

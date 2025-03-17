@@ -2,7 +2,9 @@ package j2ee.j2ee.utils;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import j2ee.j2ee.apps.user.UserEntity;
 import java.util.Date;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -19,11 +21,16 @@ public class JwtUtil {
         JwtUtil.expirationTime = expirationTime;
     }
 
-    public static String generateToken(String email, String role) {
+    public static String generateToken(Optional<UserEntity> user) {
         return Jwts
                 .builder()
-                .setSubject(email)
-                .claim("role", role)
+                .setSubject(user.get().getName())
+                .claim("id", user.get().getId())
+                .claim("name", user.get().getName())
+                .claim("phone", user.get().getPhone())
+                .claim("role", user.get().getRole().getName())
+                .claim("created_at", user.get().getCreated_at().toString())
+                .claim("updated_at", user.get().getUpdate_at().toString())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();

@@ -13,6 +13,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import lombok.Data;
 
 @Entity(name = "appointments")
@@ -48,4 +50,15 @@ public class AppointmentEntity {
     @ManyToOne
     @JoinColumn(name = "staff_id")
     private UserEntity staff;
+
+    @PrePersist
+    protected void onCreate() {
+        created_at = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updated_at = LocalDateTime.now();
+    }
+
 }
