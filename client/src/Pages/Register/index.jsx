@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import paths from "../../Constants/paths";
 import { Navigate, useNavigate } from "react-router-dom";
 import LogoImage from "../../assets/images/header/lesya-logo.png";
@@ -24,9 +24,12 @@ export default function Register() {
   const navigate = useNavigate();
   const { register, isPendingRegister, isAuthenticated, user } = useAuth();
 
-  if (isAuthenticated())
+  if (isAuthenticated)
     return (
-      <Navigate to={user?.role === 2 ? paths.home : paths.dashboard} replace />
+      <Navigate
+        to={user?.role === "customer" ? paths.home : paths.dashboard}
+        replace
+      />
     );
 
   const handleFieldsChange = (key, value) => {
