@@ -3,9 +3,12 @@ package j2ee.j2ee.apps.user;
 import java.time.LocalDate;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import j2ee.j2ee.apps.role.RoleEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -16,6 +19,7 @@ import lombok.Data;
 
 @Entity(name = "users")
 @Data
+@EntityListeners(AuditingEntityListener.class)
 public class UserEntity {
 
     @Id
@@ -33,6 +37,7 @@ public class UserEntity {
     private String password;
 
     @CreatedDate
+    @Column(updatable = false)
     private LocalDate created_at;
 
     @LastModifiedDate
@@ -41,9 +46,4 @@ public class UserEntity {
     @ManyToOne
     @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)
     private RoleEntity role;
-
-    @PrePersist
-    protected void onCreated() {
-        this.created_at = LocalDate.now();
-    }
 }
