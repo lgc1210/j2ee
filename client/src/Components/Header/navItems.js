@@ -38,7 +38,7 @@ const navItems = [
       // Show logout only for authenticated users
       { name: "Logout", path: paths.logout, requiresAuth: true, auth: true },
       { name: "Services", path: paths.service },
-      { name: "Account", path: paths.profile, requiresAuth: true },
+      { name: "Account", path: paths.profilePersonal, requiresAuth: true },
     ],
   },
   {

@@ -11,10 +11,12 @@ const Loading = React.lazy(() => import("../../Components/Loading"));
 const columns = [
   {
     name: "Title",
+    sortable: true,
     selector: (row) => row.title,
   },
   {
     name: "Year",
+    sortable: true,
     selector: (row) => row.year,
   },
   {

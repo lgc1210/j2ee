@@ -29,6 +29,16 @@ const Roles = lazy(() => import("../Pages/Roles"));
 const Statistic = lazy(() => import("../Pages/Statistic"));
 const Booking = lazy(() => import("../Pages/Booking"));
 
+// Profile Pages
+const ProfileChangePassword = lazy(() =>
+  import("../Pages/ProfileChangePassword")
+);
+const ProfileNotifications = lazy(() =>
+  import("../Pages/ProfileNotifications")
+);
+const ProfileBooking = lazy(() => import("../Pages/ProfileBooking"));
+const ProfileOrders = lazy(() => import("../Pages/ProfileOrders"));
+
 const routes = [
   {
     isPublic: true,
@@ -62,11 +72,36 @@ const routes = [
     Layout: null,
     Page: NotFound,
   },
+  // Profile
   {
     isPublic: false,
-    url: paths.profile,
+    url: paths.profilePersonal,
     Layout: ProfileLayout,
     Page: Profile,
+  },
+  {
+    isPublic: false,
+    url: paths.profileChangePassword,
+    Layout: ProfileLayout,
+    Page: ProfileChangePassword,
+  },
+  {
+    isPublic: false,
+    url: paths.profileBooking,
+    Layout: ProfileLayout,
+    Page: ProfileBooking,
+  },
+  {
+    isPublic: false,
+    url: paths.profileOrders,
+    Layout: ProfileLayout,
+    Page: ProfileOrders,
+  },
+  {
+    isPublic: false,
+    url: paths.profileNotifications,
+    Layout: ProfileLayout,
+    Page: ProfileNotifications,
   },
   {
     isPublic: true,

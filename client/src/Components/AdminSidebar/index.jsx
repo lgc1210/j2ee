@@ -25,7 +25,13 @@ const filterSidebarItems = (items, isAuthenticated, user) => {
 
 const SidebarHeader = React.memo(({ toggleSidebar, isOpen }) => (
   <div className='flex items-center justify-between p-8 text-white'>
-    <h1 className='text-5xl font-serif tracking-widest'>Booking</h1>
+    <h1 className='text-5xl font-serif tracking-widest xl:block hidden'>
+      Booking
+    </h1>
+    {/* The h1 will be shown when the sidebar is small */}
+    <h1 className='text-5xl font-serif text-[#274b60] bg-white rounded-md py-2 px-4 xl:hidden block'>
+      B
+    </h1>
     <button
       className='md:hidden p-2 rounded-xl hover:bg-slate-500'
       onClick={toggleSidebar}>
@@ -115,27 +121,32 @@ const AdminSidebar = () => {
   const { logout, isAuthenticated, user } = useAuth();
 
   return (
-    <aside
-      className={`bg-[#435d63] shadow-md rounded-md m-4 xl:mr-0 flex flex-col transition-all duration-500 min-h-screen max-h-full ${
-        isOpen ? "max-h-full" : "max-h-fit"
-      }`}>
-      <SidebarHeader toggleSidebar={() => setIsOpen(!isOpen)} isOpen={isOpen} />
+    <aside className='p-4 xl:pr-0 h-fit'>
+      <div
+        className={`bg-[#435d63] shadow-md rounded-md flex flex-col h-full transition-all duration-500 ${
+          isOpen ? "" : ""
+        }`}>
+        <SidebarHeader
+          toggleSidebar={() => setIsOpen(!isOpen)}
+          isOpen={isOpen}
+        />
 
-      {isOpen && (
-        <ul className='flex-grow p-8 pt-0'>
-          {filterSidebarItems(items, isAuthenticated, user).map((item) => (
-            <SidebarItem
-              key={item.path}
-              item={item}
-              isActive={location.pathname === item.path}
-              children={item?.children}
-              onClick={() => navigate(item.path)}
-            />
-          ))}
-        </ul>
-      )}
+        {isOpen && (
+          <ul className='flex-grow p-8 pt-0'>
+            {filterSidebarItems(items, isAuthenticated, user).map((item) => (
+              <SidebarItem
+                key={item.path}
+                item={item}
+                isActive={location.pathname === item.path}
+                children={item?.children}
+                onClick={() => navigate(item.path)}
+              />
+            ))}
+          </ul>
+        )}
 
-      <SidebarFooter onLogout={logout} />
+        <SidebarFooter onLogout={logout} />
+      </div>
     </aside>
   );
 };

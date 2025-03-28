@@ -5,7 +5,7 @@ const AdminSidebar = lazy(() => import("../../Components/AdminSidebar"));
 const AdminLayout = ({ children }) => {
   return (
     <div className='grid lg:grid-cols-5 md:grid-cols-4 bg-gray-500/5'>
-      <div className=''>
+      <div>
         <AdminSidebar />
       </div>
 
