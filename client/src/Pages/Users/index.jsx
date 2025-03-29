@@ -91,6 +91,8 @@ const Users = () => {
 
   const handleExport = () => {};
 
+  const handleCreate = () => {};
+
   return (
     <section>
       <div>
@@ -129,6 +131,11 @@ const Users = () => {
             {/* Action list will be shown here */}
             {showActions && (
               <div className='overflow-hidden absolute z-10 top-full right-0 rounded-md bg-white w-fit shadow-md'>
+                <button
+                  className='p-2 px-4 hover:bg-black/10 w-full'
+                  onClick={handleCreate}>
+                  Create
+                </button>
                 <button
                   className='p-2 px-4 hover:bg-black/10 w-full'
                   onClick={handleImport}>
