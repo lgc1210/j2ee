@@ -121,33 +121,35 @@ const AdminSidebar = () => {
   const { logout, isAuthenticated, user } = useAuth();
 
   return (
-    <aside className='p-4 xl:pr-0 h-fit'>
-      <div
-        className={`bg-[#435d63] shadow-md rounded-md flex flex-col h-full transition-all duration-500 ${
-          isOpen ? "" : ""
-        }`}>
-        <SidebarHeader
-          toggleSidebar={() => setIsOpen(!isOpen)}
-          isOpen={isOpen}
-        />
+    <>
+      <aside className='p-4 xl:pr-0 h-fit'>
+        <div
+          className={`bg-[#435d63] shadow-md rounded-md flex flex-col h-full transition-all duration-500 ${
+            isOpen ? "" : ""
+          }`}>
+          <SidebarHeader
+            toggleSidebar={() => setIsOpen(!isOpen)}
+            isOpen={isOpen}
+          />
 
-        {isOpen && (
-          <ul className='flex-grow p-8 pt-0'>
-            {filterSidebarItems(items, isAuthenticated, user).map((item) => (
-              <SidebarItem
-                key={item.path}
-                item={item}
-                isActive={location.pathname === item.path}
-                children={item?.children}
-                onClick={() => navigate(item.path)}
-              />
-            ))}
-          </ul>
-        )}
+          {isOpen && (
+            <ul className='flex-grow p-8 pt-0'>
+              {filterSidebarItems(items, isAuthenticated, user).map((item) => (
+                <SidebarItem
+                  key={item.path}
+                  item={item}
+                  isActive={location.pathname === item.path}
+                  children={item?.children}
+                  onClick={() => navigate(item.path)}
+                />
+              ))}
+            </ul>
+          )}
 
-        <SidebarFooter onLogout={logout} />
-      </div>
-    </aside>
+          <SidebarFooter onLogout={logout} />
+        </div>
+      </aside>
+    </>
   );
 };
 
