@@ -13,7 +13,7 @@ const ConfirmPopup = ({
 }) => {
   return (
     <>
-      <Overlay toggle={toggle} setToggle={setToggle} />
+      <Overlay toggle={toggle} setToggle={onCancel} />
       <div
         className={`${
           toggle

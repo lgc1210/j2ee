@@ -1,10 +1,13 @@
 import React from "react";
 import { AiOutlineEdit } from "react-icons/ai";
 import { FiPlus } from "react-icons/fi";
+import { useAuth } from "../../Contexts/Auth";
 
 const Loading = React.lazy(() => import("../../Components/Loading"));
 
 const Profile = () => {
+  const { logout } = useAuth();
+
   return (
     <React.Suspense
       fallback={
@@ -32,42 +35,44 @@ const Profile = () => {
               </div>
 
               <table>
-                <tr>
-                  <td className='pr-32 pb-6'>
-                    <div className='flex flex-col gap-1'>
-                      <p className='text-black/60 text-sm font-semibold'>
-                        Full Name
-                      </p>
-                      <p className='font-semibold'>Lê Gia Cường</p>
-                    </div>
-                  </td>
-                  <td className='pr-32 pb-6'>
-                    <div className='flex flex-col gap-1'>
-                      <p className='text-black/60 text-sm font-semibold'>
-                        Phone
-                      </p>
-                      <p className='font-semibold'>0123456789</p>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td className='pr-32 pb-6'>
-                    <div className='flex flex-col gap-1'>
-                      <p className='text-black/60 text-sm font-semibold'>
-                        Email
-                      </p>
-                      <p className='font-semibold'>lgc@gmail.com</p>
-                    </div>
-                  </td>
-                  <td className='pr-32 pb-6'>
-                    <div className='flex flex-col gap-1'>
-                      <p className='text-black/60 text-sm font-semibold'>
-                        Created At
-                      </p>
-                      <p className='font-semibold'>12/10/2003</p>
-                    </div>
-                  </td>
-                </tr>
+                <tbody>
+                  <tr>
+                    <td className='pr-32 pb-6'>
+                      <div className='flex flex-col gap-1'>
+                        <p className='text-black/60 text-sm font-semibold'>
+                          Full Name
+                        </p>
+                        <p className='font-semibold'>Lê Gia Cường</p>
+                      </div>
+                    </td>
+                    <td className='pr-32 pb-6'>
+                      <div className='flex flex-col gap-1'>
+                        <p className='text-black/60 text-sm font-semibold'>
+                          Phone
+                        </p>
+                        <p className='font-semibold'>0123456789</p>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className='pr-32 pb-6'>
+                      <div className='flex flex-col gap-1'>
+                        <p className='text-black/60 text-sm font-semibold'>
+                          Email
+                        </p>
+                        <p className='font-semibold'>lgc@gmail.com</p>
+                      </div>
+                    </td>
+                    <td className='pr-32 pb-6'>
+                      <div className='flex flex-col gap-1'>
+                        <p className='text-black/60 text-sm font-semibold'>
+                          Created At
+                        </p>
+                        <p className='font-semibold'>12/10/2003</p>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
               </table>
             </div>
 
@@ -180,7 +185,7 @@ const Profile = () => {
             </div>
           </div>
 
-          <div className='w-full mt-4'>
+          <div className='w-full mt-4' onClick={logout}>
             <p className='text-sm cursor-pointer rounded w-fit ml-auto py-2 px-4 text-white bg-black/80'>
               Log out
             </p>

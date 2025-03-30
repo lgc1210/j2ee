@@ -30,8 +30,10 @@ const ProfileSidebar = () => {
                     : handleItemClicked(item?.path)
                 }>
                 <p
-                  className={`truncate group-hover:bg-[#274b609f] font-semibold group-hover:text-white rounded p-2 cursor-pointer ${
-                    item?.deleteItem ? "text-red-500" : ""
+                  className={`truncate font-semibold rounded p-2 cursor-pointer ${
+                    item?.deleteItem
+                      ? "text-red-500 group-hover:text-red-700"
+                      : "group-hover:bg-[#274b609f] group-hover:text-white"
                   } ${
                     currentPath === item?.path
                       ? "bg-[#274b609f] text-white"
