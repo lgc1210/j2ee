@@ -55,11 +55,10 @@ const ProfileChangePassword = () => {
     }
 
     try {
-      const response = await userService.changePassword(
-        user?.id,
-        fields?.currentPassword,
-        fields?.newPassword
-      );
+      const response = await userService.changePassword(user?.id, {
+        currentPassword: fields.currentPassword,
+        newPassword: fields.newPassword,
+      });
       console.log("Response: ", response);
     } catch (error) {}
   };

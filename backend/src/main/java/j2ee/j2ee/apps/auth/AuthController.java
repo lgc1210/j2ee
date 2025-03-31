@@ -21,12 +21,15 @@ public class AuthController {
     private final UserService userService;
     private final UserController userController;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     @Autowired
-    public AuthController(UserService userService, PasswordEncoder passwordEncoder, UserController userController) {
+    public AuthController(UserService userService, PasswordEncoder passwordEncoder, UserController userController,
+            JwtUtil jwtUtil) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.userController = userController;
+        this.jwtUtil = jwtUtil;
     }
 
     @PostMapping("/register")
@@ -51,7 +54,7 @@ public class AuthController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
 
-            String token = JwtUtil.generateToken(user);
+            String token = jwtUtil.generateToken(user);
             LoginResponse response = new LoginResponse(token);
             return ResponseEntity.ok(response);
         } catch (Exception e) {

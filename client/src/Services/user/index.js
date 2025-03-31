@@ -6,7 +6,15 @@ class UserService {
   changePassword = async (userId, payload) => {
     return await apiInstance.post(
       `${baseURL}/users/${userId}/changepassword`,
-      payload
+      {
+        currentPassword: payload["currentPassword"],
+        newPassword: payload["newPassword"],
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
     );
   };
 }
