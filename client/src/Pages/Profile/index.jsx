@@ -6,7 +6,7 @@ import { useAuth } from "../../Contexts/Auth";
 const Loading = React.lazy(() => import("../../Components/Loading"));
 
 const Profile = () => {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
   return (
     <React.Suspense
@@ -42,7 +42,7 @@ const Profile = () => {
                         <p className='text-black/60 text-sm font-semibold'>
                           Full Name
                         </p>
-                        <p className='font-semibold'>Lê Gia Cường</p>
+                        <p className='font-semibold'>{user?.name}</p>
                       </div>
                     </td>
                     <td className='pr-32 pb-6'>
@@ -50,7 +50,7 @@ const Profile = () => {
                         <p className='text-black/60 text-sm font-semibold'>
                           Phone
                         </p>
-                        <p className='font-semibold'>0123456789</p>
+                        <p className='font-semibold'>{user?.phone}</p>
                       </div>
                     </td>
                   </tr>
@@ -60,7 +60,7 @@ const Profile = () => {
                         <p className='text-black/60 text-sm font-semibold'>
                           Email
                         </p>
-                        <p className='font-semibold'>lgc@gmail.com</p>
+                        <p className='font-semibold'>{user?.email}</p>
                       </div>
                     </td>
                     <td className='pr-32 pb-6'>
@@ -68,7 +68,7 @@ const Profile = () => {
                         <p className='text-black/60 text-sm font-semibold'>
                           Created At
                         </p>
-                        <p className='font-semibold'>12/10/2003</p>
+                        <p className='font-semibold'>{user?.created_at}</p>
                       </div>
                     </td>
                   </tr>

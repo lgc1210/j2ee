@@ -2,7 +2,10 @@ package j2ee.j2ee.apps.user;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
+import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -89,6 +92,28 @@ public class UserController {
             UserEntity updatedUser = userService.createOrUpdate(user);
 
             return ResponseEntity.ok(updatedUser);
+        } catch (Exception e) {
+            System.err.println("Internal Server Error: " + e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/{id}/changepassword")
+    public ResponseEntity<String> changePassword(@PathVariable(name = "id") long id,
+            @RequestBody Map<String, String> request) {
+        try {
+            String currentPassword = request.get("currentPassword");
+            String newPassword = request.get("newPassword");
+            if (currentPassword == null || newPassword == null) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            Optional<UserEntity> updatedUser = userService.changePassword(id, currentPassword, newPassword);
+            if (!updatedUser.isPresent()) {
+                return ResponseEntity.badRequest().body("Current password is incorrect");
+            }
+
+            return ResponseEntity.ok("Password changed successfully");
         } catch (Exception e) {
             System.err.println("Internal Server Error: " + e.getMessage());
             return ResponseEntity.internalServerError().build();

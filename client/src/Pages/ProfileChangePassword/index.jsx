@@ -1,5 +1,7 @@
 import React from "react";
 import { isEmpty, isConfirmPassword } from "../../Utils/validation.js";
+import { useAuth } from "../../Contexts/Auth/index.jsx";
+import { useSelector, useDispatch } from "react-redux";
 
 const FormControl = React.lazy(() => import("../../Components/FormControl"));
 
@@ -10,23 +12,26 @@ const ProfileChangePassword = () => {
     confirmPassword: "",
   });
   const [errors, setErrors] = React.useState({});
+  const { user } = useAuth();
+  const dispatch = useDispatch();
+  const userSelector = useSelector((state) => state);
 
   const validate = () => {
     const errs = {};
+
     if (isEmpty(fields.currentPassword)) {
       errs.currentPassword = "Current password is required";
     }
-
     if (isEmpty(fields.newPassword)) {
       errs.newPassword = "New password is required";
     }
-
-    if (
-      !isEmpty(fields.confirmPassword) &&
-      !isConfirmPassword(fields.password, fields.confirmPassword)
-    ) {
+    if (!isConfirmPassword(fields.newPassword, fields.confirmPassword)) {
       errs.confirmPassword = "Confirm password does not match";
     }
+
+    setErrors(errs);
+
+    return Object.keys(errs).length === 0;
   };
 
   const handleFieldsChange = (key, value) => {
@@ -48,7 +53,7 @@ const ProfileChangePassword = () => {
       return;
     }
 
-    // Do something
+    console.log("Fields: ", fields);
   };
 
   return (
@@ -147,10 +152,15 @@ const ProfileChangePassword = () => {
                   }
                   onType={() => handleFieldsType("confirmPassword")}
                   onBlur={() => {
-                    if (isEmpty(fields.confirmPassword))
+                    if (
+                      !isConfirmPassword(
+                        fields.newPassword,
+                        fields.confirmPassword
+                      )
+                    )
                       handleFieldsBlur(
                         "confirmPassword",
-                        "Confirm password is required"
+                        "Confirm password does not match"
                       );
                   }}
                   hasError={errors?.confirmPassword}

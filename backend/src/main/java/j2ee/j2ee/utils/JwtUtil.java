@@ -24,9 +24,10 @@ public class JwtUtil {
     public static String generateToken(Optional<UserEntity> user) {
         return Jwts
                 .builder()
-                .setSubject(user.get().getName())
+                .setSubject(user.get().getEmail())
                 .claim("id", user.get().getId())
                 .claim("name", user.get().getName())
+                .claim("email", user.get().getEmail())
                 .claim("phone", user.get().getPhone())
                 .claim("role", user.get().getRole().getName())
                 .claim("created_at", user.get().getCreated_at().toString())
