@@ -2,6 +2,7 @@ import React from "react";
 import { isEmpty, isConfirmPassword } from "../../Utils/validation.js";
 import { useAuth } from "../../Contexts/Auth/index.jsx";
 import { useSelector, useDispatch } from "react-redux";
+import userService from "../../Services/user";
 
 const FormControl = React.lazy(() => import("../../Components/FormControl"));
 
@@ -53,7 +54,14 @@ const ProfileChangePassword = () => {
       return;
     }
 
-    console.log("Fields: ", fields);
+    try {
+      const response = await userService.changePassword(
+        user?.id,
+        fields?.currentPassword,
+        fields?.newPassword
+      );
+      console.log("Response: ", response);
+    } catch (error) {}
   };
 
   return (

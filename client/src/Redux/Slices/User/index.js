@@ -17,9 +17,6 @@ export const userSlice = createSlice({
     deleteUser: (state, action) => {
       console.log("Delete");
     },
-    changePassword: (state, action) => {
-      const { id, password } = action.payload;
-    },
   },
 });
 

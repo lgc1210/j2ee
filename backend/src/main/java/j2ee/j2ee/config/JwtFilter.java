@@ -13,7 +13,13 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        // Skip filter for /login
+        // Allow OPTIONS requests for CORS preflight
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // Skip filter for public endpoints
         if (request.getRequestURI().equals("/api/auth/login")
                 || request.getRequestURI().equals("/api/auth/logout")
                 || request.getRequestURI().equals("/api/auth/register")) {
@@ -21,24 +27,19 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Look for token in header
+        // Check Authorization header
         String header = request.getHeader("Authorization");
         if (header == null || !header.startsWith("Bearer ")) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
-        // Get token (Skip Bearer)
         try {
-            // Extract the token after "Bearer "
             String token = header.substring(7);
             if (JwtUtil.validateToken(token)) {
-                // Proceed if valid
                 filterChain.doFilter(request, response);
             } else {
-                // Reject if invalid
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
             }
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
