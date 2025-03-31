@@ -39,6 +39,17 @@ public class UserService {
         return userRepository.findByPhone(phone);
     }
 
+    public Optional<UserEntity> changePassword(long id, String currentPassword, String newPassword) {
+        Optional<UserEntity> user = userRepository.findById(id);
+        if (!user.isPresent() && !passwordEncoder.matches(currentPassword, user.get().getPassword())) {
+            return Optional.empty();
+        }
+
+        user.get().setPassword(passwordEncoder.encode(newPassword));
+
+        return Optional.of(userRepository.save(user.get()));
+    }
+
     public UserEntity createOrUpdate(UserEntity user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 

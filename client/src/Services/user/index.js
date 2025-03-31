@@ -3,8 +3,19 @@ import apiInstance from "../../Config/api";
 const baseURL = process.env.REACT_APP_API;
 
 class UserService {
-  create = async (payload) => {
-    return await apiInstance.post(`${baseURL}/users`, payload);
+  changePassword = async (userId, payload) => {
+    return await apiInstance.post(
+      `${baseURL}/users/${userId}/changepassword`,
+      {
+        currentPassword: payload["currentPassword"],
+        newPassword: payload["newPassword"],
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
   };
 }
 

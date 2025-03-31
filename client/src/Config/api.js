@@ -1,18 +1,20 @@
 import axios from "axios";
+import { getStoredToken } from "../Utils/validation";
 
 const apiInstance = axios.create({
   baseURL: process.env.REACT_APP_API,
-  timeout: 5000,
+  timeout: 10000,
   headers: { "X-Custom-Header": "foobar" },
 });
 
 apiInstance.interceptors.request.use(
   (config) => {
-    // Do something before request is sent
+    const accessToken = getStoredToken();
+    config.headers.Authorization = `Bearer ${accessToken}`;
     return config;
   },
   (error) => {
-    // Do something with request error
+    console.log("Error while sending request: ", error);
     return Promise.reject(error);
   }
 );
@@ -22,7 +24,7 @@ apiInstance.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Do something with response error
+    console.log("Error while getting response: ", error);
     return Promise.reject(error);
   }
 );

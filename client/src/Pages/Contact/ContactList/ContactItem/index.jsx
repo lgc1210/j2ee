@@ -12,4 +12,4 @@ const ContactItem = ({ contact }) => {
   );
 };
 
-export default ContactItem;
+export default React.memo(ContactItem);

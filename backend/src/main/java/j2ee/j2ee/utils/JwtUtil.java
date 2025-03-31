@@ -3,54 +3,71 @@ package j2ee.j2ee.utils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
-import java.security.Key;
+import j2ee.j2ee.apps.user.UserEntity;
 import java.util.Date;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 @Component
 public class JwtUtil {
 
-    private static final String SECRET_KEY = "jwtsecrectkeyj2eebeautywebsitemanagement2025";
+    private final String secretKey;
+    private final long expirationTime;
 
-    private static final long EXPIRATION_TIME = 3600_000;
+    public JwtUtil(@Value("${jwt.secret}") String secretKey,
+            @Value("${jwt.expiration:3600000}") long expirationTime) {
+        this.secretKey = secretKey;
+        this.expirationTime = expirationTime;
+    }
 
-    // Create a token with the email
-    public static String generateToken(String email, long role) {
+    public String generateToken(Optional<UserEntity> user) {
         return Jwts.builder()
-                .setSubject(email)
-                .claim("role", role)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .setSubject(String.valueOf(user.get().getId()))
+                .claim("id", user.get().getId())
+                .claim("name", user.get().getName())
+                .claim("email", user.get().getEmail())
+                .claim("phone", user.get().getPhone())
+                .claim("role", user.get().getRole().getName())
+                .claim("created_at", user.get().getCreated_at().toString())
+                .claim("updated_at", user.get().getUpdate_at().toString())
+                .setExpiration(new Date(System.currentTimeMillis() + this.expirationTime))
+                .signWith(SignatureAlgorithm.HS256, this.secretKey)
                 .compact();
     }
 
-    // Get the email from the token
-    public static String extractEmail(String token) {
-        return Jwts.parser()
-                .setSigningKey(SECRET_KEY)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
-    }
-
-    // Check if the token is invalid
-    public static boolean validateToken(String token) {
+    public boolean validateToken(String token) {
         try {
             Jwts.parser()
-                    .setSigningKey(SECRET_KEY)
+                    .setSigningKey(this.secretKey)
                     .build()
-                    .parseClaimsJws(token);
-
+                    .parseClaimsJws(token)
+                    .getBody();
             return true;
         } catch (Exception e) {
+            System.out.println("Token validation failed: " + e.getMessage());
             return false;
         }
+    }
+
+    public String getRoleFromToken(String token) {
+        try {
+            return Jwts.parser()
+                    .setSigningKey(this.secretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .get("role", String.class);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Unable to extract role from token", e);
+        }
+    }
+
+    public Claims getClaims(String token) {
+        return Jwts.parser()
+                .setSigningKey(this.secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 }

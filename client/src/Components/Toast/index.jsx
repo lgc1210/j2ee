@@ -21,4 +21,4 @@ const Toast = () => {
 };
 
 export { showToast };
-export default Toast;
+export default React.memo(Toast);

@@ -1,14 +1,32 @@
 import React from "react";
 import { useAuth } from "../../Contexts/Auth";
 import { Navigate } from "react-router-dom";
+import { moveUserTo } from "../../Utils/moveUserTo";
 import paths from "../../Constants/paths";
 
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated } = useAuth();
+const ProtectedRoute = ({
+  children,
+  restrictAuthenticated = false,
+  isPublic = true,
+  requiredRole,
+}) => {
+  const { isAuthenticated, user } = useAuth();
 
-  if (!isAuthenticated()) return <Navigate to={paths.login} replace />;
+  if (isAuthenticated) {
+    if (restrictAuthenticated) {
+      return <Navigate to={moveUserTo(user?.role)} replace />;
+    }
+    if (requiredRole && !requiredRole?.includes(user?.role)) {
+      return <Navigate to={paths.home} replace />;
+    }
+    return children;
+  }
 
-  return <>{children}</>;
+  if (!isPublic) {
+    return <Navigate to={paths.login} replace />;
+  }
+
+  return children;
 };
 
-export default ProtectedRoute;
+export default React.memo(ProtectedRoute);

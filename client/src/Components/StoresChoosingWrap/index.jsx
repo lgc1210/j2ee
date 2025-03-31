@@ -1,11 +1,11 @@
 import React, { lazy, Suspense } from "react";
 import BookingImageBanner from "../../assets/images/Booking/female-hairstylist-drying-curly-girl-s-hair-using-big-plastic-brush-1920x1282.jpeg";
-import Loading from "../Loading";
 
 const Banner = lazy(() => import("../../Components/Banner"));
 const BookingHeader = lazy(() => import("../../Components/BookingHeader"));
 const StoresChossing = lazy(() => import("../../Components/StoresChoosing"));
 const Pagination = lazy(() => import("../../Components/Pagination"));
+const Loading = lazy(() => import("../Loading"));
 
 const StoresChoosingWrap = ({ handleSelectStore }) => {
   return (

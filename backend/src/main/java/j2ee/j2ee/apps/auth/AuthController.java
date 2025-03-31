@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import j2ee.j2ee.apps.user.UserController;
 import j2ee.j2ee.apps.user.UserEntity;
 import j2ee.j2ee.apps.user.UserService;
 import j2ee.j2ee.utils.JwtUtil;
@@ -19,33 +19,54 @@ import j2ee.j2ee.utils.JwtUtil;
 public class AuthController {
 
     private final UserService userService;
+    private final UserController userController;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     @Autowired
-    public AuthController(UserService userService, PasswordEncoder passwordEncoder) {
+    public AuthController(UserService userService, PasswordEncoder passwordEncoder, UserController userController,
+            JwtUtil jwtUtil) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
+        this.userController = userController;
+        this.jwtUtil = jwtUtil;
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<UserEntity> register(@RequestBody UserEntity userEntity) {
+        return userController.create(userEntity);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest credentials) {
         try {
-            if (authRequest.getEmail() == null || authRequest.getPassword() == null)
+            if (credentials.getEmail() == null || credentials.getPassword() == null) {
                 return ResponseEntity.badRequest().build();
+            }
 
-            Optional<UserEntity> user = userService.getByEmail(authRequest.getEmail());
-            if (!user.isPresent())
+            Optional<UserEntity> user = userService.getByEmail(credentials.getEmail());
+            if (!user.isPresent()) {
                 return ResponseEntity.notFound().build();
+            }
 
-            if (!passwordEncoder.matches(authRequest.getPassword(), user.get().getPassword()))
+            if (!passwordEncoder.matches(credentials.getPassword(), user.get().getPassword())) {
+
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
 
-            System.out.println(passwordEncoder.matches(authRequest.getPassword(), user.get().getPassword()));
+            String token = jwtUtil.generateToken(user);
+            LoginResponse response = new LoginResponse(token);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.err.println("Internal Server Error: " + e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 
-            String token = JwtUtil.generateToken(user.get().getEmail(), user.get().getRole().getId());
-            AuthResponse authResponse = new AuthResponse(token);
-
-            return ResponseEntity.ok(authResponse);
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout() {
+        try {
+            return ResponseEntity.ok("Logg out successfully");
         } catch (Exception e) {
             System.err.println("Internal Server Error: " + e.getMessage());
             return ResponseEntity.internalServerError().build();

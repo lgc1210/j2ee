@@ -1,42 +1,13 @@
 import React, { useState } from "react";
-import { Alert, Calendar } from "antd";
+import { Alert, Calendar, ConfigProvider } from "antd";
 import dayjs from "dayjs";
 import { FaArrowRightLong } from "react-icons/fa6";
-import Button from "../../Components/Button";
+import Button from "../Button";
+import "./index.css";
 
-const BookingForm = () => {
-  const [fields, setFields] = useState({});
-  const [errors, setErrors] = useState({});
-  const [value, setValue] = useState(() => dayjs("2017-01-25"));
-  const [selectedValue, setSelectedValue] = useState(() => dayjs("2017-01-25"));
-
-  const handleFieldsChange = (key, value) => {
-    setFields((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const handleFieldsType = (key) => {
-    setErrors((prev) => ({ ...prev, [key]: "" }));
-  };
-
-  const handelFieldsBlur = (key, message) => {
-    setErrors((prev) => ({ ...prev, [key]: message }));
-  };
-
-  const validateFields = () => {
-    const errs = {};
-
-    setErrors(errs);
-
-    return Object.keys(errs).length === 0;
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    if (!validateFields()) return;
-
-    // Do something related to booking here
-  };
+const BookingForm = ({ handleSetStep }) => {
+  const [value, setValue] = useState(() => dayjs(Date.now()));
+  const [selectedValue, setSelectedValue] = useState(() => dayjs(Date.now()));
 
   const onSelect = (newValue) => {
     setValue(newValue);
@@ -46,6 +17,77 @@ const BookingForm = () => {
   const onPanelChange = (newValue) => {
     setValue(newValue);
   };
+
+  const dateFullCellRender = (date) => {
+    const day = date.date();
+    const isSelected =
+      selectedValue &&
+      day === selectedValue.date() &&
+      date.month() === selectedValue.month() &&
+      date.year() === selectedValue.year();
+
+    return (
+      <div
+        style={{
+          textAlign: "center",
+          height: "10rem",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "1.2rem",
+          border: "1px #fafafa solid",
+          ...(isSelected && {
+            background: "#fff",
+            border: "1px #ccc solid",
+            margin: "auto",
+            position: "relative",
+          }),
+        }}
+        onMouseEnter={(e) => {
+          if (!isSelected) {
+            e.currentTarget.style.background = "#e6e6e6";
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!isSelected) {
+            e.currentTarget.style.background = "#f5f5f5";
+          }
+        }}>
+        {isSelected && (
+          <div
+            style={{
+              position: "absolute",
+              width: "40px",
+              height: "40px",
+              border: "2px #000 solid",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              zIndex: -1,
+            }}
+          />
+        )}
+        <span style={{ position: "relative", zIndex: 1 }}>{day}</span>
+      </div>
+    );
+  };
+
+  const headerRender = ({ value }) => (
+    <div
+      style={{
+        background: "#383838",
+        color: "#fff",
+        fontSize: "1.1rem",
+        fontStyle: "uppercase",
+        padding: "18px",
+        textAlign: "center",
+        letterSpacing: "0.1rem",
+        textTransform: "uppercase",
+      }}>
+      {value.format("MMMM YYYY")}
+    </div>
+  );
+
   return (
     <section className='md:py-36 py-28 md:px-0 px-6'>
       <div className='container mx-auto '>
@@ -69,17 +111,34 @@ const BookingForm = () => {
               "YYYY-MM-DD"
             )}`}
           />
-          <Calendar
-            value={value}
-            onSelect={onSelect}
-            onPanelChange={onPanelChange}
-          />
+          <ConfigProvider
+            theme={{
+              components: {
+                Calendar: {
+                  colorBgContainer: "#f5f5f5",
+                  colorBgHeader: "#333",
+                  colorTextHeading: "#fff",
+                  fullPanelHeaderTextAlign: "center",
+                  fullPanelHeaderPadding: "8px 0",
+                },
+              },
+            }}>
+            <Calendar
+              value={value}
+              onSelect={onSelect}
+              onPanelChange={onPanelChange}
+              fullCellRender={dateFullCellRender}
+              headerRender={headerRender}
+              className='custom-calendar'
+            />
+          </ConfigProvider>
           <Button
-            text='Confirm'
+            text='Next'
             Icon={FaArrowRightLong}
             iconSize={14}
             buttonStyle='justify-center gap-2 mt-10 mx-auto lg:[&]:py-6 lg:[&]:px-16 lg:[&]:text-lg'
             iconStyle=''
+            onClick={handleSetStep}
           />
         </div>
       </div>

@@ -22,9 +22,23 @@ const navItems = [
     name: "Pages",
     path: paths.shop,
     children: [
-      { name: "Login", path: paths.login },
-      { name: "Register", path: paths.register },
+      // Show login/register only for non-authenticated users
+      {
+        name: "Login",
+        path: paths.login,
+        requiresAuth: false,
+        hideWhenAuth: true,
+      },
+      {
+        name: "Register",
+        path: paths.register,
+        requiresAuth: false,
+        hideWhenAuth: true,
+      },
+      // Show logout only for authenticated users
+      { name: "Logout", path: paths.logout, requiresAuth: true, auth: true },
       { name: "Services", path: paths.service },
+      { name: "Account", path: paths.profilePersonal, requiresAuth: true },
     ],
   },
   {

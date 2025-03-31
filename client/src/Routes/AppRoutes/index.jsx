@@ -15,23 +15,36 @@ const AppRoutes = () => {
         />
       }>
       <Routes>
-        {Object.values(routes).map(({ url, Layout, Page, isPublic }, index) => {
-          const RenderPage = isPublic ? (
-            <Page />
-          ) : (
-            <ProtectedRoute>
-              <Page />
-            </ProtectedRoute>
-          );
+        {routes?.map(
+          (
+            {
+              url,
+              Layout,
+              Page,
+              isPublic,
+              restrictAuthenticated,
+              requiredRole,
+            },
+            index
+          ) => {
+            const RenderPage = (
+              <ProtectedRoute
+                restrictAuthenticated={restrictAuthenticated}
+                isPublic={isPublic}
+                requiredRole={requiredRole}>
+                <Page />
+              </ProtectedRoute>
+            );
 
-          return Layout ? (
-            <Route key={index} path={url} element={<Layout />}>
-              <Route index element={RenderPage} />
-            </Route>
-          ) : (
-            <Route key={index} path={url} element={RenderPage} />
-          );
-        })}
+            return (
+              <Route
+                key={index}
+                path={url}
+                element={Layout ? <Layout>{RenderPage}</Layout> : RenderPage}
+              />
+            );
+          }
+        )}
       </Routes>
     </Suspense>
   );

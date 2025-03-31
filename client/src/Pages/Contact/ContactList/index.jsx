@@ -33,4 +33,4 @@ const ContactList = () => {
   );
 };
 
-export default ContactList;
+export default React.memo(ContactList);

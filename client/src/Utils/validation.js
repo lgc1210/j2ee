@@ -6,7 +6,7 @@ export const isEmpty = (value) => !value?.trim();
 export const isPhone = (phone) => /^\d{10,12}$/.test(phone.trim());
 
 export const isConfirmPassword = (paswword, confirmPassword) =>
-  paswword.trim().toLowerCase() === confirmPassword.trim().toLowerCase();
+  paswword.trim() === confirmPassword.trim();
 
 export const isMinimumLength = (paswword) => paswword.trim().length >= 6;
 
