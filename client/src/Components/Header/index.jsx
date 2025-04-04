@@ -132,7 +132,7 @@ const Header = () => {
         </nav>
 
         <div className='order-3 md:order-2 flex items-center justify-center md:gap-8 gap-4'>
-          <div className='relative'>
+          <div className='relative' onClick={() => navigate(paths.cart)}>
             <FaCartShopping size={24} className='cursor-pointer' />
             <span className='text-center leading-tight absolute -top-4 -right-4 bg-[#799AA1] text-white min-w-5 h-auto rounded-full'>
               1
