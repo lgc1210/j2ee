@@ -1,4 +1,15 @@
 const paths = {
+  // Owner Paths
+  ownerhome: "/owner/home",
+  ownerstore: "/owner/store",
+  owneremployees: "/owner/employees",
+  ownerservices: "/owner/services",
+  ownerproducts: "/owner/products",
+  ownercategories: "/owner/categories",
+  ownerappointments: "/owner/appointments",
+  ownerorder: "/owner/orders",
+  ownerreviews: "/owner/reviews",
+  ownerstatistic: "/owner/statistic",
   // Customer Paths
   home: "/",
   shop: "/shop",

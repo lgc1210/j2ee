@@ -5,7 +5,19 @@ import { lazy } from "react";
 const CustomerLayout = lazy(() => import("../Layouts/Customer"));
 const AdminLayout = lazy(() => import("../Layouts/Admin"));
 const ProfileLayout = lazy(() => import("../Layouts/Profile"));
+const OwnerLayout = lazy(() => import("../Layouts/Owner"));
 
+// Owner Pages
+const OwnerHome = lazy(() => import("../Pages/OwnerPages/homeOwner"));
+const storeOwner = lazy(() => import("../Pages/OwnerPages/storeOwner"));
+const productOwner = lazy(() => import("../Pages/OwnerPages/productOwner"));
+const employeeOwner = lazy(() => import("../Pages/OwnerPages/employeeOwner"));
+const serviceOwner = lazy(() => import("../Pages/OwnerPages/serviceOwner"));
+const categoryOwner = lazy(() =>import("../Pages/OwnerPages/categoryOwner"));
+const appointmentOwner = lazy(() => import("../Pages/OwnerPages/appointmentOwner"));
+const orderOwner = lazy(() => import("../Pages/OwnerPages/orderOwner"));
+const reviewOwner = lazy(() => import("../Pages/OwnerPages/reviewOwner"));
+const statisticOwner = lazy(() => import("../Pages/OwnerPages/statisticsOwner"));
 // Customer Pages
 const Home = lazy(() => import("../Pages/Home"));
 const Login = lazy(() => import("../Pages/Login"));
@@ -188,6 +200,75 @@ const routes = [
     Layout: AdminLayout,
     Page: Statistic,
     requiredRole: ["admin"],
+  },
+  //Owner Routes
+  {isPublic: false,
+    url: paths.ownerhome,
+    Layout: OwnerLayout,
+    Page: OwnerHome,
+    requiredRole: ["owner"],
+  },
+  {isPublic: false,
+    url: paths.ownerstore,
+    Layout: OwnerLayout,
+    Page: storeOwner,
+    requiredRole: ["owner"],
+  },
+  {
+    isPublic: false,
+    url: paths.ownerproducts,
+    Layout: OwnerLayout,
+    Page: productOwner,
+    requiredRole: ["owner"],
+  },
+  {
+    isPublic: false,
+    url: paths.owneremployees,
+    Layout: OwnerLayout,
+    Page: employeeOwner,
+    requiredRole: ["owner"],
+  },
+  {
+    isPublic: false,
+    url: paths.ownerservices,
+    Layout: OwnerLayout,
+    Page: serviceOwner,
+    requiredRole: ["owner"],
+  },
+  {
+    isPublic: false,
+    url: paths.ownercategories,
+    Layout: OwnerLayout,
+    Page: categoryOwner,
+    requiredRole: ["owner"],
+  },
+  {
+    isPublic: false,
+    url: paths.ownerappointments,
+    Layout: OwnerLayout,
+    Page: appointmentOwner,
+    requiredRole: ["owner"],
+  },
+  {
+    isPublic: false,
+    url: paths.ownerorder,
+    Layout: OwnerLayout,
+    Page: orderOwner,
+    requiredRole: ["owner"],
+  },
+  {
+    isPublic: false,
+    url: paths.ownerreviews,
+    Layout: OwnerLayout,
+    Page: reviewOwner,
+    requiredRole: ["owner"],
+  },
+  {
+    isPublic: false,
+    url: paths.ownerstatistic,
+    Layout: OwnerLayout,
+    Page: statisticOwner,
+    requiredRole: ["owner"],
   },
 ];
 export default routes;
