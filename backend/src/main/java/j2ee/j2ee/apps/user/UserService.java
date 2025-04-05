@@ -17,7 +17,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, RoleRepository roleRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder,
+            RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
@@ -39,9 +40,11 @@ public class UserService {
         return userRepository.findByPhone(phone);
     }
 
-    public Optional<UserEntity> changePassword(long id, String currentPassword, String newPassword) {
+    public Optional<UserEntity> changePassword(long id, String currentPassword,
+            String newPassword) {
         Optional<UserEntity> user = userRepository.findById(id);
-        if (!user.isPresent() && !passwordEncoder.matches(currentPassword, user.get().getPassword())) {
+        if (!user.isPresent()
+                || !passwordEncoder.matches(currentPassword, user.get().getPassword())) {
             return Optional.empty();
         }
 

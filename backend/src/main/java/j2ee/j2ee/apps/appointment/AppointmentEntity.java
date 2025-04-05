@@ -6,7 +6,6 @@ import java.time.LocalTime;
 import j2ee.j2ee.apps.service.ServiceEntity;
 import j2ee.j2ee.apps.store.StoreEntity;
 import j2ee.j2ee.apps.user.UserEntity;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

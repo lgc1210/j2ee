@@ -68,10 +68,8 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.CONFLICT).build();
 
             UserEntity createdUser = userService.createOrUpdate(user);
-            URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
-                    .path("/{id}")
-                    .buildAndExpand(createdUser.getId())
-                    .toUri();
+            URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
+                    .buildAndExpand(createdUser.getId()).toUri();
 
             return ResponseEntity.created(uri).body(createdUser);
         } catch (Exception e) {
@@ -81,7 +79,8 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserEntity> update(@PathVariable(name = "id") long id, @RequestBody UserEntity user) {
+    public ResponseEntity<UserEntity> update(@PathVariable(name = "id") long id,
+            @RequestBody UserEntity user) {
         try {
             if (user == null)
                 return ResponseEntity.badRequest().build();
@@ -100,8 +99,7 @@ public class UserController {
     }
 
     @PostMapping("/{id}/changepassword")
-    public ResponseEntity<?> changePassword(
-            @PathVariable(name = "id") long id,
+    public ResponseEntity<?> changePassword(@PathVariable(name = "id") long id,
             @RequestBody Map<String, String> request) {
         try {
             String currentPassword = request.get("currentPassword");
@@ -110,9 +108,10 @@ public class UserController {
                 return ResponseEntity.badRequest().build();
             }
 
-            Optional<UserEntity> updatedUser = userService.changePassword(id, currentPassword, newPassword);
+            Optional<UserEntity> updatedUser =
+                    userService.changePassword(id, currentPassword, newPassword);
             if (!updatedUser.isPresent()) {
-                return ResponseEntity.badRequest().body("Current password is incorrect");
+                return ResponseEntity.badRequest().body("Incorrect current password");
             }
 
             return ResponseEntity.ok("Password changed successfully");
