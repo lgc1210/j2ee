@@ -11,7 +11,7 @@ const Loading = React.lazy(() => import("../../Components/Loading"));
 const FormControl = React.lazy(() => import("../../Components/FormControl"));
 
 const Profile = () => {
-	const { logout, user } = useAuth();
+	const { logout, user, setUser } = useAuth();
 	const [fields, setFields] = React.useState({
 		id: user["id"] || "",
 		name: user["name"] || "",
@@ -21,6 +21,8 @@ const Profile = () => {
 	});
 	const [isEditingUser, setIsEditingUser] = React.useState(false);
 	const [errors, setErrors] = React.useState({});
+
+	console.log("Run");
 
 	React.useEffect(() => {
 		reset();
@@ -82,6 +84,10 @@ const Profile = () => {
 			if (response.status === 200) {
 				showToast("User updated successfully");
 				setIsEditingUser(false);
+				setUser((prev) => ({
+					...prev,
+					...fields,
+				}));
 				reset();
 			}
 		} catch (error) {
@@ -146,12 +152,10 @@ const Profile = () => {
 															value={fields["name"]}
 															onChange={(event) => handleFieldsChange("name", event.target.value)}
 															onType={() => handleFieldsType("name")}
-															onBlur={() => {
-																if (isEmpty(fields.phone))
-																	handleFieldsBlur("phone", "Phone is required");
-																else if (!isPhone(fields.phone))
-																	handleFieldsBlur("phone", "Phone is invalid");
-															}}
+															onBlur={() =>
+																isEmpty(fields.phone) &&
+																handleFieldsBlur("phone", "Phone number is required")
+															}
 															hasError={errors?.name}
 															errorMessage={errors?.name}
 														/>
@@ -175,10 +179,12 @@ const Profile = () => {
 															value={fields["phone"]}
 															onChange={(event) => handleFieldsChange("phone", event.target.value)}
 															onType={() => handleFieldsType("phone")}
-															onBlur={() =>
-																isEmpty(fields.phone) &&
-																handleFieldsBlur("phone", "Phone number is required")
-															}
+															onBlur={() => {
+																if (isEmpty(fields.phone))
+																	handleFieldsBlur("phone", "Phone is required");
+																else if (!isPhone(fields.phone))
+																	handleFieldsBlur("phone", "Phone is invalid");
+															}}
 															hasError={errors?.phone}
 															errorMessage={errors?.phone}
 														/>

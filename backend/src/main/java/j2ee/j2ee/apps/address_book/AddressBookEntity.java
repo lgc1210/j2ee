@@ -17,11 +17,15 @@ public class AddressBookEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private String title;
+    private String name;
+
+    private String phone;
 
     private String address;
 
-    private String status;
+    private Boolean isDefault;
+
+    private String type;
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)

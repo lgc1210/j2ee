@@ -1,4 +1,5 @@
 import apiInstance from "../../Config/api";
+import { getStoredToken } from "../../Utils/validation";
 
 const baseURL = process.env.REACT_APP_API;
 
@@ -19,6 +20,13 @@ class UserService {
 	};
 	updateUser = async (userId, payload) => {
 		return await apiInstance.put(`${baseURL}/users/${userId}`, payload);
+	};
+	getUserProfile = async () => {
+		const token = getStoredToken();
+		if (!token) {
+			throw new Error("No token found");
+		}
+		return await apiInstance.get(`${baseURL}/users/me`);
 	};
 }
 

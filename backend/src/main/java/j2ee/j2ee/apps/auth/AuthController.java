@@ -24,8 +24,8 @@ public class AuthController {
     private final JwtUtil jwtUtil;
 
     @Autowired
-    public AuthController(UserService userService, PasswordEncoder passwordEncoder, UserController userController,
-            JwtUtil jwtUtil) {
+    public AuthController(UserService userService, PasswordEncoder passwordEncoder,
+            UserController userController, JwtUtil jwtUtil) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.userController = userController;
@@ -56,6 +56,7 @@ public class AuthController {
 
             String token = jwtUtil.generateToken(user);
             LoginResponse response = new LoginResponse(token);
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             System.err.println("Internal Server Error: " + e.getMessage());

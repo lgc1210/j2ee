@@ -1,6 +1,7 @@
 package j2ee.j2ee.apps.user;
 
 import java.net.URI;
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -42,14 +43,26 @@ public class UserController {
     public ResponseEntity<Optional<UserEntity>> getById(@PathVariable(value = "id") long id) {
         try {
             var user = userService.getById(id);
-            if (!user.isPresent())
+            if (!user.isPresent()) {
                 return ResponseEntity.notFound().build();
+            }
 
             return ResponseEntity.ok(user);
         } catch (Exception e) {
             System.err.println("Internal Server Error: " + e.getMessage());
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<Object> getProfile(Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+        }
+
+        String email = principal.getName();
+        Optional<UserEntity> user = userService.getByEmail(email);
+        return user.isPresent() ? ResponseEntity.ok(user.get()) : ResponseEntity.notFound().build();
     }
 
     @PostMapping()

@@ -26,13 +26,12 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
         String uri = request.getRequestURI();
 
         // Skip filter for public endpoints
-        if (uri.equals("/api/auth/login")
-                || uri.equals("/api/auth/register")
+        if (uri.equals("/api/auth/login") || uri.equals("/api/auth/register")
                 || uri.equals("/api/auth/logout")) {
             filterChain.doFilter(request, response);
             return;
@@ -56,11 +55,20 @@ public class JwtFilter extends OncePerRequestFilter {
             String token = header.substring(7);
             if (jwtUtil.validateToken(token)) {
                 Claims claims = jwtUtil.getClaims(token);
-                String email = claims.get("email", String.class);
+                String email = claims.getSubject();
                 String role = claims.get("role", String.class);
 
-                var authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role));
-                var authentication = new UsernamePasswordAuthenticationToken(email, null, authorities);
+                // Validate email and role
+                if (email == null || role == null) {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.getWriter().write("Invalid token: missing email or role");
+                    return;
+                }
+
+                var authorities =
+                        Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role));
+                var authentication =
+                        new UsernamePasswordAuthenticationToken(email, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
                 filterChain.doFilter(request, response);
