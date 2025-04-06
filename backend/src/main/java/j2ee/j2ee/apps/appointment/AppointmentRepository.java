@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AppointmentRepository extends JpaRepository<AppointmentEntity, Long> {
-    public List<AppointmentEntity> findAllByUserId(long userId);
+    public List<AppointmentEntity> findAllByCustomerId(long customerId);
 }

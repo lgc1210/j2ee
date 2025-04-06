@@ -14,13 +14,13 @@ public class AppointmentService {
         this.appointmentRepository = appointmentRepository;
     }
 
-    public Optional<List<AppointmentEntity>> getAllByUserId(long userId) {
+    public Optional<List<AppointmentEntity>> getAllByCustomerId(long customerId) {
         List<AppointmentEntity> appointmentList =
-                this.appointmentRepository.findAllByUserId(userId);
+                this.appointmentRepository.findAllByCustomerId(customerId);
         return Optional.ofNullable(appointmentList);
     }
 
-    public Optional<AppointmentEntity> getByOrderId(long appointmentId) {
+    public Optional<AppointmentEntity> getById(long appointmentId) {
         return this.appointmentRepository.findById(appointmentId);
     }
 }

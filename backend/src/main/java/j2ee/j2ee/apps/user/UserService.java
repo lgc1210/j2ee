@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import j2ee.j2ee.apps.role.RoleEntity;
 import j2ee.j2ee.apps.role.RoleRepository;
-
+import j2ee.j2ee.constants.ErrorMessages;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
@@ -53,18 +53,46 @@ public class UserService {
         return Optional.of(userRepository.save(user.get()));
     }
 
-    public UserEntity createOrUpdate(UserEntity user) {
+    public UserEntity create(UserEntity user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         RoleEntity role;
-        if (user.getRole() == null)
-            role = roleRepository.findById(2L)
+        if (user.getRole() == null) {
+
+            role = roleRepository.findById(2L) // Role: customer
                     .orElseThrow(() -> new RuntimeException("Customer role not found"));
-        else
+        } else {
+
             role = roleRepository.findById(user.getRole().getId())
                     .orElseThrow(() -> new RuntimeException("Selected role not found"));
+        }
         user.setRole(role);
 
         return userRepository.save(user);
+    }
+
+    public UserEntity update(long id, UserEntity updatedUser) {
+        UserEntity existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (updatedUser.getName() != null) {
+            existingUser.setName(updatedUser.getName());
+        }
+        if (updatedUser.getEmail() != null) {
+            Optional<UserEntity> email = userRepository.findByEmail(updatedUser.getEmail());
+            if (email.isPresent() && email.get().getId() != id) {
+                throw new RuntimeException(ErrorMessages.EMAIL_CONFLICT);
+            }
+            existingUser.setEmail(updatedUser.getEmail());
+        }
+        if (updatedUser.getPhone() != null) {
+            Optional<UserEntity> phone = userRepository.findByPhone(updatedUser.getPhone());
+            if (phone.isPresent() && phone.get().getId() != id) {
+                throw new RuntimeException(ErrorMessages.PHONE_CONFLICT);
+            }
+            existingUser.setPhone(updatedUser.getPhone());
+        }
+
+        return userRepository.save(existingUser);
     }
 }

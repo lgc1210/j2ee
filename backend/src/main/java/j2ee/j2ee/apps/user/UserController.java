@@ -4,8 +4,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +13,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import j2ee.j2ee.constants.ErrorMessages;
 
 @RestController
 @RequestMapping("/api/users")
@@ -67,7 +65,7 @@ public class UserController {
             if (doesEmailExist.isPresent() || doesPhoneExist.isPresent())
                 return ResponseEntity.status(HttpStatus.CONFLICT).build();
 
-            UserEntity createdUser = userService.createOrUpdate(user);
+            UserEntity createdUser = userService.create(user);
             URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                     .buildAndExpand(createdUser.getId()).toUri();
 
@@ -79,19 +77,31 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserEntity> update(@PathVariable(name = "id") long id,
+    public ResponseEntity<Object> update(@PathVariable(name = "id") long id,
             @RequestBody UserEntity user) {
         try {
-            if (user == null)
+            if (user == null) {
                 return ResponseEntity.badRequest().build();
+            }
 
-            Optional<UserEntity> userFromDb = userService.getById(id);
-            if (!userFromDb.isPresent())
+            Optional<UserEntity> existingUser = userService.getById(id);
+            if (!existingUser.isPresent()) {
                 return ResponseEntity.notFound().build();
+            }
 
-            UserEntity updatedUser = userService.createOrUpdate(user);
+            UserEntity updatedUser = userService.update(id, user);
 
             return ResponseEntity.ok(updatedUser);
+        } catch (RuntimeException e) {
+            if (e.getMessage().equals(ErrorMessages.EMAIL_CONFLICT)) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(ErrorMessages.EMAIL_CONFLICT);
+            }
+            if (e.getMessage().equals(ErrorMessages.PHONE_CONFLICT)) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(ErrorMessages.PHONE_CONFLICT);
+            }
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Failed to update user");
         } catch (Exception e) {
             System.err.println("Internal Server Error: " + e.getMessage());
             return ResponseEntity.internalServerError().build();

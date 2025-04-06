@@ -47,7 +47,9 @@ const Header = () => {
 	}, []);
 
 	const handleNavigation = (path, haveChildren = false) => {
-		if (!haveChildren) navigate(path);
+		if (!haveChildren) {
+			navigate(path);
+		}
 	};
 
 	const handleLogout = async () => {
@@ -81,7 +83,7 @@ const Header = () => {
 	};
 
 	const handleClickedNavItem = (childItem) => {
-		setToggleNav(false);
+		// setToggleNav(false);
 		childItem?.auth && isAuthenticated
 			? handleLogout()
 			: handleNavigation(childItem?.path, childItem?.children);
