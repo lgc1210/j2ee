@@ -1,3 +1,4 @@
+
 import React from "react";
 import { ToastContainer, toast, Zoom } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -20,5 +21,5 @@ const Toast = () => {
   return <ToastContainer />;
 };
 
-export { showToast };
-export default React.memo(Toast);
+export { showToast }; 
+export default React.memo(Toast); 

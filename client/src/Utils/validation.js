@@ -1,7 +1,10 @@
 export const isEmail = (email) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
-export const isEmpty = (value) => !value?.trim();
+export const isEmpty = (value) => {
+
+  return !String(value).trim();
+};
 
 export const isPhone = (phone) => /^\d{10,12}$/.test(phone.trim());
 

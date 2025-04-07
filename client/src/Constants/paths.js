@@ -27,7 +27,7 @@ const paths = {
   products: "/admin/products",
   categories: "/admin/categories",
   discounts: "/admin/discounts",
-  contacts: "/admin/contacts",
+  stores: "/admin/stores",
   roles: "/admin/roles",
   // Admin statistic
   statistic: "/admin/statistic",

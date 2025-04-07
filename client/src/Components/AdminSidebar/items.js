@@ -32,8 +32,8 @@ const items = [
     requiredRole: ["admin"],
   },
   {
-    path: paths.contacts,
-    name: "Contacts",
+    path: paths.stores,
+    name: "Stores",
     requiredAuth: true,
     requiredRole: ["admin"],
   },

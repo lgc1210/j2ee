@@ -24,7 +24,7 @@ const Users = lazy(() => import("../Pages/Users"));
 const Products = lazy(() => import("../Pages/Products"));
 const Categories = lazy(() => import("../Pages/Categories"));
 const Discounts = lazy(() => import("../Pages/Discounts"));
-const Contacts = lazy(() => import("../Pages/Contacts"));
+const Stores = lazy(() => import("../Pages/Stores"));
 const Roles = lazy(() => import("../Pages/Roles"));
 const Statistic = lazy(() => import("../Pages/Statistic"));
 const Booking = lazy(() => import("../Pages/Booking"));
@@ -170,9 +170,9 @@ const routes = [
   },
   {
     isPublic: false,
-    url: paths.contacts,
+    url: paths.stores,
     Layout: AdminLayout,
-    Page: Contacts,
+    Page: Stores,
     requiredRole: ["admin"],
   },
   {

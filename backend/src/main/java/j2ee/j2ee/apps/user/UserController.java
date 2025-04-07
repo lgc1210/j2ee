@@ -5,18 +5,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import j2ee.j2ee.apps.role.RoleDTO;
+import j2ee.j2ee.apps.store.StoreDTO;
+import j2ee.j2ee.constants.ErrorMessages;
 import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
@@ -54,7 +51,7 @@ public class UserController {
         }
     }
 
-    @PostMapping()
+    @PostMapping("createUser")
     public ResponseEntity<UserEntity> create(@RequestBody UserEntity user) {
         try {
             if (user == null)
@@ -64,16 +61,13 @@ public class UserController {
 
             Optional<UserEntity> doesEmailExist = userService.getByEmail(user.getEmail());
             Optional<UserEntity> doesPhoneExist = userService.getByPhone(user.getPhone());
+            System.out.println("Email exists: " + doesEmailExist.isPresent());
+            System.out.println("Phone exists: " + doesPhoneExist.isPresent());
             if (doesEmailExist.isPresent() || doesPhoneExist.isPresent())
                 return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            UserEntity createdUser = userService.create(user);
 
-            UserEntity createdUser = userService.createOrUpdate(user);
-            URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
-                    .path("/{id}")
-                    .buildAndExpand(createdUser.getId())
-                    .toUri();
-
-            return ResponseEntity.created(uri).body(createdUser);
+            return ResponseEntity.ok(createdUser);
         } catch (Exception e) {
             System.err.println("Internal Server Error: " + e.getMessage());
             return ResponseEntity.internalServerError().build();
@@ -81,18 +75,31 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserEntity> update(@PathVariable(name = "id") long id, @RequestBody UserEntity user) {
+    public ResponseEntity<Object> update(@PathVariable(name = "id") long id,
+                                         @RequestBody UserEntity user) {
         try {
-            if (user == null)
+            if (user == null) {
                 return ResponseEntity.badRequest().build();
+            }
 
-            Optional<UserEntity> userFromDb = userService.getById(id);
-            if (!userFromDb.isPresent())
+            Optional<UserEntity> existingUser = userService.getById(id);
+            if (!existingUser.isPresent()) {
                 return ResponseEntity.notFound().build();
+            }
 
-            UserEntity updatedUser = userService.createOrUpdate(user);
+            UserEntity updatedUser = userService.update(id, user);
 
             return ResponseEntity.ok(updatedUser);
+        } catch (RuntimeException e) {
+            if (e.getMessage().equals(ErrorMessages.EMAIL_CONFLICT)) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(ErrorMessages.EMAIL_CONFLICT);
+            }
+            if (e.getMessage().equals(ErrorMessages.PHONE_CONFLICT)) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(ErrorMessages.PHONE_CONFLICT);
+            }
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Failed to update user");
         } catch (Exception e) {
             System.err.println("Internal Server Error: " + e.getMessage());
             return ResponseEntity.internalServerError().build();
@@ -121,4 +128,40 @@ public class UserController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    @GetMapping("/getlistbyroleid/{roleId}")
+    public  ResponseEntity<List<UserEntity>> getUsersByRoleId(@PathVariable Long roleId) {
+        return  ResponseEntity.ok(userService.getUsersByRoleId(roleId));
+    }
+
+    // Delete (Xóa một store)
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
+        try {
+            userService.deleteUser(id);
+            return ResponseEntity.ok("Xóa user thành công");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body("Lỗi khi xóa: " + e.getMessage());
+        }
+    }
+
+    // Delete (Xóa nhiều stores)
+    @DeleteMapping("/delete-multiple")
+    @Transactional
+    public ResponseEntity<String> deleteMultipleUsers(@RequestBody List<Long> ids) {
+        try {
+            if (ids == null || ids.isEmpty()) {
+                return ResponseEntity.badRequest().body("Danh sách ID không được rỗng");
+            }
+            userService.deleteMultipleUsers(ids);
+            return ResponseEntity.ok("Xóa nhiều user thành công");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body("Lỗi khi xóa: " + e.getMessage());
+        }
+    }
+
+
+    
+
+
 }
