@@ -1,14 +1,14 @@
 package j2ee.j2ee.apps.store;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
+import jakarta.transaction.Transactional;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.http.ResponseEntity;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+
 
 @RestController
-@RequestMapping("/api/stores")
+@RequestMapping("/owner/store")
 public class StoreController {
 
     @Autowired
@@ -50,7 +50,8 @@ public class StoreController {
 
     // Update
     @PutMapping("/{id}")
-    public ResponseEntity<StoreDTO> updateStore(@PathVariable Long id, @RequestBody StoreDTO storeDTO) {
+    public ResponseEntity<StoreDTO> updateStore(@PathVariable Long id,
+            @RequestBody StoreDTO storeDTO) {
         try {
             StoreDTO updatedStore = storeService.updateStore(id, storeDTO);
             return ResponseEntity.ok(updatedStore);
@@ -85,3 +86,4 @@ public class StoreController {
         }
     }
 }
+
