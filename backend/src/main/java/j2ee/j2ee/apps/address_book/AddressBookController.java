@@ -40,7 +40,7 @@ public class AddressBookController {
         }
     }
 
-    @GetMapping("/users/${user_id}")
+    @GetMapping("/users/{user_id}")
     public ResponseEntity<Object> getAllByUserId(@Param("user_id") long user_id) {
         try {
             Optional<List<AddressBookEntity>> addressList =

@@ -5,7 +5,11 @@ import paths from "../../Constants/paths";
 import { useNavigate } from "react-router-dom";
 import { showToast } from "../../Components/Toast";
 import { jwtDecode } from "jwt-decode";
-import { clearTokens, getStoredToken, storeTokens } from "../../Utils/validation";
+import {
+	clearTokens,
+	getStoredToken,
+	storeTokens,
+} from "../../Utils/validation";
 import { moveUserTo } from "../../Utils/moveUserTo";
 
 const AuthContext = React.createContext();
@@ -59,7 +63,6 @@ const Auth = ({ children }) => {
 				if (userResponse.status === 200) {
 					const user = userResponse?.data;
 					const role = user?.role?.name;
-					console.log("User:", user);
 					setUser(user);
 					navigate(moveUserTo(role));
 				} else {
@@ -89,7 +92,8 @@ const Auth = ({ children }) => {
 				navigate(paths.login);
 			}
 		} catch (error) {
-			if (error.response?.status === 409) showToast("Email or phone was registered", "error");
+			if (error.response?.status === 409)
+				showToast("Email or phone was registered", "error");
 
 			showToast("Internal Server Error", "error");
 			console.log("Error occurs while registering:", error);
