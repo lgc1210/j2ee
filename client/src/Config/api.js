@@ -3,7 +3,7 @@ import { getStoredToken } from "../Utils/validation";
 
 const apiInstance = axios.create({
 	baseURL: process.env.REACT_APP_API,
-	timeout: 10000,
+	timeout: 30000,
 	headers: { "X-Custom-Header": "foobar" },
 });
 

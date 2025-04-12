@@ -39,9 +39,7 @@ public class SecurityConfig {
                 // Define authorization rules
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints: no authentication required
-                        .requestMatchers("/api/auth/login", "/api/auth/logout",
-                                "/api/auth/register")
-                        .permitAll()
+                        .requestMatchers("/api/auth/**", "/api/addresses/provinces").permitAll()
                         // All other requests require authentication
                         .anyRequest().authenticated())
                 // Add JWT filter before the default authentication filter

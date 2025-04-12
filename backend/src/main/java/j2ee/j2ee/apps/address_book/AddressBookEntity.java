@@ -15,7 +15,7 @@ public class AddressBookEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private long id;
 
     private String name;
 
@@ -23,7 +23,7 @@ public class AddressBookEntity {
 
     private String address;
 
-    private Boolean isDefault;
+    private Boolean is_default;
 
     private String type;
 

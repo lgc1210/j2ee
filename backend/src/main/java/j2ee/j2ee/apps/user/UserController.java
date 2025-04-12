@@ -71,8 +71,6 @@ public class UserController {
             if (user == null)
                 return ResponseEntity.badRequest().build();
 
-            System.out.println(user.toString());
-
             Optional<UserEntity> doesEmailExist = userService.getByEmail(user.getEmail());
             Optional<UserEntity> doesPhoneExist = userService.getByPhone(user.getPhone());
             if (doesEmailExist.isPresent() || doesPhoneExist.isPresent())

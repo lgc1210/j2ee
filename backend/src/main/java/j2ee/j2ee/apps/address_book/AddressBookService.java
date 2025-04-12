@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import j2ee.j2ee.constants.ErrorMessages;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -31,11 +32,17 @@ public class AddressBookService {
     }
 
     @Transactional
-    public AddressBookEntity create(AddressBookEntity address) {
-        if (Boolean.TRUE.equals(address.getIsDefault())) {
-            addressBookRepository.clearDefaultForUser(address.getUser().getId());
+    public AddressBookEntity create(AddressBookEntity payload) {
+        if (addressBookRepository.checkDuplicatedAddress(payload.getAddress(), payload.getPhone(),
+                payload.getName())) {
+            throw new RuntimeException(ErrorMessages.ADDRESS_CONFLICT);
         }
-        return this.addressBookRepository.save(address);
+
+        if (Boolean.TRUE.equals(payload.getIs_default())) {
+            addressBookRepository.clearDefaultForUser(payload.getUser().getId());
+
+        }
+        return this.addressBookRepository.save(payload);
     }
 
     @Transactional
@@ -43,14 +50,19 @@ public class AddressBookService {
         AddressBookEntity existingAddress = this.addressBookRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Address not found"));
 
-        if (Boolean.TRUE.equals(address.getIsDefault())) {
+        if (addressBookRepository.checkDuplicatedAddress(address.getAddress(), address.getPhone(),
+                address.getName())) {
+            throw new RuntimeException(ErrorMessages.ADDRESS_CONFLICT);
+        }
+
+        if (Boolean.TRUE.equals(address.getIs_default())) {
             addressBookRepository.clearDefaultForUser(existingAddress.getUser().getId());
         }
 
         existingAddress.setName(address.getName());
         existingAddress.setPhone(address.getPhone());
         existingAddress.setAddress(address.getAddress());
-        existingAddress.setIsDefault(address.getIsDefault());
+        existingAddress.setIs_default(address.getIs_default());
         existingAddress.setType(address.getType());
 
         return this.addressBookRepository.save(existingAddress);

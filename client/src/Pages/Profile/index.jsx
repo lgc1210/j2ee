@@ -6,9 +6,11 @@ import { isEmail, isEmpty, isPhone } from "../../Utils/validation";
 import { IoClose } from "react-icons/io5";
 import userService from "../../Services/user";
 import { showToast } from "../../Components/Toast";
+import AddressService from "../../Services/address";
 
 const Loading = React.lazy(() => import("../../Components/Loading"));
 const FormControl = React.lazy(() => import("../../Components/FormControl"));
+const Form = React.lazy(() => import("./Form"));
 
 const Profile = () => {
 	const { logout, user, setUser } = useAuth();
@@ -21,8 +23,28 @@ const Profile = () => {
 	});
 	const [isEditingUser, setIsEditingUser] = React.useState(false);
 	const [errors, setErrors] = React.useState({});
+	const [showForm, setShowForm] = React.useState(false);
+	const [addressList, setAddressList] = React.useState([]);
 
-	console.log("Run");
+	// Get user' addresses
+	React.useEffect(() => {
+		let mounted = true;
+
+		const fetchAddressList = async () => {
+			if (mounted) {
+				try {
+					const response = await AddressService.getByUserId(user?.id);
+					console.log("Response:", response);
+				} catch (error) {}
+			}
+		};
+
+		fetchAddressList();
+
+		return () => {
+			mounted = false;
+		};
+	}, []);
 
 	React.useEffect(() => {
 		reset();
@@ -140,7 +162,9 @@ const Profile = () => {
 									<tr>
 										<td className='pr-32 pb-6'>
 											<div className='flex flex-col gap-1'>
-												<p className='text-black/60 text-sm font-semibold'>Full Name</p>
+												<p className='text-black/60 text-sm font-semibold'>
+													Full Name
+												</p>
 												{isEditingUser ? (
 													<div>
 														<FormControl
@@ -150,11 +174,16 @@ const Profile = () => {
 															inputStyle='text-sm text-black placeholder:font-serif !py-1.5 !px-4'
 															id='name'
 															value={fields["name"]}
-															onChange={(event) => handleFieldsChange("name", event.target.value)}
+															onChange={(event) =>
+																handleFieldsChange("name", event.target.value)
+															}
 															onType={() => handleFieldsType("name")}
 															onBlur={() =>
 																isEmpty(fields.phone) &&
-																handleFieldsBlur("phone", "Phone number is required")
+																handleFieldsBlur(
+																	"phone",
+																	"Phone number is required"
+																)
 															}
 															hasError={errors?.name}
 															errorMessage={errors?.name}
@@ -167,7 +196,9 @@ const Profile = () => {
 										</td>
 										<td className='pr-32 pb-6'>
 											<div className='flex flex-col gap-1'>
-												<p className='text-black/60 text-sm font-semibold'>Phone</p>
+												<p className='text-black/60 text-sm font-semibold'>
+													Phone
+												</p>
 												{isEditingUser ? (
 													<div>
 														<FormControl
@@ -177,11 +208,16 @@ const Profile = () => {
 															inputStyle='text-sm text-black placeholder:font-serif !py-1.5 !px-4'
 															id='phone'
 															value={fields["phone"]}
-															onChange={(event) => handleFieldsChange("phone", event.target.value)}
+															onChange={(event) =>
+																handleFieldsChange("phone", event.target.value)
+															}
 															onType={() => handleFieldsType("phone")}
 															onBlur={() => {
 																if (isEmpty(fields.phone))
-																	handleFieldsBlur("phone", "Phone is required");
+																	handleFieldsBlur(
+																		"phone",
+																		"Phone is required"
+																	);
 																else if (!isPhone(fields.phone))
 																	handleFieldsBlur("phone", "Phone is invalid");
 															}}
@@ -198,7 +234,9 @@ const Profile = () => {
 									<tr>
 										<td className='pr-32 pb-6'>
 											<div className='flex flex-col gap-1'>
-												<p className='text-black/60 text-sm font-semibold'>Email</p>
+												<p className='text-black/60 text-sm font-semibold'>
+													Email
+												</p>
 												{isEditingUser ? (
 													<div>
 														<FormControl
@@ -208,11 +246,16 @@ const Profile = () => {
 															inputStyle='text-sm text-black placeholder:font-serif !py-1.5 !px-4'
 															id='email'
 															value={fields["email"]}
-															onChange={(event) => handleFieldsChange("email", event.target.value)}
+															onChange={(event) =>
+																handleFieldsChange("email", event.target.value)
+															}
 															onType={() => handleFieldsType("email")}
 															onBlur={() => {
 																if (isEmpty(fields.email))
-																	handleFieldsBlur("email", "Email is required");
+																	handleFieldsBlur(
+																		"email",
+																		"Email is required"
+																	);
 																else if (!isEmail(fields.email))
 																	handleFieldsBlur("email", "Email is invalid");
 															}}
@@ -227,7 +270,9 @@ const Profile = () => {
 										</td>
 										<td className='pr-32 pb-6'>
 											<div className='flex flex-col gap-1'>
-												<p className='text-black/60 text-sm font-semibold'>Created At</p>
+												<p className='text-black/60 text-sm font-semibold'>
+													Created At
+												</p>
 												<p className='font-semibold'>{user?.created_at}</p>
 											</div>
 										</td>
@@ -253,7 +298,9 @@ const Profile = () => {
 						<div className='p-4 rounded-md border border-black/10'>
 							<div className='flex items-center justify-between pb-4'>
 								<p className='font-semibold'>Addresses</p>
-								<button className='text-black/50 hover:text-black hover:border-black flex items-center gap-2 border border-black/10 rounded-full py-2 px-4'>
+								<button
+									className='text-black/50 hover:text-black hover:border-black flex items-center gap-2 border border-black/10 rounded-full py-2 px-4'
+									onClick={() => setShowForm(true)}>
 									<p className='text-sm'>Add</p>
 									<FiPlus size={16} />
 								</button>
@@ -271,7 +318,9 @@ const Profile = () => {
 										</span>
 										<div>
 											<p className='text-black/60 text-sm'>247/37 Phú Định</p>
-											<p className='text-black/60 text-sm'>Phường 16, Quận 8, TP.Hồ Chí Minh</p>
+											<p className='text-black/60 text-sm'>
+												Phường 16, Quận 8, TP.Hồ Chí Minh
+											</p>
 										</div>
 										<span className='text-xs text-[#435d63] border border-[#435d63] px-1'>
 											Mặc định
@@ -279,7 +328,9 @@ const Profile = () => {
 									</div>
 									<div className='flex flex-col items-end gap-4'>
 										<span className='flex items-center gap-2'>
-											<p className='text-sm cursor-pointer text-[#435d63]'>Update</p>
+											<p className='text-sm cursor-pointer text-[#435d63]'>
+												Update
+											</p>
 										</span>
 										<p className='text-sm cursor-pointer border border-black/20 py-0.5 px-4 hover:bg-gray-300/15'>
 											Set default
@@ -296,7 +347,9 @@ const Profile = () => {
 										</span>
 										<div>
 											<p className='text-black/60 text-sm'>247/37 Phú Định</p>
-											<p className='text-black/60 text-sm'>Phường 16, Quận 8, TP.Hồ Chí Minh</p>
+											<p className='text-black/60 text-sm'>
+												Phường 16, Quận 8, TP.Hồ Chí Minh
+											</p>
 										</div>
 										{/* <span className='text-xs text-[#435d63] border border-[#435d63] px-1'>
                     Mặc định
@@ -304,8 +357,12 @@ const Profile = () => {
 									</div>
 									<div className='flex flex-col items-end gap-4'>
 										<span className='flex items-center gap-2'>
-											<p className='text-sm cursor-pointer text-[#435d63]'>Update</p>
-											<p className='text-sm cursor-pointer text-[#435d63]'>Delete</p>
+											<p className='text-sm cursor-pointer text-[#435d63]'>
+												Update
+											</p>
+											<p className='text-sm cursor-pointer text-[#435d63]'>
+												Delete
+											</p>
 										</span>
 										<p className='text-sm cursor-pointer border border-black/20 py-0.5 px-4 hover:bg-gray-300/15'>
 											Set default
@@ -322,7 +379,9 @@ const Profile = () => {
 										</span>
 										<div>
 											<p className='text-black/60 text-sm'>247/37 Phú Định</p>
-											<p className='text-black/60 text-sm'>Phường 16, Quận 8, TP.Hồ Chí Minh</p>
+											<p className='text-black/60 text-sm'>
+												Phường 16, Quận 8, TP.Hồ Chí Minh
+											</p>
 										</div>
 										{/* <span className='text-xs text-[#435d63] border border-[#435d63] px-1'>
                     Mặc định
@@ -330,8 +389,12 @@ const Profile = () => {
 									</div>
 									<div className='flex flex-col items-end gap-4'>
 										<span className='flex items-center gap-2'>
-											<p className='text-sm cursor-pointer text-[#435d63]'>Update</p>
-											<p className='text-sm cursor-pointer text-[#435d63]'>Delete</p>
+											<p className='text-sm cursor-pointer text-[#435d63]'>
+												Update
+											</p>
+											<p className='text-sm cursor-pointer text-[#435d63]'>
+												Delete
+											</p>
 										</span>
 										<p className='text-sm cursor-pointer border border-black/20 py-0.5 px-4 hover:bg-gray-300/15'>
 											Set default
@@ -351,6 +414,8 @@ const Profile = () => {
 					</div>
 				</div>
 			</section>
+
+			<Form toggle={showForm} setToggle={setShowForm} />
 		</React.Suspense>
 	);
 };

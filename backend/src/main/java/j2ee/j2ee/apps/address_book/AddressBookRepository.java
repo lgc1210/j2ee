@@ -14,9 +14,14 @@ public interface AddressBookRepository extends JpaRepository<AddressBookEntity, 
 
     AddressBookEntity findByUserId(long userId);
 
-    Optional<AddressBookEntity> findByUserIdAndIsDefautTrue(long userId);
+    @Query("FROM address_book a WHERE a.user.id = :userId AND a.is_default = true")
+    Optional<AddressBookEntity> findByUserIdAndIsDefault(@Param("userId") long userId);
+
+    @Query("SELECT EXISTS (SELECT 1 FROM address_book a WHERE a.address = :address AND a.name = :name AND a.phone = :phone)")
+    Boolean checkDuplicatedAddress(@Param("address") String address, @Param("phone") String phone,
+            @Param("name") String name);
 
     @Modifying
-    @Query("UPDATE address_book a SET a.isDefault = false WHERE a.user.id = :userId AND a.isDefault = true")
+    @Query("UPDATE address_book a SET a.is_default = false WHERE a.user.id = :userId AND a.is_default = true")
     void clearDefaultForUser(@Param("userId") long userId);
 }
