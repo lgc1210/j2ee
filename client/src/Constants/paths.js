@@ -27,7 +27,7 @@ const paths = {
 	products: "/admin/products",
 	categories: "/admin/categories",
 	discounts: "/admin/discounts",
-	contacts: "/admin/contacts",
+	stores: "/admin/stores",
 	roles: "/admin/roles",
 	// Admin statistic
 	statistic: "/admin/statistic",
@@ -40,11 +40,16 @@ const paths = {
 	statisticAppointment: "/admin/statistic/appointment",
 	statisticOrderedProducts: "/admin/statistic/orderedproducts",
 	statisticStoreRegisterOvertime: "/admin/statistic/storeregisterovertime",
-	statisticStoreHighestLowestAppointments: "/admin/statistic/storehighestlowestappointments",
-	statisticStoreHighestLowestRevenues: "/admin/statistic/storehighestlowestrevenues",
-	statisticCustomerHighestLowestAppointments: "/admin/statistic/customerhighestlowestappointments",
-	statisticStaffHighestLowestAppointments: "/admin/statistic/staffhighestlowestappointments",
-	statisticMostLeastBookedServiceCategories: "/admin/statistic/mostlestbookedservicecategories",
+	statisticStoreHighestLowestAppointments:
+		"/admin/statistic/storehighestlowestappointments",
+	statisticStoreHighestLowestRevenues:
+		"/admin/statistic/storehighestlowestrevenues",
+	statisticCustomerHighestLowestAppointments:
+		"/admin/statistic/customerhighestlowestappointments",
+	statisticStaffHighestLowestAppointments:
+		"/admin/statistic/staffhighestlowestappointments",
+	statisticMostLeastBookedServiceCategories:
+		"/admin/statistic/mostlestbookedservicecategories",
 	statisticBusiestDaysOfWeek: "/admin/statistic/busiestdaysofweek",
 	statisticPopularTimeSlotsForAppointments: "/admin/statistic/populartimeslots",
 };

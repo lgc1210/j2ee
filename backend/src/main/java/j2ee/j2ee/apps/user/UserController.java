@@ -15,6 +15,16 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import j2ee.j2ee.apps.role.RoleDTO;
+import j2ee.j2ee.apps.store.StoreDTO;
+import j2ee.j2ee.constants.ErrorMessages;
+import org.apache.catalina.connector.Response;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import j2ee.j2ee.constants.ErrorMessages;
 
@@ -65,7 +75,7 @@ public class UserController {
         return user.isPresent() ? ResponseEntity.ok(user.get()) : ResponseEntity.notFound().build();
     }
 
-    @PostMapping()
+    @PostMapping("createUser")
     public ResponseEntity<UserEntity> create(@RequestBody UserEntity user) {
         try {
             if (user == null)
@@ -73,10 +83,12 @@ public class UserController {
 
             Optional<UserEntity> doesEmailExist = userService.getByEmail(user.getEmail());
             Optional<UserEntity> doesPhoneExist = userService.getByPhone(user.getPhone());
+            System.out.println("Email exists: " + doesEmailExist.isPresent());
+            System.out.println("Phone exists: " + doesPhoneExist.isPresent());
             if (doesEmailExist.isPresent() || doesPhoneExist.isPresent())
                 return ResponseEntity.status(HttpStatus.CONFLICT).build();
-
             UserEntity createdUser = userService.create(user);
+
             URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                     .buildAndExpand(createdUser.getId()).toUri();
 
@@ -141,4 +153,38 @@ public class UserController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    @GetMapping("/getlistbyroleid/{roleId}")
+    public ResponseEntity<List<UserEntity>> getUsersByRoleId(@PathVariable Long roleId) {
+        return ResponseEntity.ok(userService.getUsersByRoleId(roleId));
+    }
+
+    // Delete (Xóa một store)
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
+        try {
+            userService.deleteUser(id);
+            return ResponseEntity.ok("Xóa user thành công");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body("Lỗi khi xóa: " + e.getMessage());
+        }
+    }
+
+    // Delete (Xóa nhiều stores)
+    @DeleteMapping("/delete-multiple")
+    @Transactional
+    public ResponseEntity<String> deleteMultipleUsers(@RequestBody List<Long> ids) {
+        try {
+            if (ids == null || ids.isEmpty()) {
+                return ResponseEntity.badRequest().body("Danh sách ID không được rỗng");
+            }
+            userService.deleteMultipleUsers(ids);
+            return ResponseEntity.ok("Xóa nhiều user thành công");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body("Lỗi khi xóa: " + e.getMessage());
+        }
+    }
+
+
+
 }

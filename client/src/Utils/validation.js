@@ -17,6 +17,8 @@ export const isEmpty = (value) => {
 	if (value === false) {
 		return true;
 	}
+
+	return !String(value).trim();
 };
 
 export const isPhone = (phone) => /^\d{10,12}$/.test(phone.trim());

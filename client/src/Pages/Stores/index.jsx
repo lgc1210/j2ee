@@ -8,7 +8,7 @@ import ConfirmPopup from "../../Components/ConfirmPopup/index.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { showToast } from "../../Components/Toast/index.jsx";
-import CategoryOfServiceService from "../../Services/categoryOfService";
+import StoreService from "../../Services/store";
 
 const FormControl = React.lazy(() => import("../../Components/FormControl/index.jsx"));
 const Loading = React.lazy(() => import("../../Components/Loading/index.jsx"));
@@ -57,16 +57,17 @@ const SelectBox = React.forwardRef(({ ...props }) => {
   );
 });
 
-const Categories = () => {
+const Stores = () => {
   const columns = [
     {
       name: "Image",
       sortable: true,
       cell: (row) => (
         <img
-          src={`/assets/images/categoryOfService/${row.image}`} 
-          alt="Category"
+          // src={row.image ? `/assets/images/store/${row.image}` : "/assets/images/store/default.jpg"}
+          alt={row.name || "Store"}
           style={{ width: "50px", height: "50px", objectFit: "cover" }}
+          onError={(e) => (e.target.src = "/assets/images/store/default.jpg")}
         />
       ),
     },
@@ -76,9 +77,27 @@ const Categories = () => {
       selector: (row) => row.name,
     },
     {
+      name: "Description",
+      sortable: true,
+      selector: (row) => row.description || "N/A",
+    },
+    {
+      name: "Address",
+      sortable: true,
+      selector: (row) => row.address || "N/A",
+    },
+    {
+      name: "Owner",
+      sortable: true,
+      selector: (row) => {
+       
+        return row.ownerId?.name || "N/A";
+      },
+    },
+    {
       name: "Status",
       sortable: true,
-      selector: (row) => (row.status === "1" ? "Active" : "Inactive"), 
+      selector: (row) => (row.status === "1" ? "Active" : "Inactive"),
     },
     {
       name: "Actions",
@@ -106,26 +125,26 @@ const Categories = () => {
   const [showActions, setShowActions] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [categoryOSsData, setCategoryOSsData] = useState([]);
+  const [storesData, setStoresData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [editCategoryOS, setEditCategoryOS] = useState(null);
+  const [editStore, setEditStore] = useState(null);
   const [showConfirmDeleteSingle, setShowConfirmDeleteSingle] = useState(false);
-  const [categoryOSIdToDelete, setCategoryOSIdToDelete] = useState(null);
+  const [storeIdToDelete, setStoreIdToDelete] = useState(null);
   const [selectedRow, setSelectedRow] = useState(null);
 
   useEffect(() => {
-    const fetchRoles = async () => {
+    const fetchStores = async () => {
       try {
         setLoading(true);
-        const response = await CategoryOfServiceService.getAllCategoryOfServices();
-        setCategoryOSsData(response.data);
+        const response = await StoreService.getAllStores();
+        setStoresData(response.data);
       } catch (error) {
-        showToast("Lỗi khi tải danh sách", "error");
+        showToast("Lỗi khi tải danh sách cửa hàng", "error");
       } finally {
         setLoading(false);
       }
     };
-    fetchRoles();
+    fetchStores();
   }, []);
 
   const handleFieldsChange = (key, value) => {
@@ -139,8 +158,8 @@ const Categories = () => {
   const handleDeleteMultiple = async () => {
     const ids = selectedRows.map((row) => row.id);
     try {
-      await CategoryOfServiceService.deleteMultipleCategoryOfServices(ids);
-      setCategoryOSsData(categoryOSsData.filter((role) => !ids.includes(role.id)));
+      await StoreService.deleteMultipleStores(ids);
+      setStoresData(storesData.filter((store) => !ids.includes(store.id)));
       setSelectedRows([]);
       showToast("Xóa nhiều thành công", "success");
     } catch (error) {
@@ -149,15 +168,15 @@ const Categories = () => {
     }
   };
 
-  const handleDeleteSingle = (categoryOSId) => {
-    setCategoryOSIdToDelete(categoryOSId);
+  const handleDeleteSingle = (storeId) => {
+    setStoreIdToDelete(storeId);
     setShowConfirmDeleteSingle(true);
   };
 
   const confirmDeleteSingle = async () => {
     try {
-      await CategoryOfServiceService.deleteCategoryOfService(categoryOSIdToDelete);
-      setCategoryOSsData(categoryOSsData.filter((categoryOS) => categoryOS.id !== categoryOSIdToDelete));
+      await StoreService.deleteStore(storeIdToDelete);
+      setStoresData(storesData.filter((store) => store.id !== storeIdToDelete));
       setShowConfirmDeleteSingle(false);
       showToast("Xóa thành công", "success");
     } catch (error) {
@@ -166,36 +185,32 @@ const Categories = () => {
     }
   };
 
-  const handleEdit = (categoryOfService) => {
-    setEditCategoryOS(categoryOfService);
+  const handleEdit = (store) => {
+    setEditStore(store);
     setShowForm(true);
   };
 
-  const handleFormSubmit = async (newCategoryData) => { 
+  const handleFormSubmit = async (newStoreData) => {
     try {
-      if (editCategoryOS) {
-        const response = await CategoryOfServiceService.updateCategoryOfServices(
-          editCategoryOS.id,
-          newCategoryData
-        );
-        setCategoryOSsData(
-          categoryOSsData.map((categoryOfService) =>
-            categoryOfService.id === editCategoryOS.id ? response.data : categoryOfService
+      if (editStore) {
+        const response = await StoreService.updateStore(editStore.id, newStoreData);
+        setStoresData(
+          storesData.map((store) =>
+            store.id === editStore.id ? response.data : store
           )
         );
-        // showToast("Cập nhật thành công", "success");
       } else {
-        const response = await CategoryOfServiceService.createCategoryOfServices(newCategoryData);
-        setCategoryOSsData([...categoryOSsData, response.data]);
-        // showToast("Tạo thành công", "success");
+        const response = await StoreService.createStore(newStoreData);
+        setStoresData([...storesData, response.data]);
       }
       setShowForm(false);
-      setEditCategoryOS(null);
+      setEditStore(null);
     } catch (error) {
       console.error("Lỗi khi lưu:", error);
       showToast("Lỗi khi lưu", "error");
     }
   };
+
   const handleRowClicked = (row) => {
     setSelectedRow(row);
   };
@@ -211,6 +226,11 @@ const Categories = () => {
   const handleExport = () => {
     alert("Chức năng Export chưa được triển khai");
   };
+
+ 
+  const filteredData = storesData.filter((store) =>
+    store.name.toLowerCase().includes(searchInput.toLowerCase())
+  );
 
   return (
     <>
@@ -238,7 +258,7 @@ const Categories = () => {
 
             <div className="relative">
               <button
-                type="submit"
+                type="button"
                 className="text-sm rounded-md w-fit transition-all duration-700 hover:bg-black text-white bg-[#435d63] p-2 font-serif font-semibold"
                 onClick={handleActionsClicked}
               >
@@ -249,7 +269,7 @@ const Categories = () => {
                   <button
                     className="p-2 px-4 hover:bg-black/10 w-full"
                     onClick={() => {
-                      setEditCategoryOS(null);
+                      setEditStore(null);
                       setShowForm(true);
                     }}
                   >
@@ -288,7 +308,7 @@ const Categories = () => {
                 striped
                 pagination
                 onSelectedRowsChange={handleRowsSelected}
-                subHeader={selectedRows.length ? true : false}
+                subHeader={selectedRows.length > 0}
                 subHeaderComponent={
                   <SubHeader
                     selectedRows={selectedRows}
@@ -296,7 +316,7 @@ const Categories = () => {
                   />
                 }
                 columns={columns}
-                data={categoryOSsData}
+                data={filteredData} 
                 selectableRowsComponent={SelectBox}
                 selectableRowsComponentProps={{
                   style: {
@@ -316,9 +336,9 @@ const Categories = () => {
         toggle={showForm}
         setToggle={() => {
           setShowForm(false);
-          setEditCategoryOS(null);
+          setEditStore(null);
         }}
-        initialData={editCategoryOS}
+        initialData={editStore}
         onSubmit={handleFormSubmit}
         isDisabled={false}
       />
@@ -336,7 +356,7 @@ const Categories = () => {
         setToggle={() => setShowConfirmDeleteSingle(false)}
         onOk={confirmDeleteSingle}
         onCancel={() => setShowConfirmDeleteSingle(false)}
-        title="Bạn có chắc chắn muốn xóa này không?"
+        title="Bạn có chắc chắn muốn xóa cửa hàng này không?"
         message="Hành động này có thể được hoàn tác"
         okButtonText="OK"
         cancelButtonText="Hủy"
@@ -347,4 +367,4 @@ const Categories = () => {
   );
 };
 
-export default Categories;
+export default Stores;
