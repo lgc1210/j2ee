@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import j2ee.j2ee.constants.ErrorMessages;
 import jakarta.transaction.Transactional;
 
 @Service
+@Transactional
 public class AddressBookService {
 
     private final AddressBookRepository addressBookRepository;
@@ -27,36 +27,35 @@ public class AddressBookService {
         return Optional.ofNullable(address);
     }
 
+    public Optional<AddressBookEntity> getById(long id) {
+        Optional<AddressBookEntity> address = this.addressBookRepository.findById(id);
+        return address;
+    }
+
     public void deleteById(long id) {
         this.addressBookRepository.deleteById(id);
     }
 
-    @Transactional
     public AddressBookEntity create(AddressBookEntity payload) {
-        if (addressBookRepository.checkDuplicatedAddress(payload.getAddress(), payload.getPhone(),
-                payload.getName())) {
-            throw new RuntimeException(ErrorMessages.ADDRESS_CONFLICT);
-        }
-
         if (Boolean.TRUE.equals(payload.getIs_default())) {
-            addressBookRepository.clearDefaultForUser(payload.getUser().getId());
-
+            this.addressBookRepository.clearDefaultForUser(payload.getUser().getId());
+        } else {
+            boolean hasExistingAddresses =
+                    !addressBookRepository.findAllByUserId(payload.getUser().getId()).isEmpty();
+            if (!hasExistingAddresses) {
+                payload.setIs_default(false);
+            }
         }
+
         return this.addressBookRepository.save(payload);
     }
 
-    @Transactional
     public AddressBookEntity update(long id, AddressBookEntity address) {
         AddressBookEntity existingAddress = this.addressBookRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Address not found"));
 
-        if (addressBookRepository.checkDuplicatedAddress(address.getAddress(), address.getPhone(),
-                address.getName())) {
-            throw new RuntimeException(ErrorMessages.ADDRESS_CONFLICT);
-        }
-
         if (Boolean.TRUE.equals(address.getIs_default())) {
-            addressBookRepository.clearDefaultForUser(existingAddress.getUser().getId());
+            this.addressBookRepository.clearDefaultForUser(existingAddress.getUser().getId());
         }
 
         existingAddress.setName(address.getName());
@@ -66,5 +65,16 @@ public class AddressBookService {
         existingAddress.setType(address.getType());
 
         return this.addressBookRepository.save(existingAddress);
+    }
+
+
+    public void setDefaultById(long id, long userId) {
+        this.addressBookRepository.clearDefaultForUser(userId);
+
+        AddressBookEntity updatedAddress = this.getById(id).get();
+
+        updatedAddress.setIs_default(true);
+
+        this.addressBookRepository.save(updatedAddress);
     }
 }

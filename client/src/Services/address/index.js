@@ -8,9 +8,7 @@ class AddressService {
 	};
 
 	static getByUserId = async (userId) => {
-		return await apiInstance.get(
-			`${baseURL}/addresses/users/?user_id=${userId}`
-		);
+		return await apiInstance.get(`${baseURL}/addresses/users/${userId}`);
 	};
 
 	static create = async (payload) => {
@@ -18,15 +16,15 @@ class AddressService {
 	};
 
 	static update = async (id, payload) => {
-		return await apiInstance.put(`${baseURL}/addresses/${id}`, payload);
+		return await apiInstance.put(`${baseURL}/addresses/update/${id}`, payload);
 	};
 
 	static delete = async (id) => {
 		return await apiInstance.delete(`${baseURL}/addresses/${id}`);
 	};
 
-	static setDefault = async (id) => {
-		return await apiInstance.put(`${baseURL}/addresses/${id}`);
+	static setDefault = async (id, payload) => {
+		return await apiInstance.put(`${baseURL}/addresses/${id}`, payload);
 	};
 }
 

@@ -11,6 +11,7 @@ import AddressService from "../../Services/address";
 const Loading = React.lazy(() => import("../../Components/Loading"));
 const FormControl = React.lazy(() => import("../../Components/FormControl"));
 const Form = React.lazy(() => import("./Form"));
+const ConfirmPopup = React.lazy(() => import("../../Components/ConfirmPopup"));
 
 const Profile = () => {
 	const { logout, user, setUser } = useAuth();
@@ -24,31 +25,35 @@ const Profile = () => {
 	const [isEditingUser, setIsEditingUser] = React.useState(false);
 	const [errors, setErrors] = React.useState({});
 	const [showForm, setShowForm] = React.useState(false);
+	const [showConfimPopup, setShowConfirmPopup] = React.useState({
+		addressId: null,
+		isShow: false,
+	});
 	const [addressList, setAddressList] = React.useState([]);
+	const [isUpdatingAddress, setIsUpdatingAddress] = React.useState(false);
+	const [selectedAddress, setSelectedAddress] = React.useState(null);
 
-	// Get user' addresses
-	React.useEffect(() => {
-		let mounted = true;
+	const memoizedAddressList = React.useMemo(() => addressList, [addressList]);
 
-		const fetchAddressList = async () => {
-			if (mounted) {
-				try {
-					const response = await AddressService.getByUserId(user?.id);
-					console.log("Response:", response);
-				} catch (error) {}
+	const fetchAddressList = React.useCallback(async () => {
+		try {
+			const response = await AddressService.getByUserId(user?.id);
+			if (response.status === 200) {
+				setAddressList(response?.data);
 			}
-		};
+		} catch (error) {}
+	}, [user?.id]);
 
-		fetchAddressList();
-
+	const isMounted = React.useRef(true);
+	React.useEffect(() => {
 		return () => {
-			mounted = false;
+			isMounted.current = false;
 		};
 	}, []);
 
 	React.useEffect(() => {
-		reset();
-	}, [isEditingUser, user]);
+		fetchAddressList();
+	}, [fetchAddressList]);
 
 	const reset = React.useCallback(() => {
 		setFields({
@@ -60,6 +65,10 @@ const Profile = () => {
 		});
 		setErrors({});
 	}, [user]);
+
+	React.useEffect(() => {
+		reset();
+	}, [isEditingUser, reset, user]);
 
 	const handleFieldsChange = (key, value) => {
 		setFields((prev) => ({ ...prev, [key]: value }));
@@ -79,21 +88,25 @@ const Profile = () => {
 		if (isEmpty(fields.name)) {
 			errs.name = "Full name is required";
 		}
+
 		if (isEmpty(fields.email)) {
 			errs.email = "Email is required";
 		} else if (!isEmail(fields.email)) {
 			errs.email = "Email is invalid";
 		}
+
 		if (isEmpty(fields.phone)) {
 			errs.phone = "Phone number is required";
 		} else if (!isPhone(fields.phone)) {
 			errs.phone = "Phone number is invalid";
 		}
+
 		setErrors(errs);
 
 		return Object.keys(errs).length === 0;
 	};
 
+	// Update user's information
 	const handleSubmit = async (event) => {
 		event.preventDefault();
 
@@ -119,6 +132,49 @@ const Profile = () => {
 				showToast("Internal Server Error", "error");
 			}
 		}
+	};
+
+	const handleDeleteAddress = async () => {
+		try {
+			const response = await AddressService.delete(showConfimPopup.addressId);
+			if (response?.status === 200) {
+				showToast("Address deleted successfully");
+				reset();
+				fetchAddressList();
+				setShowConfirmPopup((prev) => ({
+					...prev,
+					addressId: null,
+					isShow: false,
+				}));
+			}
+		} catch (error) {
+			showToast("Error occurs while deleting the address");
+		}
+	};
+
+	const handleSetDefault = async (id) => {
+		try {
+			const response = await AddressService.setDefault(id, {
+				user: { id: user?.id },
+			});
+			if (response.status === 200) {
+				showToast("Address set as default");
+			}
+		} catch (error) {
+			showToast("Error occurs while setting default address", "error");
+		}
+	};
+
+	const handleClickedUpdate = (address) => {
+		setSelectedAddress(address);
+		setIsUpdatingAddress(true);
+		setShowForm(true);
+	};
+
+	const handleCloseForm = () => {
+		setShowForm(false);
+		setSelectedAddress(null);
+		setIsUpdatingAddress(false);
 	};
 
 	return (
@@ -308,99 +364,57 @@ const Profile = () => {
 
 							{/* List of address */}
 							<ul className=''>
-								<li className='flex items-center justify-between py-4 border-t border-black/10'>
-									<div>
-										<span className='flex items-center justify-start'>
-											<p className='font-semibold'>Cường Lê</p>
-											{/* Divider */}
-											<span className='mx-2 w-[1px] h-6 bg-black/10'></span>
-											<p className='text-black/60 text-sm'>0948800917</p>
-										</span>
-										<div>
-											<p className='text-black/60 text-sm'>247/37 Phú Định</p>
-											<p className='text-black/60 text-sm'>
-												Phường 16, Quận 8, TP.Hồ Chí Minh
-											</p>
-										</div>
-										<span className='text-xs text-[#435d63] border border-[#435d63] px-1'>
-											Mặc định
-										</span>
-									</div>
-									<div className='flex flex-col items-end gap-4'>
-										<span className='flex items-center gap-2'>
-											<p className='text-sm cursor-pointer text-[#435d63]'>
-												Update
-											</p>
-										</span>
-										<p className='text-sm cursor-pointer border border-black/20 py-0.5 px-4 hover:bg-gray-300/15'>
-											Set default
-										</p>
-									</div>
-								</li>
-								<li className='flex items-center justify-between py-4 border-t border-black/10'>
-									<div>
-										<span className='flex items-center justify-start'>
-											<p className='font-semibold'>Cường Lê</p>
-											{/* Divider */}
-											<span className='mx-2 w-[1px] h-6 bg-black/10'></span>
-											<p className='text-black/60 text-sm'>0948800917</p>
-										</span>
-										<div>
-											<p className='text-black/60 text-sm'>247/37 Phú Định</p>
-											<p className='text-black/60 text-sm'>
-												Phường 16, Quận 8, TP.Hồ Chí Minh
-											</p>
-										</div>
-										{/* <span className='text-xs text-[#435d63] border border-[#435d63] px-1'>
-                    Mặc định
-                  </span> */}
-									</div>
-									<div className='flex flex-col items-end gap-4'>
-										<span className='flex items-center gap-2'>
-											<p className='text-sm cursor-pointer text-[#435d63]'>
-												Update
-											</p>
-											<p className='text-sm cursor-pointer text-[#435d63]'>
-												Delete
-											</p>
-										</span>
-										<p className='text-sm cursor-pointer border border-black/20 py-0.5 px-4 hover:bg-gray-300/15'>
-											Set default
-										</p>
-									</div>
-								</li>
-								<li className='flex items-center justify-between py-4 border-t border-black/10'>
-									<div>
-										<span className='flex items-center justify-start'>
-											<p className='font-semibold'>Cường Lê</p>
-											{/* Divider */}
-											<span className='mx-2 w-[1px] h-6 bg-black/10'></span>
-											<p className='text-black/60 text-sm'>0948800917</p>
-										</span>
-										<div>
-											<p className='text-black/60 text-sm'>247/37 Phú Định</p>
-											<p className='text-black/60 text-sm'>
-												Phường 16, Quận 8, TP.Hồ Chí Minh
-											</p>
-										</div>
-										{/* <span className='text-xs text-[#435d63] border border-[#435d63] px-1'>
-                    Mặc định
-                  </span> */}
-									</div>
-									<div className='flex flex-col items-end gap-4'>
-										<span className='flex items-center gap-2'>
-											<p className='text-sm cursor-pointer text-[#435d63]'>
-												Update
-											</p>
-											<p className='text-sm cursor-pointer text-[#435d63]'>
-												Delete
-											</p>
-										</span>
-										<p className='text-sm cursor-pointer border border-black/20 py-0.5 px-4 hover:bg-gray-300/15'>
-											Set default
-										</p>
-									</div>
-								</li>
+								{memoizedAddressList?.map((a) => {
+									return (
+										<li
+											key={a?.id}
+											className='flex items-center justify-between py-4 border-t border-black/10'>
+											<div>
+												<span className='flex items-center justify-start'>
+													<p className='font-semibold'>{a?.name}</p>
+													{/* Divider */}
+													<span className='mx-2 w-[1px] h-6 bg-black/10'></span>
+													<p className='text-black/60 text-sm'>{a?.phone}</p>
+												</span>
+												<div>
+													<p className='text-black/60 text-sm'>{a?.address}</p>
+												</div>
+												{a?.is_default && (
+													<span className='text-xs text-[#435d63] border border-[#435d63] px-1'>
+														Default
+													</span>
+												)}
+											</div>
+											<div className='flex flex-col items-end gap-4'>
+												<span className='flex items-center gap-2'>
+													<p
+														className='text-sm cursor-pointer text-[#435d63]'
+														onClick={() => handleClickedUpdate(a)}>
+														Update
+													</p>
+													{!a?.is_default && (
+														<p
+															className='text-sm cursor-pointer text-[#435d63]'
+															onClick={() =>
+																setShowConfirmPopup((prev) => ({
+																	...prev,
+																	addressId: a?.id,
+																	isShow: true,
+																}))
+															}>
+															Delete
+														</p>
+													)}
+												</span>
+												<p
+													className='text-sm cursor-pointer border border-black/20 py-0.5 px-4 hover:bg-gray-300/15'
+													onClick={() => handleSetDefault(a?.id)}>
+													Set default
+												</p>
+											</div>
+										</li>
+									);
+								})}
 							</ul>
 						</div>
 					</div>
@@ -415,7 +429,28 @@ const Profile = () => {
 				</div>
 			</section>
 
-			<Form toggle={showForm} setToggle={setShowForm} />
+			<Form
+				toggle={showForm}
+				setToggle={handleCloseForm}
+				isUpdating={isUpdatingAddress}
+				data={selectedAddress}
+				onSuccess={fetchAddressList}
+			/>
+
+			<ConfirmPopup
+				toggle={showConfimPopup.isShow}
+				setToggle={() =>
+					setShowConfirmPopup((prev) => ({ ...prev, isShow: false }))
+				}
+				title='Are you sure you want to delete this address?'
+				message='This action can be undone.'
+				okButtonText='Accept'
+				cancelButtonText='Cancel'
+				onOk={handleDeleteAddress}
+				onCancel={() =>
+					setShowConfirmPopup((prev) => ({ ...prev, isShow: false }))
+				}
+			/>
 		</React.Suspense>
 	);
 };

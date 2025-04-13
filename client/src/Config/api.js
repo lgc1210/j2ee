@@ -5,6 +5,7 @@ const apiInstance = axios.create({
 	baseURL: process.env.REACT_APP_API,
 	timeout: 30000,
 	headers: { "X-Custom-Header": "foobar" },
+	withCredentials: true,
 });
 
 apiInstance.interceptors.request.use(

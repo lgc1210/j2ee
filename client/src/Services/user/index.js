@@ -21,6 +21,7 @@ class UserService {
 	updateUser = async (userId, payload) => {
 		return await apiInstance.put(`${baseURL}/users/${userId}`, payload);
 	};
+
 	getUserProfile = async () => {
 		const token = getStoredToken();
 		if (!token) {
@@ -55,20 +56,6 @@ class UserService {
 		});
 	};
 
-	changePassword = async (userId, payload) => {
-		return await apiInstance.post(
-			`${baseURL}/users/${userId}/changepassword`,
-			{
-				currentPassword: payload["currentPassword"],
-				newPassword: payload["newPassword"],
-			},
-			{
-				headers: {
-					"Content-Type": "application/json",
-				},
-			}
-		);
-	};
 	// Tạo user mới
 	createUser = async (payload) => {
 		try {
@@ -83,19 +70,6 @@ class UserService {
 					"Email hoặc số điện thoại đã được sử dụng. Vui lòng thử lại."
 				);
 			}
-			throw error.response?.data || error.message;
-		}
-	};
-
-	// Cập nhật user
-	updateUser = async (userId, payload) => {
-		try {
-			return await apiInstance.put(`${baseURL}/users/${userId}`, payload, {
-				headers: {
-					"Content-Type": "application/json",
-				},
-			});
-		} catch (error) {
 			throw error.response?.data || error.message;
 		}
 	};

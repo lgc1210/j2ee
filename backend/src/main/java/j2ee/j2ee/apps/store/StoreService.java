@@ -31,7 +31,8 @@ public class StoreService {
     }
 
     public Optional<StoreEntity> getById(long id) {
-        return this.storeRepository.findById(id);
+        var store = this.storeRepository.findById(id);
+        return Optional.ofNullable(store);
     }
 
     private StoreDTO toDTO(StoreEntity entity) {

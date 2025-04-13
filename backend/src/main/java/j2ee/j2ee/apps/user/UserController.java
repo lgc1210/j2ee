@@ -15,18 +15,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import j2ee.j2ee.apps.role.RoleDTO;
-import j2ee.j2ee.apps.store.StoreDTO;
 import j2ee.j2ee.constants.ErrorMessages;
-import org.apache.catalina.connector.Response;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import j2ee.j2ee.constants.ErrorMessages;
 
 @RestController
 @RequestMapping("/api/users")
