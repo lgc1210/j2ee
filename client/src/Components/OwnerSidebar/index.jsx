@@ -15,10 +15,11 @@ const filterSidebarItems = (items, isAuthenticated, user) => {
     if (
       isAuthenticated &&
       item?.requiredRole &&
-      !item?.requiredRole.includes(user?.role)
+      !item?.requiredRole.includes(user?.role?.name)
     ) {
       return false;
     }
+    
     return true;
   });
 };
