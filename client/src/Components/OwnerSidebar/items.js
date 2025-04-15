@@ -38,7 +38,7 @@ const items = [
     requiredRole: ["owner"],
   },
   {
-    path: paths.ownerorder,
+    path: paths.ownerorders,
     name: "Order",
     requiredAuth: true,
     requiredRole: ["owner"],

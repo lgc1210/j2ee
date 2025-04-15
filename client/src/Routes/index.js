@@ -13,7 +13,7 @@ const storeOwner = lazy(() => import("../Pages/OwnerPages/storeOwner"));
 const productOwner = lazy(() => import("../Pages/OwnerPages/productOwner"));
 const employeeOwner = lazy(() => import("../Pages/OwnerPages/employeeOwner"));
 const serviceOwner = lazy(() => import("../Pages/OwnerPages/serviceOwner"));
-const categoryOwner = lazy(() =>import("../Pages/OwnerPages/categoryOwner"));
+const CategoryOwner = lazy(() =>import("../Pages/OwnerPages/CategoryOwner"));
 const appointmentOwner = lazy(() => import("../Pages/OwnerPages/appointmentOwner"));
 const orderOwner = lazy(() => import("../Pages/OwnerPages/orderOwner"));
 const reviewOwner = lazy(() => import("../Pages/OwnerPages/reviewOwner"));
@@ -239,7 +239,7 @@ const routes = [
     isPublic: false,
     url: paths.ownercategories,
     Layout: OwnerLayout,
-    Page: categoryOwner,
+    Page: CategoryOwner,
     requiredRole: ["owner"],
   },
   {
@@ -251,7 +251,7 @@ const routes = [
   },
   {
     isPublic: false,
-    url: paths.ownerorder,
+    url: paths.ownerorders,
     Layout: OwnerLayout,
     Page: orderOwner,
     requiredRole: ["owner"],
