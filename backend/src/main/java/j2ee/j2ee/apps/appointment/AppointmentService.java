@@ -7,16 +7,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AppointmentService {
-    private final AppointmentRepository appointmentRepository;
 
     @Autowired
-    public AppointmentService(AppointmentRepository appointmentRepository) {
-        this.appointmentRepository = appointmentRepository;
-    }
+    private AppointmentRepository appointmentRepository;
 
     public Optional<List<AppointmentEntity>> getAllByCustomerId(long customerId) {
-        List<AppointmentEntity> appointmentList =
-                this.appointmentRepository.findAllByCustomerId(customerId);
+        List<AppointmentEntity> appointmentList = this.appointmentRepository.findAllByCustomerId(customerId);
         return Optional.ofNullable(appointmentList);
     }
 

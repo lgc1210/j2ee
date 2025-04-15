@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 
-
 @RestController
 @RequestMapping("/owner/store")
 public class StoreController {
@@ -86,4 +85,3 @@ public class StoreController {
         }
     }
 }
-

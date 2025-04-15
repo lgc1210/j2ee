@@ -2,18 +2,13 @@ package j2ee.j2ee.apps.product;
 
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ProductService {
-    private ProductRepository productRepository;
-
     @Autowired
-    public ProductService(ProductRepository productRepository) {
-        this.productRepository = productRepository;
-    }
+    private ProductRepository productRepository;
 
     public Optional<List<ProductEntity>> getAll() {
         List<ProductEntity> productList = this.productRepository.findAll();
