@@ -1,5 +1,5 @@
-import { Button } from "antd";
 import React from "react";
+import { Button } from "antd";
 import { FaArrowRightLong } from "react-icons/fa6";
 
 const BookingSelectTime = ({ handleSetStep, handleInfoChange }) => {
@@ -18,6 +18,8 @@ const BookingSelectTime = ({ handleSetStep, handleInfoChange }) => {
             Calendar
           </p>
         </div>
+
+        {/*  */}
 
         {/* Confirm */}
         <div className='mt-20'>

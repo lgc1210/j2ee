@@ -1,6 +1,8 @@
 import React from "react";
 
-const ProfileSidebar = React.lazy(() => import("../../Components/ProfileSidebar"));
+const ProfileSidebar = React.lazy(() =>
+	import("../../Components/ProfileSidebar")
+);
 const Loading = React.lazy(() => import("../../Components/ProfileSidebar"));
 
 const ProfileLayout = ({ children }) => {

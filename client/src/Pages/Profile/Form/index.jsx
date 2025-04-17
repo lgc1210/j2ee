@@ -511,7 +511,6 @@ const Form = ({
 					</form>
 				)}
 			</div>
-			)
 		</React.Suspense>
 	);
 };

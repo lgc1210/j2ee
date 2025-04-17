@@ -1,5 +1,6 @@
 import React from "react";
-import FormControl from "../FormControl";
+
+const FormControl  = React.lazy(()=>import( "../FormControl"));
 
 const BookingHeader = ({ selectedService, setSelectedService }) => {
   return (

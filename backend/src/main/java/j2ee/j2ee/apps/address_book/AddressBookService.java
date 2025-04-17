@@ -1,8 +1,11 @@
 package j2ee.j2ee.apps.address_book;
 
-import java.util.List;
 import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 
@@ -17,9 +20,9 @@ public class AddressBookService {
         this.addressBookRepository = addressBookRepository;
     }
 
-    public Optional<List<AddressBookEntity>> getAllByUserId(long userId) {
-        List<AddressBookEntity> addressList = this.addressBookRepository.findAllByUserId(userId);
-        return Optional.ofNullable(addressList);
+    public Page<AddressBookEntity> getAllByUserId(long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return this.addressBookRepository.findAllByUserId(userId, pageable);
     }
 
     public Optional<AddressBookEntity> getByUserId(long userId) {
@@ -28,8 +31,7 @@ public class AddressBookService {
     }
 
     public Optional<AddressBookEntity> getById(long id) {
-        Optional<AddressBookEntity> address = this.addressBookRepository.findById(id);
-        return address;
+        return this.addressBookRepository.findById(id);
     }
 
     public void deleteById(long id) {
@@ -40,8 +42,7 @@ public class AddressBookService {
         if (Boolean.TRUE.equals(payload.getIs_default())) {
             this.addressBookRepository.clearDefaultForUser(payload.getUser().getId());
         } else {
-            boolean hasExistingAddresses =
-                    !addressBookRepository.findAllByUserId(payload.getUser().getId()).isEmpty();
+            boolean hasExistingAddresses = !addressBookRepository.findAllByUserId(payload.getUser().getId()).isEmpty();
             if (!hasExistingAddresses) {
                 payload.setIs_default(false);
             }
@@ -51,8 +52,7 @@ public class AddressBookService {
     }
 
     public AddressBookEntity update(long id, AddressBookEntity address) {
-        AddressBookEntity existingAddress = this.addressBookRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Address not found"));
+        AddressBookEntity existingAddress = this.addressBookRepository.findById(id).orElseThrow(() -> new RuntimeException("Address not found"));
 
         if (Boolean.TRUE.equals(address.getIs_default())) {
             this.addressBookRepository.clearDefaultForUser(existingAddress.getUser().getId());

@@ -1,7 +1,11 @@
 package j2ee.j2ee.apps.appointment;
 
+import java.util.HashMap;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,15 +21,23 @@ public class AppointmentController {
     private AppointmentService appointmentService;
 
     @GetMapping("/users/{customer_id}")
-    public ResponseEntity<List<AppointmentEntity>> getAllByCustomerId(
-            @PathVariable(value = "customer_id") long customer_id) {
+    public ResponseEntity<Object> getAllByCustomerId(
+            @PathVariable(value = "customer_id") long customer_id,
+            @RequestParam("page") int page,
+            @RequestParam("page") int size
+    ) {
         try {
-            var appointmentList = this.appointmentService.getAllByCustomerId(customer_id);
-            if (!appointmentList.isPresent()) {
+            var pageAppointments = this.appointmentService.getAllByCustomerId(customer_id, page, size);
+            if (pageAppointments.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
 
-            return ResponseEntity.ok().body(appointmentList.get());
+            HashMap<String, Object> response = new HashMap<>();
+            response.put("currentPage", pageAppointments.getNumber());
+            response.put("totalPages", pageAppointments.getTotalPages());
+            response.put("totalElements", pageAppointments.getTotalElements());
+
+            return ResponseEntity.ok().body(response);
         } catch (Exception e) {
             System.err.println("Internal Server Error: " + e.getMessage());
             return ResponseEntity.internalServerError().build();

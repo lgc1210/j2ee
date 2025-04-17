@@ -3,7 +3,6 @@ package j2ee.j2ee.apps.cart;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import j2ee.j2ee.apps.product.ProductRepository;
 import jakarta.transaction.Transactional;
 
@@ -27,13 +26,14 @@ public class CartService {
         var items = cart.getItems();
         var existingItem = items.stream().filter(item -> item.getProduct().getId() == product_id).findFirst();
 
-        if (!existingItem.isPresent()) {
+        if (existingItem.isPresent()) {
             existingItem.get().setQuantity(existingItem.get().getQuantity() + quantity);
         } else {
             var cartItem = new CartItem();
             cartItem.setProduct(product);
             cartItem.setQuantity(quantity);
             items.add(cartItem);
+
         }
 
         this.cartRepository.save(cart);

@@ -2,7 +2,6 @@ package j2ee.j2ee.apps.store;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-
 import j2ee.j2ee.apps.user.UserEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

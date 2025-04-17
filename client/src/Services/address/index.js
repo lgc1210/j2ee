@@ -7,8 +7,10 @@ class AddressService {
 		return await apiInstance.get(`${baseURL}/addresses/provinces`);
 	};
 
-	static getByUserId = async (userId) => {
-		return await apiInstance.get(`${baseURL}/addresses/users/${userId}`);
+	static getAllByUserId = async (userId, page = 0, size = 4) => {
+		return await apiInstance.get(
+			`${baseURL}/addresses/users/${userId}?page=${page}&size=${size}`
+		);
 	};
 
 	static create = async (payload) => {
