@@ -18,4 +18,5 @@ public class UserDTO {
     private LocalDate createdAt;
     private LocalDate updatedAt;
     private Long roleId;
+    private String status;
 }

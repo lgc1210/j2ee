@@ -84,4 +84,10 @@ public class StoreController {
             return ResponseEntity.badRequest().body("Lỗi khi xóa: " + e.getMessage());
         }
     }
+    //import
+    @PostMapping("/import")
+    public ResponseEntity<String> importStores(@RequestBody List<StoreEntity> stores) {
+        storeService.importStores(stores);
+        return ResponseEntity.ok("Import successful");
+    }
 }

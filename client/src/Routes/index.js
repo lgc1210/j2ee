@@ -28,6 +28,9 @@ const Stores = lazy(() => import("../Pages/Stores"));
 const Roles = lazy(() => import("../Pages/Roles"));
 const Statistic = lazy(() => import("../Pages/Statistic"));
 const Booking = lazy(() => import("../Pages/Booking"));
+const Statistic1 = lazy(() => import("../Pages/Statistic/Statistic1"));
+const StatisticByAllTime = lazy(() => import("../Pages/Statistic/StatisticByAllTime"));
+
 
 // Profile Pages
 const ProfileChangePassword = lazy(() =>
@@ -187,6 +190,20 @@ const routes = [
     url: paths.statistic,
     Layout: AdminLayout,
     Page: Statistic,
+    requiredRole: ["admin"],
+  },
+  {
+    isPublic: false,
+    url: paths.statistic1,
+    Layout: AdminLayout,
+    Page: Statistic1,
+    requiredRole: ["admin"],
+  },
+  {
+    isPublic: false,
+    url: paths.statisticByAllTime,
+    Layout: AdminLayout,
+    Page: StatisticByAllTime,
     requiredRole: ["admin"],
   },
 ];

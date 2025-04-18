@@ -13,7 +13,7 @@ public class CategoryOfServiceController {
     @Autowired
     private CategoryOfServiceService categoryService;
 
-    // Create (Tạo mới category)
+    // Create
     @PostMapping
     public ResponseEntity<CategoryOfServiceDTO> createCategory(@RequestBody CategoryOfServiceDTO categoryDTO) {
         try {
@@ -24,7 +24,7 @@ public class CategoryOfServiceController {
         }
     }
 
-    // Read (Lấy tất cả categories)
+    // Lấy tất cả categories
     @GetMapping
     public ResponseEntity<List<CategoryOfServiceDTO>> getAllCategories() {
         try {

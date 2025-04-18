@@ -57,6 +57,14 @@ class StoreService {
       },
     });
   };
+  // Import Stores 
+  importStores = async (stores) => {
+    return await apiInstance.post(`${baseURL}/stores/import`, stores, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  };
 }
 
 export default new StoreService();

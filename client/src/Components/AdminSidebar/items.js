@@ -60,7 +60,7 @@ const items = [
         requiredAuth: true,
       },
       {
-        path: paths.statisticWeekly,
+        path: paths.statistic1,
         name: "Weekly",
         requiredAuth: true,
       },

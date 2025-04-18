@@ -9,7 +9,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { showToast } from "../../Components/Toast/index.jsx";
 import UserService from "../../Services/user";
-
+import * as XLSX from "xlsx";
 const FormControl = React.lazy(() => import("../../Components/FormControl/index.jsx"));
 const Loading = React.lazy(() => import("../../Components/Loading/index.jsx"));
 const Form = React.lazy(() => import("./Form/index.jsx"));
@@ -38,10 +38,10 @@ const SubHeader = ({ selectedRows, handleDeleteMultiple }) => {
         setToggle={() => setShowConfirmDelete(false)}
         onOk={handleDeleteMultiple}
         onCancel={() => setShowConfirmDelete(false)}
-        title="Bạn có chắc chắn muốn xóa không?"
-        message="Hành động này có thể được hoàn tác"
+        title="Are you sure you want to delete this?"
+        message="This action can be undone"
         okButtonText="OK"
-        cancelButtonText="Hủy"
+        cancelButtonText="Cancel"
       />
     </>
   );
@@ -75,11 +75,11 @@ const Users = () => {
       sortable: true,
       selector: (row) => row.phone,
     },
-    {
-      name: "Password",
-      sortable: true,
-      selector: (row) => row.password || "N/A",
-    },
+    // {
+    //   name: "Password",
+    //   sortable: true,
+    //   selector: (row) => row.password || "N/A",
+    // },
     {
       name: "Role",
       sortable: true,
@@ -88,6 +88,11 @@ const Users = () => {
         return row.role?.name || "N/A";
       },
     },
+    // {
+    //   name: "Status",
+    //   sortable: true,
+    //   selector: (row) => (row.status === "1" ? "Active" : "Inactive"),
+    // },
     {
       name: "Actions",
       center: true,
@@ -198,7 +203,7 @@ const Users = () => {
       setEditUser(null);
     } catch (error) {
       console.error("Lỗi khi lưu:", error);
-      const errorMessage = typeof error === "string" ? error : error.message || "Lỗi không xác định";
+      const errorMessage = typeof error === "string" ? error : error.message || "Lỗi";
       showToast(`Lỗi khi lưu: ${errorMessage}`, "error");
     }
   };
@@ -212,13 +217,27 @@ const Users = () => {
   };
 
   const handleImport = () => {
-    alert("Chức năng Import chưa được triển khai");
+    alert("");
   };
 
   const handleExport = () => {
-    alert("Chức năng Export chưa được triển khai");
+    const exportData = usersData.map((user) => ({
+      ID: user.id,
+      Name: user.name,
+      Email: user.email,
+      Phone: user.phone,
+      Password: user.password || "N/A", 
+      "Role Name": user.role?.name || "N/A",
+      "Created At": user.created_at || "N/A",
+      "Updated At": user.update_at || "N/A",
+      // status: user.Status || "1",
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Users");
+    XLSX.writeFile(workbook, "Users_Export.xlsx");
+    showToast("Xuất file Excel thành công", "success");
   };
-
 
   const filteredData = usersData.filter((user) =>
     user.name.toLowerCase().includes(searchInput.toLowerCase())
@@ -254,7 +273,7 @@ const Users = () => {
                 className="text-sm rounded-md w-fit transition-all duration-700 hover:bg-black text-white bg-[#435d63] p-2 font-serif font-semibold"
                 onClick={handleActionsClicked}
               >
-                <p>Hành động</p>
+                <p>Action</p>
               </button>
               {showActions && (
                 <div className="overflow-hidden absolute z-10 top-full right-0 rounded-md bg-white w-fit shadow-md">
@@ -265,19 +284,19 @@ const Users = () => {
                       setShowForm(true);
                     }}
                   >
-                    Tạo mới
+                    Create
                   </button>
                   <button
                     className="p-2 px-4 hover:bg-black/10 w-full"
                     onClick={handleImport}
                   >
-                    Nhập
+                    Import
                   </button>
                   <button
                     className="p-2 px-4 hover:bg-black/10 w-full"
                     onClick={handleExport}
                   >
-                    Xuất
+                    Export
                   </button>
                 </div>
               )}
@@ -333,6 +352,7 @@ const Users = () => {
         initialData={editUser}
         onSubmit={handleFormSubmit}
         isDisabled={false}
+        usersData={usersData}
       />
 
       <Form
@@ -341,6 +361,7 @@ const Users = () => {
         initialData={selectedRow}
         onSubmit={() => {}}
         isDisabled={true}
+        usersData={usersData}
       />
 
       <ConfirmPopup
@@ -348,10 +369,10 @@ const Users = () => {
         setToggle={() => setShowConfirmDeleteSingle(false)}
         onOk={confirmDeleteSingle}
         onCancel={() => setShowConfirmDeleteSingle(false)}
-        title="Bạn có chắc chắn muốn xóa cửa hàng này không?"
-        message="Hành động này có thể được hoàn tác"
+        title="Are you sure you want to delete this?"
+        message="This action can be undone"
         okButtonText="OK"
-        cancelButtonText="Hủy"
+        cancelButtonText="Cancel"
       />
 
       <ToastContainer />

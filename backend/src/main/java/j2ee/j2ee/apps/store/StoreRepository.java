@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface StoreRepository extends JpaRepository<StoreEntity, Long> {
     void deleteAllByIdIn(List<Long> ids);
+
 }
