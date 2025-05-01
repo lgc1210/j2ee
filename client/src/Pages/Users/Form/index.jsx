@@ -18,7 +18,7 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false, us
     createdAt: "",
     updateAt: "",
     role: "",
-    status: "",
+    // status: "",
   });
   const [file, setFile] = useState(null);
   const [errors, setErrors] = useState({});
@@ -35,7 +35,7 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false, us
         updateAt: initialData.updateAt || "",
         password: initialData.password || "",
         role: initialData.role?.id || "",
-        status: initialData.status || "",
+        // status: initialData.status || "",
       });
       setErrors({}); 
     } else {
@@ -47,7 +47,7 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false, us
         updateAt: "",
         role: "",
         password: "",
-        status: "",
+        // status: "",
       });
       setErrors({}); 
     }

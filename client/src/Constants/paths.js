@@ -53,6 +53,8 @@ const paths = {
   statisticBusiestDaysOfWeek: "/admin/statistic/busiestdaysofweek",
   statisticPopularTimeSlotsForAppointments: "/admin/statistic/populartimeslots",
   statistic1: "/admin/statistic/statistic1",
+  statistic2: "/admin/statistic/statistic2",
+
   
 };
 

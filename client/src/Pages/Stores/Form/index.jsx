@@ -223,10 +223,7 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
                   src={file ? URL.createObjectURL(file) : fields.image}
                   alt={fields.name || "Store Image"}
                   className="w-32 h-32 object-cover rounded-md"
-                  onError={(e) => {
-                    e.target.src = "/src/assets/stores/default.jpg";
-              
-                  }}
+                
                 />
               </div>
             )}

@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import Statistics from '../../../Services/statistic';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -9,95 +12,220 @@ import {
   Legend,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
-import AppointmentService from '../../../Services/appointment'; 
+
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-const WeeklyBookingStats = () => {
-  const [selectedWeek, setSelectedWeek] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+const StatisticsPage = () => {
+  const [timeFilter, setTimeFilter] = useState('all');
   const [specificFilter, setSpecificFilter] = useState('');
-  const [busiestDays, setBusiestDays] = useState({}); 
-  const [popularTimeSlots, setPopularTimeSlots] = useState({}); 
+  const [selectedWeek, setSelectedWeek] = useState('');
+  const [monthInputValue, setMonthInputValue] = useState('');
+  const [selectedYear, setSelectedYear] = useState('');
+  const [storeAppointmentStats, setStoreAppointmentStats] = useState({ mostBooked: [], leastBooked: [] });
+  const [storeRevenueStats, setStoreRevenueStats] = useState({ highestRevenue: [], lowestRevenue: [] });
+  const [customerStats, setCustomerStats] = useState({ mostBooked: [], leastBooked: [] });
+  const [staffStats, setStaffStats] = useState({ mostBooked: [], leastBooked: [] });
 
-  const barOptions = {
+  const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: { position: 'top' },
-      title: { display: true, text: 'The Busiest Days of the Week for Bookings' },
+      title: { display: true, text: 'Statistics' },
     },
-    scales: {
-      y: { beginAtZero: true },
-    },
+    scales: { y: { beginAtZero: true } },
   };
 
-  const horizontalBarOptions = {
-    indexAxis: 'y', 
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'top' },
-      title: { display: true, text: 'The Most Popular Time Slots for Appointments' },
-    },
-    scales: {
-      x: { beginAtZero: true },
-      y: { ticks: { autoSkip: false } }, 
-    },
+  const filterExtremes = (array, valueKey, nameKey, idKey) => {
+    if (!array || array.length === 0) return { highest: [], lowest: [] };
+
+    const cleanedArray = array
+      .filter(item => item && item[idKey] !== undefined && item[idKey] !== null)
+      .map(item => ({
+        ...item,
+        [nameKey]: item[nameKey] || `None_${item[idKey]}`,
+      }));
+
+    const uniqueArray = Array.from(
+      new Map(cleanedArray.map(item => [item[idKey], item])).values()
+    );
+
+    if (uniqueArray.length === 0) return { highest: [], lowest: [] };
+
+    const values = uniqueArray.map(item => item[valueKey]);
+    const maxValue = Math.max(...values);
+    const minValue = Math.min(...values);
+
+    const highest = uniqueArray.filter(item => item[valueKey] === maxValue).slice(0, 1);
+    const lowest = uniqueArray.filter(item => item[valueKey] === minValue).slice(0, 1);
+
+    return {
+      highest,
+      lowest,
+    };
   };
 
+  const getStoreAppointmentChartData = () => {
+    const labels = [
+      ...storeAppointmentStats.mostBooked.map(s => s.storeName),
+      ...storeAppointmentStats.leastBooked.map(s => s.storeName),
+    ];
+    const data = [
+      ...storeAppointmentStats.mostBooked.map(s => s.value),
+      ...storeAppointmentStats.leastBooked.map(s => s.value),
+    ];
 
-  const busiestDaysData = {
-    labels: Object.keys(busiestDays),
-    datasets: [
-      {
-        label: `Bookings (${specificFilter || 'Current Week'})`,
-        data: Object.values(busiestDays), 
+    return {
+      labels: labels.length > 0 ? labels : ['No data'],
+      datasets: [{
+        label: 'Appointment Count',
+        data: data.length > 0 ? data : [0],
+        backgroundColor: 'rgba(59, 130, 246, 0.5)',
+        borderColor: 'rgba(59, 130, 246, 1)',
+        borderWidth: 1,
+      }],
+    };
+  };
+
+  const getStoreRevenueChartData = () => {
+    const labels = [
+      ...storeRevenueStats.highestRevenue.map(s => s.storeName),
+      ...storeRevenueStats.lowestRevenue.map(s => s.storeName),
+    ];
+    const data = [
+      ...storeRevenueStats.highestRevenue.map(s => s.value),
+      ...storeRevenueStats.lowestRevenue.map(s => s.value),
+    ];
+
+    return {
+      labels: labels.length > 0 ? labels : ['No data'],
+      datasets: [{
+        label: 'Revenue',
+        data: data.length > 0 ? data : [0],
         backgroundColor: 'rgba(75, 192, 192, 0.5)',
         borderColor: 'rgba(75, 192, 192, 1)',
         borderWidth: 1,
-      },
-    ],
+      }],
+    };
   };
 
-  
-  const timeSlotsData = {
-    labels: Object.keys(popularTimeSlots),
-    datasets: [
-      {
-        label: `Appointments (${specificFilter || 'Current Week'})`,
-        data: Object.values(popularTimeSlots), 
+  const getCustomerChartData = () => {
+    const labels = [
+      ...customerStats.mostBooked.map(c => c.userName),
+      ...customerStats.leastBooked.map(c => c.userName),
+    ];
+    const data = [
+      ...customerStats.mostBooked.map(c => c.appointmentCount),
+      ...customerStats.leastBooked.map(c => c.appointmentCount),
+    ];
+
+    return {
+      labels: labels.length > 0 ? labels : ['No data'],
+      datasets: [{
+        label: 'Appointment Count',
+        data: data.length > 0 ? data : [0],
+        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+        borderColor: 'rgba(255, 99, 132, 1)',
+        borderWidth: 1,
+      }],
+    };
+  };
+
+  const getStaffChartData = () => {
+    const labels = [
+      ...staffStats.mostBooked.map(s => s.userName),
+      ...staffStats.leastBooked.map(s => s.userName),
+    ];
+    const data = [
+      ...staffStats.mostBooked.map(s => s.appointmentCount),
+      ...staffStats.leastBooked.map(s => s.appointmentCount),
+    ];
+
+    return {
+      labels: labels.length > 0 ? labels : ['No data'],
+      datasets: [{
+        label: 'Appointment Count',
+        data: data.length > 0 ? data : [0],
         backgroundColor: 'rgba(153, 102, 255, 0.5)',
         borderColor: 'rgba(153, 102, 255, 1)',
         borderWidth: 1,
-      },
-    ],
+      }],
+    };
   };
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const [storeAppt, storeRev, cust, staff] = await Promise.all([
+          Statistics.getStoreAppointmentStats(timeFilter, specificFilter),
+          Statistics.getStoreRevenueStats(timeFilter, specificFilter),
+          Statistics.getCustomerAppointmentStats(timeFilter, specificFilter),
+          Statistics.getStaffAppointmentStats(timeFilter, specificFilter),
+        ]);
+
+        const filteredStoreAppt = {
+          mostBooked: filterExtremes(storeAppt.data.mostBooked, 'value', 'storeName', 'storeId').highest,
+          leastBooked: filterExtremes(storeAppt.data.leastBooked, 'value', 'storeName', 'storeId').lowest,
+        };
+
+        const filteredStoreRev = {
+          highestRevenue: filterExtremes(storeRev.data.highestRevenue, 'value', 'storeName', 'storeId').highest,
+          lowestRevenue: filterExtremes(storeRev.data.lowestRevenue, 'value', 'storeName', 'storeId').lowest,
+        };
+
+        const filteredCust = {
+          mostBooked: filterExtremes(cust.data.mostBooked, 'appointmentCount', 'userName', 'userId').highest,
+          leastBooked: filterExtremes(cust.data.leastBooked, 'appointmentCount', 'userName', 'userId').lowest,
+        };
+
+        const filteredStaff = {
+          mostBooked: filterExtremes(staff.data.mostBooked, 'appointmentCount', 'userName', 'userId').highest,
+          leastBooked: filterExtremes(staff.data.leastBooked, 'appointmentCount', 'userName', 'userId').lowest,
+        };
+
+        setStoreAppointmentStats(filteredStoreAppt);
+        setStoreRevenueStats(filteredStoreRev);
+        setCustomerStats(filteredCust);
+        setStaffStats(filteredStaff);
+      } catch (error) {
+        console.error('Error fetching statistics:', error);
+      }
+    };
+    fetchStats();
+  }, [timeFilter, specificFilter]);
 
   const handleWeekChange = (weekString) => {
     if (!weekString) {
-      setStartDate('');
-      setEndDate('');
       setSpecificFilter('');
-      setBusiestDays({});
-      setPopularTimeSlots({});
+      setSelectedWeek('');
       return;
     }
-    const [year, week] = weekString.split('-W');
-    const weekNum = parseInt(week, 10);
-    const firstDayOfYear = new Date(year, 0, 1);
-    const dayOfWeek = firstDayOfYear.getDay();
-    const startOfWeek = new Date(firstDayOfYear);
-    const daysToAdd = (weekNum - 1) * 7 - (dayOfWeek > 1 ? dayOfWeek - 1 : 0);
-    startOfWeek.setDate(firstDayOfYear.getDate() + daysToAdd);
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6);
-    const formatDateForInput = (date) => date.toISOString().split('T')[0];
-
-    setStartDate(formatDateForInput(startOfWeek));
-    setEndDate(formatDateForInput(endOfWeek));
     setSelectedWeek(weekString);
     setSpecificFilter(weekString);
+  };
+
+  const handleFilterChange = (filter) => {
+    setTimeFilter(filter);
+    setSpecificFilter('');
+    setSelectedWeek('');
+    setMonthInputValue('');
+    setSelectedYear('');
+
+    if (filter === 'weekly') {
+      const currentWeek = getCurrentWeek();
+      setSelectedWeek(currentWeek);
+      setSpecificFilter(currentWeek);
+    } else if (filter === 'monthly') {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      setMonthInputValue(`${year}-${month}`);
+      setSpecificFilter(`${year}-${month}`);
+    } else if (filter === 'yearly') {
+      const currentYear = new Date().getFullYear();
+      setSelectedYear(currentYear.toString());
+      setSpecificFilter(currentYear.toString());
+    }
   };
 
   const getCurrentWeek = () => {
@@ -110,107 +238,123 @@ const WeeklyBookingStats = () => {
     return `${year}-W${String(weekNum).padStart(2, '0')}`;
   };
 
-
-  useEffect(() => {
-    const currentWeek = getCurrentWeek();
-    setSelectedWeek(currentWeek);
-    handleWeekChange(currentWeek);
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (selectedWeek) {
-        const [year, week] = selectedWeek.split('-W');
-        try {
-          const busiestDaysResponse = await AppointmentService.getBusiestDays(year, parseInt(week));
-          setBusiestDays(busiestDaysResponse.data);
-          const timeSlotsResponse = await AppointmentService.getPopularTimeSlots(year, parseInt(week));
-          setPopularTimeSlots(timeSlotsResponse.data);
-        } catch (error) {
-          console.error("Error fetching data from backend:", error);
-          setBusiestDays({
-            "Monday": 0,
-            "Tuesday": 0,
-            "Wednesday": 0,
-            "Thursday": 0,
-            "Friday": 0,
-            "Saturday": 0,
-            "Sunday": 0,
-          });
-          setPopularTimeSlots({
-            "07:00-08:00": 0,
-            "08:00-09:00": 0,
-            "09:00-10:00": 0,
-            "10:00-11:00": 0,
-            "11:00-12:00": 0,
-            "12:00-13:00": 0,
-            "13:00-14:00": 0,
-            "14:00-15:00": 0,
-            "15:00-16:00": 0,
-            "16:00-17:00": 0,
-            "17:00-18:00": 0,
-            "18:00-19:00": 0,
-            "19:00-20:00": 0,
-            "20:00-21:00": 0,
-            "21:00-22:00": 0,
-          });
-        }
-      }
-    };
-    fetchData();
-  }, [selectedWeek]);
-
   return (
     <div className="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
-        <h1 className="text-3xl font-bold text-gray-900 text-center">Weekly Booking Statistics</h1>
-
-        {/* Bộ lọc tuần */}
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Select Week</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Week</label>
-              <input
-                type="week"
-                value={selectedWeek}
-                onChange={(e) => handleWeekChange(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                <input
-                  type="date"
-                  value={startDate}
-                  readOnly
-                  className="w-full p-2 border border-gray-300 rounded-md bg-gray-100"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-                <input
-                  type="date"
-                  value={endDate}
-                  readOnly
-                  className="w-full p-2 border border-gray-300 rounded-md bg-gray-100"
-                />
-              </div>
-            </div>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">Filter by Time</h2>
+          <div className="flex flex-wrap gap-4 mb-4">
+            {['all', 'weekly', 'monthly', 'yearly'].map((filter) => (
+              <button
+                key={filter}
+                onClick={() => handleFilterChange(filter)}
+                className={`px-4 py-2 rounded-md font-medium capitalize transition-colors ${
+                  timeFilter === filter
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                {filter === 'all' ? 'All Time' : filter === 'weekly' ? 'Weekly' : filter === 'monthly' ? 'Monthly' : 'Yearly'}
+              </button>
+            ))}
           </div>
+
+          {timeFilter !== 'all' && (
+            <div className="space-y-4">
+              {timeFilter === 'weekly' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Select Week</label>
+                  <input
+                    type="week"
+                    value={selectedWeek}
+                    onChange={(e) => handleWeekChange(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                  />
+                </div>
+              )}
+              {timeFilter === 'monthly' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Select Month</label>
+                  <input
+                    type="month"
+                    value={monthInputValue}
+                    onChange={(e) => {
+                      setMonthInputValue(e.target.value);
+                      setSpecificFilter(e.target.value);
+                    }}
+                    className="w-full sm:w-1/2 p-2 border border-gray-300 rounded-md"
+                  />
+                </div>
+              )}
+              {timeFilter === 'yearly' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Select Year</label>
+                  <DatePicker
+                    selected={selectedYear ? new Date(`${selectedYear}-01-01`) : null}
+                    onChange={(date) => {
+                      const year = date.getFullYear();
+                      setSelectedYear(year.toString());
+                      setSpecificFilter(year.toString());
+                    }}
+                    showYearPicker
+                    dateFormat="yyyy"
+                    placeholderText="Select Year"
+                    className="w-full sm:w-1/2 p-2 border border-gray-300 rounded-md"
+                    maxDate={new Date()}
+                  />
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-white p-6 rounded-lg shadow-md">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Store Appointment Statistics</h2>
             <div className="h-96">
-              <Bar data={busiestDaysData} options={barOptions} />
+              <Bar
+                data={getStoreAppointmentChartData()}
+                options={{
+                  ...chartOptions,
+                  plugins: { ...chartOptions.plugins, title: { display: true, text: 'Store Appointments' } },
+                }}
+              />
             </div>
           </div>
-
           <div className="bg-white p-6 rounded-lg shadow-md">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Store Revenue Statistics</h2>
             <div className="h-96">
-              <Bar data={timeSlotsData} options={horizontalBarOptions} />
+              <Bar
+                data={getStoreRevenueChartData()}
+                options={{
+                  ...chartOptions,
+                  plugins: { ...chartOptions.plugins, title: { display: true, text: 'Store Revenue' } },
+                }}
+              />
+            </div>
+          </div>
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Customer Statistics</h2>
+            <div className="h-96">
+              <Bar
+                data={getCustomerChartData()}
+                options={{
+                  ...chartOptions,
+                  plugins: { ...chartOptions.plugins, title: { display: true, text: 'Customer Appointments' } },
+                }}
+              />
+            </div>
+          </div>
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Staff Statistics</h2>
+            <div className="h-96">
+              <Bar
+                data={getStaffChartData()}
+                options={{
+                  ...chartOptions,
+                  plugins: { ...chartOptions.plugins, title: { display: true, text: 'Staff Appointments' } },
+                }}
+              />
             </div>
           </div>
         </div>
@@ -219,4 +363,4 @@ const WeeklyBookingStats = () => {
   );
 };
 
-export default WeeklyBookingStats;
+export default StatisticsPage;

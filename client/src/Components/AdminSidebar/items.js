@@ -65,7 +65,7 @@ const items = [
         requiredAuth: true,
       },
       {
-        path: paths.statisticMonthly,
+        path: paths.statistic2,
         name: "Monthly",
         requiredAuth: true,
       },

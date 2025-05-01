@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
 @RestController
-@RequestMapping("/api/appointment") // Adjusted to match frontend
+@RequestMapping("/api/appointment")
 public class AppointmentController {
 
     @Autowired
@@ -31,7 +31,7 @@ public class AppointmentController {
     }
 
     //------------------day-time--------------------
-    // Endpoint lấy số lượng lịch hẹn theo ngày trong tuần
+    //lấy số lượng lịch hẹn theo ngày trong tuần
     @GetMapping("/busiest-days")
     public ResponseEntity<Map<String, Integer>> getBusiestDays(
             @RequestParam("year") int year,
