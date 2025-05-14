@@ -4,7 +4,7 @@ const OwnerSidebar = lazy(() => import("../../Components/OwnerSidebar"));
 
 const OwnerLayout = ({ children }) => {
   return (
-    <div className='grid lg:grid-cols-5 md:grid-cols-4 bg-gray-500/5'>
+    <div className='grid lg:grid-cols-5 md:grid-cols-4 bg-gray-500/5 min-h-screen max-h-fit'>
       <div>
         <OwnerSidebar />
       </div>

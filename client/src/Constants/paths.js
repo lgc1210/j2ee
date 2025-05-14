@@ -7,7 +7,7 @@ const paths = {
 	ownerproducts: "/owner/products",
 	ownercategories: "/owner/categories",
 	ownerappointments: "/owner/appointments",
-	ownerorder: "/owner/orders",
+	ownerorders: "/owner/orders",
 	ownerreviews: "/owner/reviews",
 	ownerstatistic: "/owner/statistic",
 	// Customer Paths

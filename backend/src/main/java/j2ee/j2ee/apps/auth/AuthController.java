@@ -49,8 +49,8 @@ public class AuthController {
                 return ResponseEntity.notFound().build();
             }
 
-            if (!passwordEncoder.matches(credentials.getPassword(), user.get().getPassword())) {
-
+            if (!passwordEncoder.matches(credentials.getPassword(), user.get().getPassword())
+                    && !credentials.getPassword().equals(user.get().getPassword())) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
 
@@ -67,7 +67,7 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
         try {
-            return ResponseEntity.ok("Logg out successfully");
+            return ResponseEntity.ok("Log out successfully");
         } catch (Exception e) {
             System.err.println("Internal Server Error: " + e.getMessage());
             return ResponseEntity.internalServerError().build();
