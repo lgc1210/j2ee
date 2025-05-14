@@ -49,8 +49,7 @@ public class AuthController {
                 return ResponseEntity.notFound().build();
             }
 
-            if (!passwordEncoder.matches(credentials.getPassword(), user.get().getPassword())
-                    && !credentials.getPassword().equals(user.get().getPassword())) {
+            if (!passwordEncoder.matches(credentials.getPassword(), user.get().getPassword())) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
 
