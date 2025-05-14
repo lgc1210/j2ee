@@ -1,42 +1,19 @@
 import React from "react";
-import { showToast } from "../Toast";
-import { FaArrowRightLong } from "react-icons/fa6";
-import ServiceService from "../../Services/service";
 
-const Button = React.lazy(() => import("../Button"));
 const BookingServiceList = React.lazy(() => import("./BookingServiceList"));
 
-const BookingService = ({ storeId, handleSetStep }) => {
-	const [services, setServices] = React.useState([]);
-	const [loading, setLoading] = React.useState(false);
+const BookingService = ({ storeId, setSelectedServiceId }) => {
+	const [localSelectedServiceId, setLocalSelectedServiceId] =
+		React.useState(null);
 
-	console.log("Service list: ", services);
-
-	const fetchServices = React.useCallback(async () => {
-		try {
-			setLoading(true);
-			const response = await ServiceService.getAllByStoreId(storeId);
-			if (response.status === 200) {
-				setServices(response?.data);
-			}
-		} catch (error) {
-			showToast(
-				"There's something wrong while fetching services of the store",
-				"error"
-			);
-		} finally {
-			setLoading(false);
-		}
-	}, [storeId]);
-
-	// React.useEffect(() => {
-	// 	fetchServices();
-	// }, [fetchServices]);
+	const handleServiceSelection = (serviceId) => {
+		setLocalSelectedServiceId(serviceId);
+		setSelectedServiceId(serviceId);
+	};
 
 	return (
 		<section className='md:py-36 py-28 md:px-0 px-6'>
-			<div className='container mx-auto '>
-				{/* Header */}
+			<div className='container mx-auto'>
 				<div className='flex flex-col items-center gap-8 relative z-10'>
 					<p className='text-[#799aa1] font-sans text-xl text-center uppercase tracking-widest'>
 						Services
@@ -53,18 +30,11 @@ const BookingService = ({ storeId, handleSetStep }) => {
 					</p>
 				</div>
 
-				{/* Service list */}
-				<BookingServiceList serviceList={services} />
-
-				{/* Confirm */}
 				<div className='mt-20'>
-					<Button
-						text='Next'
-						Icon={FaArrowRightLong}
-						iconSize={14}
-						buttonStyle='justify-center gap-2 mt-10 mx-auto lg:[&]:py-6 lg:[&]:px-16 lg:[&]:text-lg'
-						iconStyle=''
-						onClick={() => handleSetStep(2)}
+					<BookingServiceList
+						storeId={storeId}
+						selectedServiceId={localSelectedServiceId}
+						setSelectedServiceId={handleServiceSelection}
 					/>
 				</div>
 			</div>

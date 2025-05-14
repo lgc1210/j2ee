@@ -1,80 +1,63 @@
-import React from "react";
+import React, { useEffect } from "react";
 import DataTable from "react-data-table-component";
-import { FaRegEdit } from "react-icons/fa";
 import { IoTrashOutline } from "react-icons/io5";
+import { CiSearch } from "react-icons/ci";
+import { useProfile } from "../../Contexts/Profile";
+import FormControl from "../../Components/FormControl";
 
 const Loading = React.lazy(() => import("../../Components/Loading"));
 
 const columns = [
 	{
-		name: "Title",
-		sortable: true,
-		selector: (row) => row.title,
+		name: "No",
+		selector: (_, index) => index + 1,
 	},
 	{
-		name: "Year",
+		name: "Appointment date",
 		sortable: true,
-		selector: (row) => row.year,
+		selector: (row) => row.appointment_date,
 	},
 	{
-		name: "Actions",
-		center: true,
-		selector: (row) => <FaRegEdit className='cursor-pointer' size={18} />,
+		name: "Appointment time",
+		sortable: true,
+		selector: (row) => row.appointment_time,
+	},
+	{
+		name: "Status",
+		sortable: true,
+		selector: (row) => row.status,
+	},
+	{
+		name: "Service",
+		sortable: true,
+		selector: (row) => row.service.name,
+	},
+	{
+		name: "Staff",
+		sortable: true,
+		selector: (row) => row.staff.name,
+	},
+	{
+		name: "Store",
+		sortable: true,
+		selector: (row) => row.store.name,
 	},
 ];
-
-const data = [
-	{
-		id: 1,
-		title: "Beetlejuice",
-		year: "1988",
-	},
-	{
-		id: 2,
-		title: "Ghostbusters",
-		year: "1984",
-	},
-];
-
-const SubHeader = ({ selectedRows }) => {
-	if (selectedRows.length === 0) {
-		return null;
-	}
-
-	return (
-		<div className='w-full p-5 bg-gray-100 flex items-center justify-between'>
-			<span>{selectedRows.length} items selected</span>
-			<button>
-				<IoTrashOutline
-					size={36}
-					className='cursor-pointer rounded-full bg-red-100 hover:bg-red-200 text-red-500 p-2'
-				/>
-			</button>
-		</div>
-	);
-};
-
-const SelectBox = React.forwardRef(({ ...props }) => {
-	return (
-		<input
-			type='checkbox'
-			{...props}
-			className='w-4 h-4 text-[#435d63] bg-[#435d63] border-gray-200 rounded focus:ring-[#435d63]'
-		/>
-	);
-});
 
 const ProfileBooking = () => {
 	const [searchInput, setSearchInput] = React.useState("");
 	const [errors, setErrors] = React.useState("");
 	const [showActions, setShowActions] = React.useState(false);
 	const [selectedRows, setSelectedRows] = React.useState([]);
+	const {
+		historyAppointmentList,
+		loadingHistoryAppointmentList,
+		fetchHistoryAppointmentList,
+	} = useProfile();
 
-	const handleFieldsChange = (key, value) => {};
-
-	const handleFieldsType = (key) => {};
-
-	const handelFieldsBlur = (key, message) => {};
+	useEffect(() => {
+		fetchHistoryAppointmentList();
+	}, [fetchHistoryAppointmentList]);
 
 	const handleActionsClicked = () => {
 		setShowActions(!showActions);
@@ -83,12 +66,6 @@ const ProfileBooking = () => {
 	const handleRowsSelected = ({ selectedRows }) => {
 		setSelectedRows(selectedRows);
 	};
-
-	const handleImport = () => {};
-
-	const handleExport = () => {};
-
-	const handleCreate = () => {};
 
 	return (
 		<React.Suspense
@@ -101,39 +78,51 @@ const ProfileBooking = () => {
 			}>
 			<section className='flex-grow bg-white rounded-md shadow-md p-4'>
 				<div className=''>
-					<div className='mb-6'>
-						<p className='font-bold'>Booking History</p>
-						<p className='text-black/50 font-semibold'>Track and manage your booking process</p>
-					</div>
+					<div className='mb-2'>
+						<div className='mb-4'>
+							<p className='font-bold'>Booking History</p>
+							<p className='text-black/50 font-semibold'>
+								Track and manage your booking process
+							</p>
+						</div>
 
-					<div className='flex flex-col gap-4'>
-						{/* Personal Information */}
-						<div className='p-4 rounded-md border border-black/10'>
-							<DataTable
-								customStyles={{
-									subHeader: {
-										style: { padding: "0", margin: "0", minHeight: "0" },
-									},
-								}}
-								pointerOnHover
-								highlightOnHover
-								striped
-								pagination
-								onSelectedRowsChange={handleRowsSelected}
-								subHeader={selectedRows.length ? true : false}
-								subHeaderComponent={<SubHeader selectedRows={selectedRows} />}
-								columns={columns}
-								data={data}
-								selectableRowsComponent={SelectBox}
-								selectableRowsComponentProps={{
-									style: {
-										backgroundColor: "white",
-										borderColor: "#435d63",
-										accentColor: "#435d63",
-									},
-								}}
+						<div className='min-w-fit max-w-xs'>
+							<FormControl
+								type='text'
+								placeHolder='Search here...'
+								wrapInputStyle='!border-black/10 rounded-md focus-within:!border-[#435d63] transition-all'
+								inputStyle='font-serif placeholder:text-lg text-black placeholder:font-serif !p-4 !py-2'
+								id='search'
+								onChange={(event) => setSearchInput(event.target.value)}
+								hasButton
+								Icon={CiSearch}
+								iconSize={24}
+								iconStyle='transition-all text-[#435d63] hover:text-black mx-4'
+								hasError={errors?.searchInput}
+								errorMessage={errors?.searchInput}
 							/>
 						</div>
+					</div>
+
+					{/* Appointment list */}
+					<div className='p-4 rounded-md border border-black/10'>
+						<DataTable
+							pointerOnHover
+							highlightOnHover
+							striped
+							pagination
+							onSelectedRowsChange={handleRowsSelected}
+							subHeader={selectedRows.length ? true : false}
+							columns={columns}
+							data={historyAppointmentList}
+							selectableRowsComponentProps={{
+								style: {
+									backgroundColor: "white",
+									borderColor: "#435d63",
+									accentColor: "#435d63",
+								},
+							}}
+						/>
 					</div>
 				</div>
 			</section>

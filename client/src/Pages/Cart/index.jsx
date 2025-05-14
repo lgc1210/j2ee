@@ -4,14 +4,26 @@ import { IoClose } from "react-icons/io5";
 import { FiMinusCircle, FiPlusCircle } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import paths from "../../Constants/paths";
+import { useCart } from "../../Contexts/Cart";
 
 const Loading = React.lazy(() => import("../../Components/Loading"));
 
 const Cart = () => {
 	const navigate = useNavigate();
+	const { cart, handleChangeQuantity, handleDeleteFromCart } = useCart();
 
 	const handleClickedProduct = (productId) => {
-		navigate(paths.productDetails);
+		navigate(paths.productDetails.replace(":id", productId), {
+			state: { productId },
+		});
+	};
+
+	const changeQuantity = async (productId, quantity) => {
+		await handleChangeQuantity(productId, quantity);
+	};
+
+	const handleDeleteItem = async (productId) => {
+		await handleDeleteFromCart(productId);
 	};
 
 	return (
@@ -32,323 +44,126 @@ const Cart = () => {
 								className='w-fit flex items-center justify-start cursor-pointer text-black/50 hover:text-black'
 								onClick={() => navigate(paths.shop)}>
 								<MdOutlineKeyboardArrowLeft size={20} />
-								<p className='uppercase text-xs tracking-wider font-medium'>Back to store</p>
+								<p className='uppercase text-xs tracking-wider font-medium'>
+									Back to store
+								</p>
 							</div>
 							<div className='flex items-center justify-between mt-6'>
 								<p className='text-5xl text-black/60'>Shopping cart</p>
-								<p className='uppercase text-black/70 font-medium'>3 items</p>
+								<p className='uppercase text-black/70 font-medium'>
+									{cart?.items?.length || 0} items
+								</p>
 							</div>
 						</div>
 						<div className='overflow-x-auto'>
-							<table className='mt-16 w-full min-w-[600px]'>
-								<thead className=''>
-									<tr>
-										<th scope='col' className='w-3/6 text-start text-sm text-black/65'>
-											Item
-										</th>
-										<th scope='col' className='w-1/6 text-start text-sm text-black/65'>
-											Size
-										</th>
-										<th scope='col' className='w-1/6 text-start text-sm text-black/65'>
-											Quantity
-										</th>
-										<th scope='col' className='w-1/6 text-start text-sm text-black/65'>
-											Price
-										</th>
-										<th scope='col' className='w-[5%] text-start text-sm text-black/65'></th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr>
-										<td className='py-4 cursor-pointer' onClick={handleClickedProduct}>
-											<div className='flex items-center justify-start gap-2'>
-												{/* Image */}
-												<div className='md:size-1/6 size-1/4 rounded overflow-hidden'>
-													<img
-														src='https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod2-1000x1000.jpg'
-														alt='Product thumbnail'
-														className='w-full h-full object-cover object-center'
-													/>
-												</div>
-												<div className=''>
-													<p className='text-xl'>Product title</p>
-													<p className='uppercase mt-4 text-xs tracking-wider text-black/60 font-medium'>
-														Product category
-													</p>
-												</div>
-											</div>
-										</td>
-										<td className='font-medium text-black/65'>255ml</td>
-										<td className='py-4'>
-											<div className='flex items-center justify-start gap-2'>
-												<FiMinusCircle className='text-black/30 cursor-pointer' size={18} />
-												<p>1</p>
-												<FiPlusCircle className='cursor-pointer' size={18} />
-											</div>
-										</td>
-										<td className='text-black/65 font-medium py-4'>40.000 đ</td>
-										<td className='py-4 text-center'>
-											<IoClose className='cursor-pointer block' size={18} />
-										</td>
-									</tr>
-									<tr>
-										<td className='py-4 cursor-pointer' onClick={handleClickedProduct}>
-											<div className='flex items-center justify-start gap-2'>
-												{/* Image */}
-												<div className='md:size-1/6 size-1/4 rounded overflow-hidden'>
-													<img
-														src='https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod2-1000x1000.jpg'
-														alt='Product thumbnail'
-														className='w-full h-full object-cover object-center'
-													/>
-												</div>
-												<div className=''>
-													<p className='text-xl'>Product title</p>
-													<p className='uppercase mt-4 text-xs tracking-wider text-black/60 font-medium'>
-														Product category
-													</p>
-												</div>
-											</div>
-										</td>
-										<td className='font-medium text-black/65'>255ml</td>
-										<td className='py-4'>
-											<div className='flex items-center justify-start gap-2'>
-												<FiMinusCircle className='text-black/30 cursor-pointer' size={18} />
-												<p>1</p>
-												<FiPlusCircle className='cursor-pointer' size={18} />
-											</div>
-										</td>
-										<td className='text-black/65 font-medium py-4'>40.000 đ</td>
-										<td className='py-4 text-center'>
-											<IoClose className='cursor-pointer block' size={18} />
-										</td>
-									</tr>
-									<tr>
-										<td className='py-4 cursor-pointer' onClick={handleClickedProduct}>
-											<div className='flex items-center justify-start gap-2'>
-												{/* Image */}
-												<div className='md:size-1/6 size-1/4 rounded overflow-hidden'>
-													<img
-														src='https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod2-1000x1000.jpg'
-														alt='Product thumbnail'
-														className='w-full h-full object-cover object-center'
-													/>
-												</div>
-												<div className=''>
-													<p className='text-xl'>Product title</p>
-													<p className='uppercase mt-4 text-xs tracking-wider text-black/60 font-medium'>
-														Product category
-													</p>
-												</div>
-											</div>
-										</td>
-										<td className='font-medium text-black/65'>255ml</td>
-										<td className='py-4'>
-											<div className='flex items-center justify-start gap-2'>
-												<FiMinusCircle className='text-black/30 cursor-pointer' size={18} />
-												<p>1</p>
-												<FiPlusCircle className='cursor-pointer' size={18} />
-											</div>
-										</td>
-										<td className='text-black/65 font-medium py-4'>40.000 đ</td>
-										<td className='py-4 text-center'>
-											<IoClose className='cursor-pointer block' size={18} />
-										</td>
-									</tr>
-									<tr>
-										<td className='py-4 cursor-pointer' onClick={handleClickedProduct}>
-											<div className='flex items-center justify-start gap-2'>
-												{/* Image */}
-												<div className='md:size-1/6 size-1/4 rounded overflow-hidden'>
-													<img
-														src='https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod2-1000x1000.jpg'
-														alt='Product thumbnail'
-														className='w-full h-full object-cover object-center'
-													/>
-												</div>
-												<div className=''>
-													<p className='text-xl'>Product title</p>
-													<p className='uppercase mt-4 text-xs tracking-wider text-black/60 font-medium'>
-														Product category
-													</p>
-												</div>
-											</div>
-										</td>
-										<td className='font-medium text-black/65'>255ml</td>
-										<td className='py-4'>
-											<div className='flex items-center justify-start gap-2'>
-												<FiMinusCircle className='text-black/30 cursor-pointer' size={18} />
-												<p>1</p>
-												<FiPlusCircle className='cursor-pointer' size={18} />
-											</div>
-										</td>
-										<td className='text-black/65 font-medium py-4'>40.000 đ</td>
-										<td className='py-4 text-center'>
-											<IoClose className='cursor-pointer block' size={18} />
-										</td>
-									</tr>
-									<tr>
-										<td className='py-4 cursor-pointer' onClick={handleClickedProduct}>
-											<div className='flex items-center justify-start gap-2'>
-												{/* Image */}
-												<div className='md:size-1/6 size-1/4 rounded overflow-hidden'>
-													<img
-														src='https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod2-1000x1000.jpg'
-														alt='Product thumbnail'
-														className='w-full h-full object-cover object-center'
-													/>
-												</div>
-												<div className=''>
-													<p className='text-xl'>Product title</p>
-													<p className='uppercase mt-4 text-xs tracking-wider text-black/60 font-medium'>
-														Product category
-													</p>
-												</div>
-											</div>
-										</td>
-										<td className='font-medium text-black/65'>255ml</td>
-										<td className='py-4'>
-											<div className='flex items-center justify-start gap-2'>
-												<FiMinusCircle className='text-black/30 cursor-pointer' size={18} />
-												<p>1</p>
-												<FiPlusCircle className='cursor-pointer' size={18} />
-											</div>
-										</td>
-										<td className='text-black/65 font-medium py-4'>40.000 đ</td>
-										<td className='py-4 text-center'>
-											<IoClose className='cursor-pointer block' size={18} />
-										</td>
-									</tr>
-									<tr>
-										<td className='py-4 cursor-pointer' onClick={handleClickedProduct}>
-											<div className='flex items-center justify-start gap-2'>
-												{/* Image */}
-												<div className='md:size-1/6 size-1/4 rounded overflow-hidden'>
-													<img
-														src='https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod2-1000x1000.jpg'
-														alt='Product thumbnail'
-														className='w-full h-full object-cover object-center'
-													/>
-												</div>
-												<div className=''>
-													<p className='text-xl'>Product title</p>
-													<p className='uppercase mt-4 text-xs tracking-wider text-black/60 font-medium'>
-														Product category
-													</p>
-												</div>
-											</div>
-										</td>
-										<td className='font-medium text-black/65'>255ml</td>
-										<td className='py-4'>
-											<div className='flex items-center justify-start gap-2'>
-												<FiMinusCircle className='text-black/30 cursor-pointer' size={18} />
-												<p>1</p>
-												<FiPlusCircle className='cursor-pointer' size={18} />
-											</div>
-										</td>
-										<td className='text-black/65 font-medium py-4'>40.000 đ</td>
-										<td className='py-4 text-center'>
-											<IoClose className='cursor-pointer block' size={18} />
-										</td>
-									</tr>
-									<tr>
-										<td className='py-4 cursor-pointer' onClick={handleClickedProduct}>
-											<div className='flex items-center justify-start gap-2'>
-												{/* Image */}
-												<div className='md:size-1/6 size-1/4 rounded overflow-hidden'>
-													<img
-														src='https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod2-1000x1000.jpg'
-														alt='Product thumbnail'
-														className='w-full h-full object-cover object-center'
-													/>
-												</div>
-												<div className=''>
-													<p className='text-xl'>Product title</p>
-													<p className='uppercase mt-4 text-xs tracking-wider text-black/60 font-medium'>
-														Product category
-													</p>
-												</div>
-											</div>
-										</td>
-										<td className='font-medium text-black/65'>255ml</td>
-										<td className='py-4'>
-											<div className='flex items-center justify-start gap-2'>
-												<FiMinusCircle className='text-black/30 cursor-pointer' size={18} />
-												<p>1</p>
-												<FiPlusCircle className='cursor-pointer' size={18} />
-											</div>
-										</td>
-										<td className='text-black/65 font-medium py-4'>40.000 đ</td>
-										<td className='py-4 text-center'>
-											<IoClose className='cursor-pointer block' size={18} />
-										</td>
-									</tr>
-									<tr>
-										<td className='py-4 cursor-pointer' onClick={handleClickedProduct}>
-											<div className='flex items-center justify-start gap-2'>
-												{/* Image */}
-												<div className='md:size-1/6 size-1/4 rounded overflow-hidden'>
-													<img
-														src='https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod2-1000x1000.jpg'
-														alt='Product thumbnail'
-														className='w-full h-full object-cover object-center'
-													/>
-												</div>
-												<div className=''>
-													<p className='text-xl'>Product title</p>
-													<p className='uppercase mt-4 text-xs tracking-wider text-black/60 font-medium'>
-														Product category
-													</p>
-												</div>
-											</div>
-										</td>
-										<td className='font-medium text-black/65'>255ml</td>
-										<td className='py-4'>
-											<div className='flex items-center justify-start gap-2'>
-												<FiMinusCircle className='text-black/30 cursor-pointer' size={18} />
-												<p>1</p>
-												<FiPlusCircle className='cursor-pointer' size={18} />
-											</div>
-										</td>
-										<td className='text-black/65 font-medium py-4'>40.000 đ</td>
-										<td className='py-4 text-center'>
-											<IoClose className='cursor-pointer block' size={18} />
-										</td>
-									</tr>
-									<tr>
-										<td className='py-4 cursor-pointer' onClick={handleClickedProduct}>
-											<div className='flex items-center justify-start gap-2'>
-												{/* Image */}
-												<div className='md:size-1/6 size-1/4 rounded overflow-hidden'>
-													<img
-														src='https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod2-1000x1000.jpg'
-														alt='Product thumbnail'
-														className='w-full h-full object-cover object-center'
-													/>
-												</div>
-												<div className=''>
-													<p className='text-xl'>Product title</p>
-													<p className='uppercase mt-4 text-xs tracking-wider text-black/60 font-medium'>
-														Product category
-													</p>
-												</div>
-											</div>
-										</td>
-										<td className='font-medium text-black/65'>255ml</td>
-										<td className='py-4'>
-											<div className='flex items-center justify-start gap-2'>
-												<FiMinusCircle className='text-black/30 cursor-pointer' size={18} />
-												<p>1</p>
-												<FiPlusCircle className='cursor-pointer' size={18} />
-											</div>
-										</td>
-										<td className='text-black/65 font-medium py-4'>40.000 đ</td>
-										<td className='py-4 text-center'>
-											<IoClose className='cursor-pointer block' size={18} />
-										</td>
-									</tr>
-								</tbody>
-							</table>
+							{cart && cart?.items?.length !== 0 ? (
+								<table className='mt-16 w-full min-w-[600px]'>
+									<thead className=''>
+										<tr>
+											<th
+												scope='col'
+												className='w-3/6 text-start text-sm text-black/65'>
+												Item
+											</th>
+											<th
+												scope='col'
+												className='w-1/6 text-start text-sm text-black/65'>
+												Size
+											</th>
+											<th
+												scope='col'
+												className='w-1/6 text-start text-sm text-black/65'>
+												Quantity
+											</th>
+											<th
+												scope='col'
+												className='w-1/6 text-start text-sm text-black/65'>
+												Price
+											</th>
+											<th
+												scope='col'
+												className='w-[5%] text-start text-sm text-black/65'></th>
+										</tr>
+									</thead>
+									<tbody>
+										{cart?.items?.map((item) => {
+											return (
+												<tr key={item?.id}>
+													<td
+														className='py-4 cursor-pointer'
+														onClick={() =>
+															handleClickedProduct(item?.product?.id)
+														}>
+														<div className='flex items-center justify-start gap-2'>
+															{/* Image */}
+															<div className='md:size-1/6 size-1/4 rounded overflow-hidden'>
+																<img
+																	src='https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod2-1000x1000.jpg'
+																	alt='Product thumbnail'
+																	className='w-full h-full object-cover object-center'
+																/>
+															</div>
+															<div className=''>
+																<p className='text-xl'>{item?.product?.name}</p>
+																<p className='uppercase mt-4 text-xs tracking-wider text-black/60 font-medium'>
+																	{item?.product?.category?.name}
+																</p>
+															</div>
+														</div>
+													</td>
+													<td className='font-medium text-black/65'>255ml</td>
+													<td className='py-4'>
+														<div className='flex items-center justify-start gap-2'>
+															<FiMinusCircle
+																className={`${
+																	item?.quantity <= 1
+																		? "text-black/30 cursor-not-allowed pointer-events-none"
+																		: "cursor-pointer"
+																}`}
+																size={18}
+																onClick={() =>
+																	changeQuantity(item?.product?.id, -1)
+																}
+															/>
+															<p>{item?.quantity}</p>
+															<FiPlusCircle
+																className='cursor-pointer'
+																size={18}
+																onClick={() =>
+																	changeQuantity(item?.product?.id, 1)
+																}
+															/>
+														</div>
+													</td>
+													<td className='text-black/65 font-medium py-4'>
+														40.000 đ
+													</td>
+													<td className='py-4 text-center'>
+														<IoClose
+															className='cursor-pointer block'
+															size={18}
+															onClick={() =>
+																handleDeleteItem(item?.product?.id)
+															}
+														/>
+													</td>
+												</tr>
+											);
+										})}
+									</tbody>
+								</table>
+							) : (
+								<div className='flex items-center justify-center h-52'>
+									<p className=''>
+										No items in your cart.{" "}
+										<span
+											className='underline text-[#779AA1] cursor-pointer'
+											onClick={() => navigate(paths.shop)}>
+											Let's shopping now!
+										</span>
+									</p>
+								</div>
+							)}
 						</div>
 					</div>
 

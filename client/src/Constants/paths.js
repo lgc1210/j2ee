@@ -14,6 +14,7 @@ const paths = {
 	home: "/",
 	shop: "/shop",
 	login: "/login",
+	googleLoginCallback: "/auth/google/callback",
 	register: "/register",
 	checkout: "/checkout",
 	contact: "/contact",
@@ -29,7 +30,7 @@ const paths = {
 	about: "/about",
 	appointment: "/appointment",
 	bookingCalendar: "/booking/calendar",
-	productDetails: "/shop/products/details",
+	productDetails: "/shop/products/details/:id",
 	// Not Found Path
 	notFound: "*",
 	// Admin Paths

@@ -12,7 +12,11 @@ const filterSidebarItems = (items, isAuthenticated, user) => {
 		if (!isAuthenticated && item?.requiredAuth) {
 			return false;
 		}
-		if (isAuthenticated && item?.requiredRole && !item?.requiredRole.includes(user?.role?.name)) {
+		if (
+			isAuthenticated &&
+			item?.requiredRole &&
+			!item?.requiredRole.includes(user?.role?.name)
+		) {
 			return false;
 		}
 		return true;
@@ -20,13 +24,17 @@ const filterSidebarItems = (items, isAuthenticated, user) => {
 };
 
 const SidebarHeader = React.memo(({ toggleSidebar, isOpen }) => (
-	<div className='flex items-center justify-between p-8 text-white'>
-		<h1 className='text-5xl font-serif tracking-widest xl:block hidden'>Booking</h1>
+	<div className='flex items-center justify-between p-8 text-white w-full'>
+		<h1 className='text-5xl font-serif tracking-widest xl:block hidden'>
+			Booking
+		</h1>
 		{/* The h1 will be shown when the sidebar is small */}
 		<h1 className='text-5xl font-serif text-[#274b60] bg-white rounded-md py-2 px-4 xl:hidden block'>
 			B
 		</h1>
-		<button className='md:hidden p-2 rounded-xl hover:bg-slate-500' onClick={toggleSidebar}>
+		<button
+			className='md:hidden p-2 rounded-xl hover:bg-slate-500'
+			onClick={toggleSidebar}>
 			{isOpen ? <IoClose size={24} /> : <LuMenu size={22} />}
 		</button>
 	</div>
@@ -45,17 +53,21 @@ const SidebarItem = ({ item, isActive, onClick, children }) => {
 
 	return (
 		<li
-			className={`group cursor-pointer rounded-md p-4 ${
+			className={`group cursor-pointer rounded px-4 py-2 my-1 ${
 				isActive && children ? "" : "hover:bg-slate-500"
 			} ${isActive ? "bg-slate-300 text-[#274b60]" : "text-white"}`}
 			onClick={handleItemClick}>
 			<div
-				className={`flex items-center justify-between ${isActive && openChildren ? "mb-2" : ""}`}>
+				className={`flex items-center justify-between ${
+					isActive && openChildren ? "mb-2" : ""
+				}`}>
 				<p className='truncate'>{item?.name}</p>
 				{children && (
 					<IoIosArrowDown
 						size={22}
-						className={`transition-all duration-500 ${openChildren ? "rotate-0" : "rotate-180"}`}
+						className={`transition-all duration-500 ${
+							openChildren ? "rotate-0" : "rotate-180"
+						}`}
 					/>
 				)}
 			</div>
@@ -84,7 +96,7 @@ const SidebarItemChild = ({ item, isActive, onClick }) => {
 
 	return (
 		<li
-			className={`cursor-pointer hover:bg-black/30 hover:text-white rounded-md p-4 ${
+			className={`cursor-pointer hover:bg-black/30 hover:text-white rounded px-4 py-2 ${
 				isActive ? "bg-slate-300 text-[#274b60]" : "text-[#274b60]"
 			}`}
 			onClick={handleItemClick}>
@@ -95,7 +107,7 @@ const SidebarItemChild = ({ item, isActive, onClick }) => {
 
 const SidebarFooter = ({ onLogout }) => (
 	<div
-		className='bg-slate-300 p-2 cursor-pointer mb-10 flex items-center justify-center gap-4 text-[#14373f]'
+		className='px-12 cursor-pointer mb-8 flex items-center justify-start gap-2 text-white'
 		onClick={onLogout}>
 		<PiSignOut size={20} />
 		<span>Sign out</span>
@@ -110,12 +122,15 @@ const AdminSidebar = () => {
 
 	return (
 		<>
-			<aside className='p-4 xl:pr-0 h-full'>
+			<aside className='p-4 xl:pr-0 h-full w-full'>
 				<div
 					className={`bg-[#435d63] shadow-md rounded-md flex flex-col h-full transition-all duration-500 ${
 						isOpen ? "" : ""
 					}`}>
-					<SidebarHeader toggleSidebar={() => setIsOpen(!isOpen)} isOpen={isOpen} />
+					<SidebarHeader
+						toggleSidebar={() => setIsOpen(!isOpen)}
+						isOpen={isOpen}
+					/>
 
 					{isOpen && (
 						<ul className='flex-grow p-8 pt-0'>

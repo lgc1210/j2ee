@@ -10,15 +10,17 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 import { HiOutlineBars3 } from "react-icons/hi2";
 import { useAuth } from "../../Contexts/Auth";
 import { GoArrowRight } from "react-icons/go";
+import { useCart } from "../../Contexts/Cart";
 
 const Header = () => {
 	const navigate = useNavigate();
 	const [toggleNav, setToggleNav] = React.useState(true);
 	const [isSticky, setIsSticky] = React.useState(false);
 	const headerRef = React.useRef(null);
-	const { logout, isAuthenticated } = useAuth();
 	const [showSearchInput, setShowSearchInput] = React.useState(false);
 	const searchInputRef = React.useRef(null);
+	const { logout, isAuthenticated } = useAuth();
+	const { cart } = useCart();
 
 	React.useEffect(() => {
 		const header = headerRef.current;
@@ -34,7 +36,10 @@ const Header = () => {
 
 	React.useEffect(() => {
 		const handleClickOutside = (event) => {
-			if (searchInputRef.current && !searchInputRef.current.contains(event.target)) {
+			if (
+				searchInputRef.current &&
+				!searchInputRef.current.contains(event.target)
+			) {
 				setShowSearchInput(false);
 			}
 		};
@@ -103,8 +108,14 @@ const Header = () => {
 					onClick={() => setToggleNav(!toggleNav)}
 				/>
 
-				<div className='md:order-1 order-2 cursor-pointer' onClick={() => navigate(paths.home)}>
-					<img src={Logo} alt='Logo' className='max-w-40 h-full object-contain object-center' />
+				<div
+					className='md:order-1 order-2 cursor-pointer'
+					onClick={() => navigate(paths.home)}>
+					<img
+						src={Logo}
+						alt='Logo'
+						className='max-w-40 h-full object-contain object-center'
+					/>
 				</div>
 
 				<nav
@@ -125,16 +136,18 @@ const Header = () => {
 								{/* Sub nav */}
 								{item?.children && (
 									<div className='md:bg-white bg-gray-200 cursor-pointer text-md md:max-w-xl md:w-80 w-screen hidden md:absolute md:top-full shadow transition-all duration-500 group-hover:block'>
-										{item.children.filter(shouldDisplayChildItem).map((childItem, index) => {
-											return (
-												<div
-													key={index}
-													className='py-2 px-4 border-t hover:text-[#799AA1] transition-all duration-500 w-full'
-													onClick={() => handleClickedNavItem(childItem)}>
-													{childItem.name}
-												</div>
-											);
-										})}
+										{item.children
+											.filter(shouldDisplayChildItem)
+											.map((childItem, index) => {
+												return (
+													<div
+														key={index}
+														className='py-2 px-4 border-t hover:text-[#799AA1] transition-all duration-500 w-full'
+														onClick={() => handleClickedNavItem(childItem)}>
+														{childItem.name}
+													</div>
+												);
+											})}
 									</div>
 								)}
 							</div>
@@ -146,7 +159,7 @@ const Header = () => {
 					<div className='relative' onClick={() => navigate(paths.cart)}>
 						<FaCartShopping size={24} className='cursor-pointer' />
 						<span className='text-center leading-tight absolute -top-4 -right-4 bg-[#799AA1] text-white min-w-5 h-auto rounded-full'>
-							1
+							{cart?.items?.length || 0}
 						</span>
 					</div>
 					<div className='md:block hidden'>
@@ -172,7 +185,11 @@ const Header = () => {
 						? "translate-y-0 opacity-100 pointer-events-auto"
 						: "-translate-y-full opacity-0 pointer-events-none"
 				}`}>
-				<input type='text' placeholder='Enter your keyword' className='py-2 px-4 outline-none' />
+				<input
+					type='text'
+					placeholder='Enter your keyword'
+					className='py-2 px-4 outline-none'
+				/>
 				<button className='bg-[#779AA1]'>
 					<GoArrowRight size={20} className='text-white w-full h-full p-3' />
 				</button>

@@ -1,7 +1,9 @@
-import React, { useState, useRef, lazy, Suspense } from "react";
+import React, { useState, useRef, lazy, Suspense, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import ShopImageBanner from "../../assets/images/banner/uby-yanes-0ABufdkXgPI-unsplash-900x900.jpg";
 import { BsCartPlus } from "react-icons/bs";
+import { useProduct } from "../../Contexts/Product";
+import { useCart } from "../../Contexts/Cart";
 
 const FormControl = lazy(() => import("../../Components/FormControl"));
 const Button = lazy(() => import("../../Components/Button"));
@@ -17,24 +19,38 @@ const ProductDetails = () => {
 	const [mainImage, setMainImage] = useState(
 		"https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod2.jpg"
 	);
+	const { fetchProductDetails, productDetails } = useProduct();
+	const { cart, handleChangeQuantity } = useCart();
+
+	console.log("Quantity: ", quantity);
+
+	useEffect(() => {
+		if (productId) {
+			fetchProductDetails(productId);
+		}
+	}, [productId, fetchProductDetails]);
 
 	const handleMouseMove = (event) => {
 		const image = imageRef.current;
-
-		if (!image) {
-			return;
-		}
+		if (!image) return;
 
 		const rect = image.getBoundingClientRect();
-
 		const x = ((event.clientX - rect.left) / rect.width) * 100;
 		const y = ((event.clientY - rect.top) / rect.height) * 100;
-
 		setPosition({ x, y, scale: 2 });
 	};
 
 	const handleMouseLeave = () => {
 		setPosition({ x: 0, y: 0, scale: 1 });
+	};
+
+	const changeQuantity = (value) => {
+		const changedValue = quantity > 0 && value > 0 ? value : 1;
+		setQuantity(changedValue);
+	};
+
+	const handleAddToCart = async () => {
+		await handleChangeQuantity(productId, quantity);
 	};
 
 	return (
@@ -47,7 +63,11 @@ const ProductDetails = () => {
 				/>
 			}>
 			<section>
-				<Banner imageBanner={ShopImageBanner} titleBanner='Shop' pathBanner='Shop' />
+				<Banner
+					imageBanner={ShopImageBanner}
+					titleBanner='Shop'
+					pathBanner='Shop'
+				/>
 
 				<div className='md:py-36 py-28 md:px-0 px-6'>
 					<div className='container mx-auto'>
@@ -61,8 +81,8 @@ const ProductDetails = () => {
 									onMouseLeave={handleMouseLeave}>
 									<img
 										ref={imageRef}
-										src={mainImage}
-										alt='Product Detail Name'
+										src={productDetails?.image || mainImage}
+										alt={productDetails?.name || "Product Detail Name"}
 										className='transition-transform duration-700 w-full h-full object-cover'
 										style={{
 											transformOrigin: `${position.x}% ${position.y}%`,
@@ -117,14 +137,14 @@ const ProductDetails = () => {
 							{/* Product's Information */}
 							<div>
 								<div className='flex flex-col gap-6'>
-									<p className='font-serif text-4xl'>Beauty Care</p>
-									<p className='text-2xl font-semibold'>$59.00</p>
+									<p className='font-serif text-4xl'>
+										{productDetails?.name || "Loading..."}
+									</p>
+									<p className='text-2xl font-semibold'>
+										${productDetails?.price || "0.00"}
+									</p>
 									<p className='text-lg text-zinc-600 lg:w-3/4 lg:text-start text-justify leading-loose'>
-										Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed
-										quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque
-										porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci
-										velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore
-										magnam aliquam quaerat voluptatem.
+										{productDetails?.description || "No description available."}
 									</p>
 								</div>
 								<div className='flex items-center justify-start gap-4 my-8'>
@@ -133,7 +153,7 @@ const ProductDetails = () => {
 										wrapInputStyle='border-zinc-400 w-1/6'
 										inputStyle='text-center text-lg w-full'
 										value={quantity}
-										onChange={(event) => setQuantity(event.target.value)}
+										onChange={(event) => changeQuantity(event.target.value)}
 									/>
 									<Button
 										text='Add To Cart'
@@ -142,13 +162,14 @@ const ProductDetails = () => {
 										buttonStyle='[&]:py-4.5 bg-[#779AA1] [&]:border-[#779AA1] [&]:hover:border-black'
 										textStyle='text-white me-2 [&]:group-hover:text-black'
 										hoverStyle='[&]:bg-white'
+										onClick={handleAddToCart}
 									/>
 								</div>
 								<div className='flex flex-col gap-2'>
 									<p className='text-lg text-zinc-600'>
 										Category:{" "}
 										<span className='underline hover:no-underline cursor-pointer text-[#779AA1] transition-all duration-700'>
-											Organic
+											{productDetails?.category?.name || "Organic"}
 										</span>
 									</p>
 									<p className='text-lg text-zinc-600'>

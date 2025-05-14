@@ -2,12 +2,7 @@ package j2ee.j2ee.apps.cart;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/carts")
@@ -16,13 +11,13 @@ public class CartController {
     @Autowired
     private CartService cartService;
 
-    public record CartItemRequest(long cartId, long productId, int quantity) {
+    public record CartItemRequest(Long userId, Long productId, int quantity) {
     }
 
     @PostMapping
-    public ResponseEntity<?> addToCart(@RequestBody CartItemRequest payload) {
+    public ResponseEntity<?> changeQuantity(@RequestBody CartItemRequest payload) {
         try {
-            this.cartService.addToCart(payload.cartId(), payload.productId(), payload.quantity());
+            this.cartService.changeQuantity(payload.userId(), payload.productId(), payload.quantity());
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             System.err.println("Internal Server Error: " + e.getMessage());
@@ -30,9 +25,8 @@ public class CartController {
         }
     }
 
-    @DeleteMapping("/{cart_id}/products/{product_id}")
-    public ResponseEntity<?> deleteFromCart(@PathVariable(value = "cart_id") long cart_id,
-            @PathVariable(value = "product_id") long product_id) {
+    @DeleteMapping
+    public ResponseEntity<?> deleteFromCart(@RequestParam("cart_id") Long cart_id, @RequestParam("product_id") Long product_id) {
         try {
             this.cartService.deleteFromCart(cart_id, product_id);
             return ResponseEntity.ok().build();
@@ -42,4 +36,14 @@ public class CartController {
         }
     }
 
+    @GetMapping("/customers")
+    public ResponseEntity<?> getCartByCustomerId(@RequestParam("customer_id") Long customer_id) {
+        try {
+            var cart = cartService.getByUserId(customer_id);
+            return ResponseEntity.ok().body(cart);
+        } catch (Exception e) {
+            System.err.println("Internal Server Error: " + e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 }

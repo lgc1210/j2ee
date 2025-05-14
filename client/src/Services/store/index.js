@@ -4,18 +4,16 @@ const baseURL = process.env.REACT_APP_API;
 
 class StoreService {
 	// Lấy tất cả store
-	static getAll = async () => {
-		return await apiInstance.get(`${baseURL}/stores`);
+	static getAll = async (page = 0, size = 5) => {
+		return await apiInstance.get(`${baseURL}/stores?page=${page}&size=${size}`);
 	};
 
 	// // Lấy Store  theo ID
-	// getStoreById = async (roleId) => {
-	// 	return await apiInstance.get(`${baseURL}/stores/${roleId}`, {
-	// 		headers: {
-	// 			"Content-Type": "application/json",
-	// 		},
-	// 	});
-	// };
+	static getStoreCloseTimeById = async (store_id) => {
+		return await apiInstance.get(
+			`${baseURL}/stores/close_time?store_id=${store_id}`
+		);
+	};
 
 	// // Tạo Store  mới
 	// createStore = async (payload) => {

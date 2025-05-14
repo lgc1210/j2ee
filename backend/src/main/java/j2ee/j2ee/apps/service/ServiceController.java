@@ -1,13 +1,9 @@
 package j2ee.j2ee.apps.service;
 
 import java.util.HashMap;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,14 +14,16 @@ public class ServiceController {
     @Autowired
     private ServiceService serviceSerivce;
 
-    @GetMapping("/{storeId}")
+    // Get service pagination by store id
+    @GetMapping("/stores/{store_id}")
     public ResponseEntity<Object> getByStoreId(
-            @PathVariable int storeId,
-            @RequestParam("page") int page,
-            @RequestParam("size") int size
+            @PathVariable(name = "store_id") long store_id,
+            @RequestParam(name = "page") int page,
+            @RequestParam(name = "size") int size
     ) {
         try {
-            Page<ServiceEntity> PageService = serviceSerivce.getByStoreId(storeId, page, size);
+            System.out.println("Store id " + store_id);
+            Page<ServiceEntity> PageService = serviceSerivce.getByStoreId(store_id, page, size);
             if (PageService.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }

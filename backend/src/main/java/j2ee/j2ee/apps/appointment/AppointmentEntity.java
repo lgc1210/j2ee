@@ -22,7 +22,7 @@ public class AppointmentEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+    private Long id;
 
     private LocalDate appointment_date;
 
@@ -59,5 +59,4 @@ public class AppointmentEntity {
     protected void onUpdate() {
         updated_at = LocalDateTime.now();
     }
-
 }

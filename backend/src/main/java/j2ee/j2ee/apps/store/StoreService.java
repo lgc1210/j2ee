@@ -4,9 +4,12 @@ import j2ee.j2ee.apps.user.UserDTO;
 import j2ee.j2ee.apps.user.UserEntity;
 import j2ee.j2ee.apps.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -19,20 +22,18 @@ public class StoreService {
 
     @Autowired
     private StoreRepository storeRepository;
-
     @Autowired
     private UserRepository userRepository;
 
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
-    public Optional<List<StoreEntity>> getAll() {
-        List<StoreEntity> storeList = this.storeRepository.findAll();
-        return Optional.ofNullable((storeList));
+    public Page<StoreEntity> getAllStorePage(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "name"));
+        return this.storeRepository.findAllPage(pageable);
     }
 
     public Optional<StoreEntity> getById(long id) {
-        var store = this.storeRepository.findById(id);
-        return Optional.ofNullable(store);
+        return this.storeRepository.findById(id);
     }
 
     private StoreDTO toDTO(StoreEntity entity) {

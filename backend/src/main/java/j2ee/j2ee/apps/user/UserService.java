@@ -18,6 +18,8 @@ import j2ee.j2ee.constants.ErrorMessages;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.swing.text.html.Option;
+
 @Service
 public class UserService {
     private final UserRepository userRepository;
@@ -25,8 +27,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder,
-            RoleRepository roleRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
@@ -48,11 +49,9 @@ public class UserService {
         return userRepository.findByPhone(phone);
     }
 
-    public Optional<UserEntity> changePassword(long id, String currentPassword,
-            String newPassword) {
+    public Optional<UserEntity> changePassword(long id, String currentPassword, String newPassword) {
         Optional<UserEntity> user = userRepository.findById(id);
-        if (!user.isPresent()
-                || !passwordEncoder.matches(currentPassword, user.get().getPassword())) {
+        if (!user.isPresent() || !passwordEncoder.matches(currentPassword, user.get().getPassword())) {
             return Optional.empty();
         }
 
@@ -71,8 +70,7 @@ public class UserService {
                     .orElseThrow(() -> new RuntimeException("Customer role not found"));
         } else {
 
-            role = roleRepository.findById(user.getRole().getId())
-                    .orElseThrow(() -> new RuntimeException("Selected role not found"));
+            role = roleRepository.findById(user.getRole().getId()).orElseThrow(() -> new RuntimeException("Selected role not found"));
         }
         user.setRole(role);
 
@@ -84,8 +82,7 @@ public class UserService {
     }
 
     public UserEntity update(long id, UserEntity updatedUser) {
-        UserEntity existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        UserEntity existingUser = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
 
         if (updatedUser.getName() != null) {
             existingUser.setName(updatedUser.getName());
@@ -120,7 +117,6 @@ public class UserService {
     public void deleteMultipleUsers(List<Long> ids) {
         userRepository.deleteAllByIdIn(ids);
     }
-
 
 
     // Mã hóa mật khẩu

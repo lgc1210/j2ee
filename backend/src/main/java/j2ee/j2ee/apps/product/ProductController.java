@@ -1,12 +1,12 @@
 package j2ee.j2ee.apps.product;
 
+import java.util.HashMap;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/products")
@@ -15,47 +15,51 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<List<ProductEntity>> getAll() {
         try {
             var productList = this.productService.getAll();
-            if (!productList.isPresent()) {
-                return ResponseEntity.notFound().build();
-            }
-
-            return ResponseEntity.ok(productList.get());
+            return productList.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
         } catch (Exception e) {
             System.err.println("Internal Server Error: " + e.getMessage());
             return ResponseEntity.internalServerError().build();
         }
     }
 
-    @GetMapping("/stores/{store_id}")
-    public ResponseEntity<List<ProductEntity>> getAllByStoreId(
-            @PathVariable(value = "store_id") long store_id) {
+    // Get product pagination by store id
+    @GetMapping("/stores")
+    public ResponseEntity<Object> getAllByStoreId(
+            @RequestParam(value = "store_id") long store_id,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(required = false, value = "name") String name,
+            @RequestParam(required = false, value = "category") String category
+    ) {
         try {
-            var productList = this.productService.getAllByStoreId(store_id);
-            if (!productList.isPresent()) {
+            int size = 8;
+            var pageProducts = this.productService.getAllByStoreId(store_id, page, size, name, category);
+            if (pageProducts.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
 
-            return ResponseEntity.ok(productList.get());
+            HashMap<String, Object> response = new HashMap<>();
+            response.put("products", pageProducts.getContent());
+            response.put("currentPage", pageProducts.getNumber());
+            response.put("totalPages", pageProducts.getTotalPages());
+            response.put("totalElements", pageProducts.getTotalElements());
+
+            return ResponseEntity.ok().body(response);
         } catch (Exception e) {
             System.err.println("Internal Server Error: " + e.getMessage());
             return ResponseEntity.internalServerError().build();
         }
     }
 
-    @GetMapping("/{product_id}")
-    public ResponseEntity<ProductEntity> getById(
-            @PathVariable(value = "product_id") long product_id) {
+    @GetMapping("/details")
+    public ResponseEntity<ProductEntity> getById(@RequestParam("product_id") Long product_id) {
         try {
             var product = this.productService.getById(product_id);
-            if (!product.isPresent()) {
-                return ResponseEntity.notFound().build();
-            }
 
-            return ResponseEntity.ok().body(product.get());
+            return product.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
         } catch (Exception e) {
             System.err.println("Internal Server Error: " + e.getMessage());
             return ResponseEntity.internalServerError().build();
