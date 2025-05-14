@@ -78,7 +78,6 @@ public class StoreService {
         entity.setClose_time(parseTime(dto.getCloseTime()));
         entity.setStatus(dto.getStatus());
 
-
         if (dto.getOwnerId() != null) {
             Long ownerId = dto.getOwnerId().getId();
             if (ownerId != null) {
@@ -175,5 +174,20 @@ public class StoreService {
     @Transactional
     public void deleteMultipleStores(List<Long> ids) {
         storeRepository.deleteAllByIdIn(ids);
+    }
+
+    // -------import---------
+
+    public void importStores(List<StoreEntity> stores) {
+        LocalDateTime importTime = LocalDateTime.now();
+        stores.forEach(store -> {
+            if (store.getName() == null || store.getName().trim().isEmpty()) {
+                store.setName("Unnamed Store");
+            }
+            store.setCreated_at(importTime);
+            store.setUpdated_at(importTime);
+        });
+
+        storeRepository.saveAll(stores);
     }
 }

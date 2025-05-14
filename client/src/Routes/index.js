@@ -45,6 +45,12 @@ const Stores = lazy(() => import("../Pages/Stores"));
 const Roles = lazy(() => import("../Pages/Roles"));
 const Statistic = lazy(() => import("../Pages/Statistic"));
 const Booking = lazy(() => import("../Pages/Booking"));
+const Statistic1 = lazy(() => import("../Pages/Statistic/Statistic1"));
+const Statistic2 = lazy(() => import("../Pages/Statistic/Statistic2"));
+
+const StatisticByAllTime = lazy(() =>
+	import("../Pages/Statistic/StatisticByAllTime")
+);
 
 // Profile Pages
 const ProfileChangePassword = lazy(() =>
@@ -171,20 +177,7 @@ const routes = [
 		Page: Products,
 		requiredRole: ["admin"],
 	},
-	{
-		isPublic: false,
-		url: paths.categories,
-		Layout: AdminLayout,
-		Page: Categories,
-		requiredRole: ["admin"],
-	},
-	{
-		isPublic: false,
-		url: paths.discounts,
-		Layout: AdminLayout,
-		Page: Discounts,
-		requiredRole: ["admin"],
-	},
+
 	{
 		isPublic: false,
 		url: paths.stores,
@@ -276,6 +269,42 @@ const routes = [
 		Layout: OwnerLayout,
 		Page: statisticOwner,
 		requiredRole: ["owner"],
+	},
+
+	{
+		isPublic: false,
+		url: paths.categories,
+		Layout: AdminLayout,
+		Page: Categories,
+		requiredRole: ["admin"],
+	},
+	{
+		isPublic: false,
+		url: paths.discounts,
+		Layout: AdminLayout,
+		Page: Discounts,
+		requiredRole: ["admin"],
+	},
+	{
+		isPublic: false,
+		url: paths.statistic1,
+		Layout: AdminLayout,
+		Page: Statistic1,
+		requiredRole: ["admin"],
+	},
+	{
+		isPublic: false,
+		url: paths.statistic2,
+		Layout: AdminLayout,
+		Page: Statistic2,
+		requiredRole: ["admin"],
+	},
+	{
+		isPublic: false,
+		url: paths.statisticByAllTime,
+		Layout: AdminLayout,
+		Page: StatisticByAllTime,
+		requiredRole: ["admin"],
 	},
 ];
 export default routes;

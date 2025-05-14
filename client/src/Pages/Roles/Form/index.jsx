@@ -8,7 +8,7 @@ const FormControl = React.lazy(() => import("../../../Components/FormControl"));
 const Overlay = React.lazy(() => import("../../../Components/Overlay"));
 const Loading = React.lazy(() => import("../../../Components/Loading"));
 
-const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) => {
+const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false, rolesData }) => {
   const [fields, setFields] = useState({ name: "" });
   const [errors, setErrors] = useState({});
   const [pending, setPending] = useState(false);
@@ -16,13 +16,15 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
   useEffect(() => {
     if (initialData && initialData.name) {
       setFields({ name: initialData.name });
+      setErrors({});
     } else {
       setFields({ name: "" });
+      setErrors({});
     }
   }, [initialData]);
 
   const handleFieldsChange = (key, value) => {
-    if (!isDisabled) { 
+    if (!isDisabled) {
       setFields((prev) => ({ ...prev, [key]: value }));
       setErrors((prev) => ({ ...prev, [key]: "" }));
     }
@@ -42,11 +44,30 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
 
   const validateForm = () => {
     let newErrors = {};
+
     if (isEmpty(fields.name)) {
-      newErrors.name = "Tên vai trò là bắt buộc";
+      newErrors.name = "Name is required";
     }
+
+    if (fields.name && rolesData) {
+      const nameExists = rolesData.some(
+        (role) =>
+          role.name.trim().toLowerCase() === fields.name.trim().toLowerCase() &&
+          (!initialData || role.id !== initialData.id)
+      );
+      if (nameExists) {
+        newErrors.name = "Name already exists";
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleClose = () => {
+    setFields({ name: "" });
+    setErrors({});
+    setToggle(false);
   };
 
   const handleSubmit = async (e) => {
@@ -92,7 +113,11 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
         >
           <div className="flex items-center justify-between w-full mb-4">
             <p className="font-semibold text-lg">
-              {isDisabled ? "Thông tin vai trò" : initialData ? "Chỉnh sửa vai trò" : "Tạo vai tò"}
+              {isDisabled
+                ? "Thông tin vai trò"
+                : initialData
+                ? "Chỉnh sửa vai trò"
+                : "Tạo vai trò"}
             </p>
             <IoClose size={26} className="cursor-pointer" onClick={setToggle} />
           </div>
@@ -100,19 +125,19 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
           <div>
             <FormControl
               type="text"
-              placeHolder="Nhập tên vai trò"
+              placeHolder="Enter Name"
               wrapInputStyle=""
               inputStyle="placeholder:text-lg text-black placeholder:font-serif"
               hasLabel
               id="name"
-              label="Tên vai trò"
+              label="Name"
               labelStyle="mb-1 font-serif"
               value={fields.name}
               onChange={(event) => handleFieldsChange("name", event.target.value)}
               onType={() => handleFieldsType("name")}
               onBlur={() =>
                 isEmpty(fields.name) &&
-                handleFieldsBlur("name", "Tên vai trò là bắt buộc")
+                handleFieldsBlur("name", "Name is required")
               }
               hasError={errors?.name}
               errorMessage={errors?.name}
@@ -129,7 +154,7 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
                   onClick={setToggle}
                   disabled={pending}
                 >
-                  Hủy
+                  Cancel
                 </button>
                 <button
                   type="submit"
@@ -150,7 +175,7 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
                 className="transition-all duration-700 hover:bg-black text-white bg-[#799aa1] w-full py-2 rounded font-serif font-semibold"
                 onClick={() => setToggle(false)}
               >
-                Đóng
+                Close
               </button>
             )}
           </div>

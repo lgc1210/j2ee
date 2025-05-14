@@ -44,6 +44,7 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
         status: initialData.status || "",
         image: initialData.image || "",
       });
+      setErrors({});
 
     } else {
       setFields({
@@ -54,12 +55,12 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
         createdAt: "",
         updateAt: "",
         openTime: "",
-
         closeTime: "",
         ownerId: "",
         status: "",
         image: "",
       });
+      setErrors({});
     }
   }, [initialData]);
  console.log("name:" + fields.ownerId.id)
@@ -112,11 +113,22 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
 
   const validateForm = () => {
     let newErrors = {};
-    if (isEmpty(fields.name)) newErrors.name = "Tên là bắt buộc";
-    if (isEmpty(fields.status)) newErrors.status = "Trạng thái là bắt buộc";
-    // if (isEmpty(fields.ownerId.id)) newErrors.ownerId = "Chủ cửa hàng là bắt buộc";
-    if (isEmpty(fields.openTime)) newErrors.openTime = "Giờ mở cửa là bắt buộc";
-    if (isEmpty(fields.closeTime)) newErrors.closeTime = "Giờ đóng cửa là bắt buộc";
+    if (isEmpty(fields.name)) newErrors.name = "Name is required";
+    if (isEmpty(fields.phone)) newErrors.phone = "Phone number is required";
+    if (isEmpty(fields.description)) newErrors.description = "Description is required";
+    if (isEmpty(fields.address)) newErrors.address = "Address is required";
+    if (isEmpty(fields.status)) newErrors.status = "Status is required";
+    if (isEmpty(fields.ownerId.id)) newErrors.ownerId = "Store owner is required";
+    if (isEmpty(fields.openTime)) newErrors.openTime = "Opening time is required";
+    if (isEmpty(fields.closeTime)) newErrors.closeTime = "Closing time is required";
+    if (fields.phone) {
+      const phoneRegex = /^\d+$/; 
+      if (!phoneRegex.test(fields.phone)) {
+        newErrors.phone = "Phone number must contain only digits";
+      } else if (fields.phone.length !== 10) {
+        newErrors.phone = "Phone number must be exactly 10 digits";
+      }
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -211,28 +223,25 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
                   src={file ? URL.createObjectURL(file) : fields.image}
                   alt={fields.name || "Store Image"}
                   className="w-32 h-32 object-cover rounded-md"
-                  onError={(e) => {
-                    e.target.src = "/src/assets/stores/default.jpg";
-              
-                  }}
+                
                 />
               </div>
             )}
 
             <FormControl
               type="text"
-              placeHolder="Nhập tên cửa hàng"
+              placeHolder="Enter Name"
               wrapInputStyle=""
               inputStyle="placeholder:text-lg text-black placeholder:font-serif"
               hasLabel
               id="name"
-              label="Tên cửa hàng"
+              label="Name"
               labelStyle="mb-1 font-serif"
               value={fields.name}
               onChange={(event) => handleFieldsChange("name", event.target.value)}
               onType={() => handleFieldsType("name")}
               onBlur={() =>
-                isEmpty(fields.name) && handleFieldsBlur("name", "Tên cửa hàng là bắt buộc")
+                isEmpty(fields.name) && handleFieldsBlur("name", "Name is required")
               }
               hasError={!!errors?.name}
               errorMessage={errors?.name}
@@ -241,47 +250,65 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
 
             <FormControl
               type="textarea"
-              placeHolder="Nhập mô tả"
+             placeHolder="Enter description"
               wrapInputStyle=""
               inputStyle="placeholder:text-lg text-black placeholder:font-serif"
               hasLabel
               id="description"
-              label="Mô tả"
+              label="Description"
               labelStyle="mb-1 font-serif"
               value={fields.description}
               onChange={(event) => handleFieldsChange("description", event.target.value)}
               onType={() => handleFieldsType("description")}
+              onBlur={() =>
+                isEmpty(fields.description) && handleFieldsBlur("description", "Description is required")
+              }
               disabled={isDisabled}
+              hasError={!!errors?.description}
+              errorMessage={errors?.description}
+          
             />
+          
 
             <FormControl
               type="text"
-              placeHolder="Nhập địa chỉ"
+              placeHolder="Enter address"
               wrapInputStyle=""
               inputStyle="placeholder:text-lg text-black placeholder:font-serif"
               hasLabel
               id="address"
-              label="Địa chỉ"
+              label="Address"
               labelStyle="mb-1 font-serif"
               value={fields.address}
               onChange={(event) => handleFieldsChange("address", event.target.value)}
               onType={() => handleFieldsType("address")}
+              onBlur={() =>
+                isEmpty(fields.address) && handleFieldsBlur("address", "Address is required")
+              }
               disabled={isDisabled}
+              hasError={!!errors?.address}
+              errorMessage={errors?.address}
             />
 
             <FormControl
               type="text"
-              placeHolder="Nhập số điện thoại"
+              placeHolder="Enter phone"
               wrapInputStyle=""
               inputStyle="placeholder:text-lg text-black placeholder:font-serif"
               hasLabel
               id="phone"
-              label="Số điện thoại"
+              label="Phone"
               labelStyle="mb-1 font-serif"
               value={fields.phone}
               onChange={(event) => handleFieldsChange("phone", event.target.value)}
               onType={() => handleFieldsType("phone")}
+              onBlur={() =>
+                isEmpty(fields.phone) &&
+                handleFieldsBlur("phone", "Phone is required")
+              }
               disabled={isDisabled}
+              hasError={!!errors?.phone}
+              errorMessage={errors?.phone}
             />
 
             <FormControl
@@ -290,17 +317,17 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
               inputStyle="placeholder:text-lg text-black placeholder:font-serif"
               hasLabel
               id="openTime"
-              label="Giờ mở cửa"
+              label="Opening time"
               labelStyle="mb-1 font-serif"
               value={fields.openTime}
               onChange={(event) => handleFieldsChange("openTime", event.target.value)}
               onType={() => handleFieldsType("openTime")}
               onBlur={() =>
                 isEmpty(fields.openTime) &&
-                handleFieldsBlur("openTime", "Giờ mở cửa là bắt buộc")
+                handleFieldsBlur("openTime", "Opening time is required ")
               }
               hasError={!!errors?.openTime}
-              errorMessage={errors?.ートopenTime}
+              errorMessage={errors?.openTime}
               disabled={isDisabled}
             />
 
@@ -310,18 +337,19 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
               inputStyle="placeholder:text-lg text-black placeholder:font-serif"
               hasLabel
               id="closeTime"
-              label="Giờ đóng cửa"
+              label="Closing time"
               labelStyle="mb-1 font-serif"
               value={fields.closeTime}
               onChange={(event) => handleFieldsChange("closeTime", event.target.value)}
               onType={() => handleFieldsType("closeTime")}
               onBlur={() =>
                 isEmpty(fields.closeTime) &&
-                handleFieldsBlur("closeTime", "Giờ đóng cửa là bắt buộc")
+                handleFieldsBlur("closeTime", "Closing time is required")
               }
               hasError={!!errors?.closeTime}
               errorMessage={errors?.closeTime}
               disabled={isDisabled}
+        
             />
 <FormControl
   type="select"
@@ -329,20 +357,20 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
   inputStyle="placeholder:text-lg text-black placeholder:font-serif"
   hasLabel
   id="ownerId"
-  label="Chủ cửa hàng"
+  label="Owner"
   labelStyle="mb-1 font-serif"
   value={fields.ownerId || ""} 
   onChange={(event) => handleFieldsChange("ownerId", event.target.value)}
   onType={() => handleFieldsType("ownerId")}
   onBlur={() =>
     isEmpty(fields.ownerId) &&
-    handleFieldsBlur("ownerId", "Chủ cửa hàng là bắt buộc")
+    handleFieldsBlur("ownerId", "Owner is required")
   }
   hasError={!!errors?.ownerId}
   errorMessage={errors?.ownerId}
   disabled={isDisabled}
   options={[
-    { value: "", label: "Chọn chủ cửa hàng" },
+    { value: "", label: "Choose owner" },
     ...(Array.isArray(owners) ? owners : []).map((owner) => ({
       value: String(owner.id),
       label: owner.name,
@@ -355,20 +383,20 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
               inputStyle="placeholder:text-lg text-black placeholder:font-serif"
               hasLabel
               id="status"
-              label="Trạng thái"
+              label="Status"
               labelStyle="mb-1 font-serif"
               value={fields.status}
               onChange={(event) => handleFieldsChange("status", event.target.value)}
               onType={() => handleFieldsType("status")}
               onBlur={() =>
                 isEmpty(fields.status) &&
-                handleFieldsBlur("status", "Trạng thái là bắt buộc")
+                handleFieldsBlur("status", "Status is required")
               }
               hasError={!!errors?.status}
               errorMessage={errors?.status}
               disabled={isDisabled}
               options={[
-                { value: "", label: "Chọn trạng thái" },
+                { value: "", label: "Choose status" },
                 { value: "1", label: "Active" },
                 { value: "2", label: "Inactive" },
               ]}
@@ -384,7 +412,7 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
                   onClick={setToggle}
                   disabled={pending}
                 >
-                  Hủy
+                  Cancel
                 </button>
                 <button
                   type="submit"
@@ -405,7 +433,7 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
                 className="transition-all duration-700 hover:bg-black text-white bg-[#799aa1] w-full py-2 rounded font-serif font-semibold"
                 onClick={() => setToggle(false)}
               >
-                Đóng
+                Close
               </button>
             )}
           </div>

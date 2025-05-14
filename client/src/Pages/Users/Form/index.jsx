@@ -9,16 +9,16 @@ const FormControl = React.lazy(() => import("../../../Components/FormControl"));
 const Overlay = React.lazy(() => import("../../../Components/Overlay"));
 const Loading = React.lazy(() => import("../../../Components/Loading"));
 
-const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) => {
+const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false, usersData }) => {
   const [fields, setFields] = useState({
     name: "",
     email: "",
     phone: "",
     password: "",
     createdAt: "",
-    updateAt: "", 
-    role:  "" ,
-
+    updateAt: "",
+    role: "",
+    // status: "",
   });
   const [file, setFile] = useState(null);
   const [errors, setErrors] = useState({});
@@ -34,9 +34,10 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
         createdAt: initialData.createdAt || "",
         updateAt: initialData.updateAt || "",
         password: initialData.password || "",
-        role: initialData.role.id || "",
+        role: initialData.role?.id || "",
+        // status: initialData.status || "",
       });
-
+      setErrors({}); 
     } else {
       setFields({
         name: "",
@@ -45,11 +46,13 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
         createdAt: "",
         updateAt: "",
         role: "",
-        password:""
-
+        password: "",
+        // status: "",
       });
+      setErrors({}); 
     }
   }, [initialData]);
+
   useEffect(() => {
     const fetchOwners = async () => {
       try {
@@ -57,18 +60,19 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
         const rolesData = response.data;
         setRoles(Array.isArray(rolesData) ? rolesData : []);
       } catch (error) {
-        console.error("Lỗi khi lấy danh sách  :", error);
-        showToast("Không thể tải danh sách", "error");
+        console.error("Lỗi khi lấy danh sách roles:", error);
+        showToast("Không thể tải danh sách roles", "error");
         setRoles([]);
       }
     };
     fetchOwners();
   }, []);
+
   const handleFieldsChange = (key, value) => {
     if (!isDisabled) {
       if (key === "role") {
         console.log("Selected role value:", value);
-        setFields((prev) => ({ ...prev, role: value })); 
+        setFields((prev) => ({ ...prev, role: value }));
       } else {
         setFields((prev) => ({ ...prev, [key]: value }));
       }
@@ -99,11 +103,52 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
 
   const validateForm = () => {
     let newErrors = {};
-    if (isEmpty(fields.name)) newErrors.name = "Tên là bắt buộc";
-    if (isEmpty(fields.email)) newErrors.email = "Email là bắt buộc"; 
-    if (isEmpty(fields.role)) newErrors.role = "Vai trò là bắt buộc"; 
-    if (!initialData && isEmpty(fields.password)) newErrors.password = "Mật khẩu là bắt buộc"; 
-    if (isEmpty(fields.phone)) newErrors.phone = "Số điện thoại là bắt buộc";
+
+    const phoneRegex = /^\d{10}$/;
+    const emailRegex = /^[^\s@]+@gmail\.com$/;
+
+ 
+    if (isEmpty(fields.name)) newErrors.name = "Name is required";
+    if (isEmpty(fields.status)) newErrors.status = "Status is required";
+
+ 
+    if (isEmpty(fields.email)) {
+      newErrors.email = "Email is required";
+    } else if (!emailRegex.test(fields.email)) {
+      newErrors.email = "Email must be a valid @gmail.com address";
+    } else if (fields.email && usersData) {
+      const emailExists = usersData.some(
+        (user) =>
+          user.email.trim().toLowerCase() === fields.email.trim().toLowerCase() &&
+          (!initialData || user.id !== initialData.id)
+      );
+      if (emailExists) {
+        newErrors.email = "Email already exists";
+      }
+    }
+
+    if (isEmpty(fields.phone)) {
+      newErrors.phone = "Phone number is required";
+    } else if (!phoneRegex.test(fields.phone)) {
+      newErrors.phone = "Phone number must be 10 digits";
+    } else if (fields.phone && usersData) {
+      const phoneExists = usersData.some(
+        (user) =>
+          user.phone.trim() === fields.phone.trim() &&
+          (!initialData || user.id !== initialData.id)
+      );
+      if (phoneExists) {
+        newErrors.phone = "Phone number already exists";
+      }
+    }
+
+    if (isEmpty(fields.role)) newErrors.role = "Role is required";
+
+  
+    if (!initialData && isEmpty(fields.password)) {
+      newErrors.password = "Password is required";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -111,37 +156,36 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isDisabled || !validateForm() || pending) return;
-  
+
     setPending(true);
     try {
       const data = {
-        name: fields.name,
+        name: fields.name.trim(),
         password: fields.password,
-        email: fields.email,
-        phone: fields.phone,
+        email: fields.email.trim(),
+        phone: fields.phone.trim(),
         createdAt: null,
         updateAt: null,
         role: fields.role ? { id: Number(fields.role) } : null,
+        status: fields.status,
       };
-  
+
       let response;
       if (initialData) {
         response = await UserService.updateUser(initialData.id, data);
       } else {
         response = await UserService.createUser(data);
       }
-  
+
       if (response && response.data) {
         onSubmit(response.data);
-    
         setToggle(false);
       }
     } catch (error) {
       console.error("Lỗi khi lưu:", error);
       const errorMessage = typeof error === "string" ? error : error.message || "Lỗi không xác định";
       showToast(`Lỗi khi lưu: ${errorMessage}`, "error");
-  
-    
+
       if (errorMessage.includes("Email")) {
         setErrors((prev) => ({ ...prev, email: errorMessage }));
       } else if (errorMessage.includes("Phone")) {
@@ -152,9 +196,26 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
     }
   };
 
+  // Hàm đóng form, reset cả fields và errors
+  const handleClose = () => {
+    setFields({
+      name: "",
+      email: "",
+      phone: "",
+      password: "",
+      createdAt: "",
+      updateAt: "",
+      role: "",
+      status: "",
+    });
+    setFile(null);
+    setErrors({});
+    setToggle(false);
+  };
+
   return (
     <>
-      <Overlay toggle={toggle} setToggle={setToggle} />
+      <Overlay toggle={toggle} setToggle={handleClose} />
       <section
         className={`
           ${
@@ -173,117 +234,175 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
                 ? "Chỉnh sửa User"
                 : "Tạo User"}
             </p>
-            <IoClose size={26} className="cursor-pointer" onClick={setToggle} />
+            <IoClose size={26} className="cursor-pointer" onClick={handleClose} />
           </div>
 
           <div className="space-y-4">
-            
-
-           
-
             <FormControl
               type="text"
-              placeHolder="Nhập tên"
+              placeHolder="Enter Name"
               wrapInputStyle=""
               inputStyle="placeholder:text-lg text-black placeholder:font-serif"
               hasLabel
               id="name"
-              label="Tên User"
+              label="Name"
               labelStyle="mb-1 font-serif"
               value={fields.name}
               onChange={(event) => handleFieldsChange("name", event.target.value)}
               onType={() => handleFieldsType("name")}
-              onBlur={() =>
-                isEmpty(fields.name) && handleFieldsBlur("name", "Tên User là bắt buộc")
-              }
+              onBlur={() => {
+                if (isEmpty(fields.name)) {
+                  handleFieldsBlur("name", "Name is required");
+                }
+              }}
               hasError={!!errors?.name}
               errorMessage={errors?.name}
               disabled={isDisabled}
             />
 
-        
-         
             <FormControl
               type="text"
-              placeHolder="Nhập số điện thoại"
+              placeHolder="Enter phone"
               wrapInputStyle=""
               inputStyle="placeholder:text-lg text-black placeholder:font-serif"
               hasLabel
               id="phone"
-              label="Số điện thoại"
+              label="Phone"
               labelStyle="mb-1 font-serif"
               value={fields.phone}
               onChange={(event) => handleFieldsChange("phone", event.target.value)}
               onType={() => handleFieldsType("phone")}
+              onBlur={() => {
+                if (isEmpty(fields.phone)) {
+                  handleFieldsBlur("phone", "Phone number is required");
+                } else if (!/^\d{10}$/.test(fields.phone)) {
+                  handleFieldsBlur("phone", "Phone number must be 10 digits");
+                } else if (
+                  usersData &&
+                  usersData.some(
+                    (user) =>
+                      user.phone.trim() === fields.phone.trim() &&
+                      (!initialData || user.id !== initialData.id)
+                  )
+                ) {
+                  handleFieldsBlur("phone", "Phone number already exists");
+                }
+              }}
               disabled={isDisabled}
+              hasError={!!errors?.phone}
+              errorMessage={errors?.phone}
             />
-            
+
             <FormControl
               type="text"
-              placeHolder="Nhập email"
+              placeHolder="Enter email"
               wrapInputStyle=""
               inputStyle="placeholder:text-lg text-black placeholder:font-serif"
               hasLabel
               id="email"
-              label="Tên Email"
+              label="Email"
               labelStyle="mb-1 font-serif"
               value={fields.email}
               onChange={(event) => handleFieldsChange("email", event.target.value)}
               onType={() => handleFieldsType("email")}
-              onBlur={() =>
-                isEmpty(fields.email) && handleFieldsBlur("email", "Email là bắt buộc")
-              }
+              onBlur={() => {
+                if (isEmpty(fields.email)) {
+                  handleFieldsBlur("email", "Email is required");
+                } else if (!/^[^\s@]+@gmail\.com$/.test(fields.email)) {
+                  handleFieldsBlur("email", "Email must be a valid @gmail.com address");
+                } else if (
+                  usersData &&
+                  usersData.some(
+                    (user) =>
+                      user.email.trim().toLowerCase() === fields.email.trim().toLowerCase() &&
+                      (!initialData || user.id !== initialData.id)
+                  )
+                ) {
+                  handleFieldsBlur("email", "Email already exists");
+                }
+              }}
               hasError={!!errors?.email}
               errorMessage={errors?.email}
               disabled={isDisabled}
             />
-             <FormControl
-              type="text"
-              placeHolder="Nhập password"
+
+            { (
+              <FormControl
+                type="text"
+                placeHolder="Enter password"
+                wrapInputStyle=""
+                inputStyle="placeholder:text-lg text-black placeholder:font-serif"
+                hasLabel
+                id="password"
+                label="Password"
+                labelStyle="mb-1 font-serif"
+                value={fields.password}
+                onChange={(event) => handleFieldsChange("password", event.target.value)}
+                onType={() => handleFieldsType("password")}
+                onBlur={() => {
+                  if (isEmpty(fields.password)) {
+                    handleFieldsBlur("password", "Password is required");
+                  }
+                }}
+                hasError={!!errors?.password}
+                errorMessage={errors?.password}
+                disabled={isDisabled}
+              />
+            )}
+
+            <FormControl
+              type="select"
               wrapInputStyle=""
               inputStyle="placeholder:text-lg text-black placeholder:font-serif"
               hasLabel
-              id="password"
-              label="Password"
+              id="role"
+              label="Role"
               labelStyle="mb-1 font-serif"
-              value={fields.password}
-              onChange={(event) => handleFieldsChange("password", event.target.value)}
-              onType={() => handleFieldsType("password")}
-              onBlur={() =>
-                isEmpty(fields.password) && handleFieldsBlur("password", "Password là bắt buộc")
-              }
-              hasError={!!errors?.password}
-              errorMessage={errors?.password}
+              value={fields.role || ""}
+              onChange={(event) => handleFieldsChange("role", event.target.value)}
+              onType={() => handleFieldsType("role")}
+              onBlur={() => {
+                if (isEmpty(fields.role)) {
+                  handleFieldsBlur("role", "Role is required");
+                }
+              }}
+              hasError={!!errors?.role}
+              errorMessage={errors?.role}
               disabled={isDisabled}
+              options={[
+                { value: "", label: "Choose role" },
+                ...(Array.isArray(roles) ? roles : []).map((role) => ({
+                  value: String(role.id),
+                  label: role.name,
+                })),
+              ]}
             />
-            
 
-            
-            <FormControl
-  type="select"
-  wrapInputStyle=""
-  inputStyle="placeholder:text-lg text-black placeholder:font-serif"
-  hasLabel
-  id="role"
-  label="Vai trò"
-  labelStyle="mb-1 font-serif"
-  value={fields.role || ""}
-  onChange={(event) => handleFieldsChange("role", event.target.value)}
-  onType={() => handleFieldsType("role")}
-  onBlur={() =>
-    isEmpty(fields.role) && handleFieldsBlur("role", "Vai trò là bắt buộc")
-  }
-  hasError={!!errors?.role}
-  errorMessage={errors?.role}
-  disabled={isDisabled}
-  options={[
-    { value: "", label: "Chọn vai trò" },
-    ...(Array.isArray(roles) ? roles : []).map((role) => ({
-      value: String(role.id),
-      label: role.name,
-    })),
-  ]}
-/>
+            {/* <FormControl
+              type="select"
+              wrapInputStyle=""
+              inputStyle="placeholder:text-lg text-black placeholder:font-serif"
+              hasLabel
+              id="status"
+              label="Status"
+              labelStyle="mb-1 font-serif"
+              value={fields.status}
+              onChange={(event) => handleFieldsChange("status", event.target.value)}
+              onType={() => handleFieldsType("status")}
+              onBlur={() => {
+                if (isEmpty(fields.status)) {
+                  handleFieldsBlur("status", "Status is required");
+                }
+              }}
+              hasError={!!errors?.status}
+              errorMessage={errors?.status}
+              disabled={isDisabled}
+              options={[
+                { value: "", label: "Choose status" },
+                { value: "1", label: "Active" },
+                { value: "2", label: "Inactive" },
+              ]}
+            /> */}
           </div>
 
           <div className="flex items-center gap-4 mt-6">
@@ -292,10 +411,10 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
                 <button
                   type="button"
                   className="transition-all duration-700 text-black w-full py-2 rounded font-serif font-semibold bg-gray-200 hover:bg-gray-300"
-                  onClick={setToggle}
+                  onClick={handleClose}
                   disabled={pending}
                 >
-                  Hủy
+                  Cancel
                 </button>
                 <button
                   type="submit"
@@ -314,9 +433,9 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
               <button
                 type="button"
                 className="transition-all duration-700 hover:bg-black text-white bg-[#799aa1] w-full py-2 rounded font-serif font-semibold"
-                onClick={() => setToggle(false)}
+                onClick={handleClose}
               >
-                Đóng
+                Close
               </button>
             )}
           </div>

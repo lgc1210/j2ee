@@ -9,7 +9,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { showToast } from "../../Components/Toast/index.jsx";
 import StoreService from "../../Services/store";
-
+import * as XLSX from "xlsx";
 const FormControl = React.lazy(() => import("../../Components/FormControl/index.jsx"));
 const Loading = React.lazy(() => import("../../Components/Loading/index.jsx"));
 const Form = React.lazy(() => import("./Form/index.jsx"));
@@ -38,10 +38,10 @@ const SubHeader = ({ selectedRows, handleDeleteMultiple }) => {
         setToggle={() => setShowConfirmDelete(false)}
         onOk={handleDeleteMultiple}
         onCancel={() => setShowConfirmDelete(false)}
-        title="Bạn có chắc chắn muốn xóa không?"
-        message="Hành động này có thể được hoàn tác"
+        title="Are you sure you want to delete this?"
+        message="This action can be undone"
         okButtonText="OK"
-        cancelButtonText="Hủy"
+        cancelButtonText="Cancel"
       />
     </>
   );
@@ -219,17 +219,76 @@ const Stores = () => {
     setShowActions(!showActions);
   };
 
-  const handleImport = () => {
-    alert("Chức năng Import chưa được triển khai");
+  const handleImport = async () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".xlsx, .xls";
+
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      try {
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          const data = new Uint8Array(event.target.result);
+          const workbook = XLSX.read(data, { type: "array" });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+      
+          const mappedData = jsonData.map((item) => ({
+            name: item.Name || "Unnamed Store",
+            description: item.Description || null,
+            address: item.Address || null,
+            phone: item.Phone || null,
+            owner: { id: item.ownerId }, 
+            status: item.Status || "1",
+            open_time: item["Open Time"] || null,
+            close_time: item["Close Time"] || null,
+            image: item.Image || null,
+          }));
+
+          await StoreService.importStores(mappedData);
+          const response = await StoreService.getAllStores();
+          setStoresData(Array.isArray(response.data) ? response.data : []);
+          showToast("Import dữ liệu thành công (chỉ thêm mới)", "success");
+        };
+        reader.readAsArrayBuffer(file);
+      } catch (error) {
+        console.error("Lỗi khi import:", error);
+        showToast("Lỗi khi import dữ liệu", "error");
+      }
+    };
+
+    input.click();
   };
 
   const handleExport = () => {
-    alert("Chức năng Export chưa được triển khai");
+    const exportData = storesData.map((store) => ({
+      ID: store.id,
+      Name: store.name,
+      Description: store.description || "N/A",
+      Address: store.address || "N/A",
+      Phone: store.phone || "N/A",
+      "Owner Name": store.ownerId?.name || "N/A",
+      Status: store.status === "1" ? "Active" : "Inactive",
+      "Open Time": store.openTime || "N/A",
+      "Close Time": store.closeTime || "N/A",
+      "Created At": store.createdAt || "N/A",
+      "Updated At": store.updatedAt || "N/A",
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Stores");
+    XLSX.writeFile(workbook, "Stores_Export.xlsx");
+    showToast("Xuất file Excel thành công", "success");
   };
 
- 
   const filteredData = storesData.filter((store) =>
-    store.name.toLowerCase().includes(searchInput.toLowerCase())
+    (store.name || "").toLowerCase().includes(searchInput.toLowerCase())  
+ 
   );
 
   return (
@@ -262,7 +321,7 @@ const Stores = () => {
                 className="text-sm rounded-md w-fit transition-all duration-700 hover:bg-black text-white bg-[#435d63] p-2 font-serif font-semibold"
                 onClick={handleActionsClicked}
               >
-                <p>Hành động</p>
+                <p>Action</p>
               </button>
               {showActions && (
                 <div className="overflow-hidden absolute z-10 top-full right-0 rounded-md bg-white w-fit shadow-md">
@@ -273,19 +332,19 @@ const Stores = () => {
                       setShowForm(true);
                     }}
                   >
-                    Tạo mới
+                   Create
                   </button>
                   <button
                     className="p-2 px-4 hover:bg-black/10 w-full"
                     onClick={handleImport}
                   >
-                    Nhập
+                    Import
                   </button>
                   <button
                     className="p-2 px-4 hover:bg-black/10 w-full"
                     onClick={handleExport}
                   >
-                    Xuất
+                    Export
                   </button>
                 </div>
               )}
@@ -356,10 +415,10 @@ const Stores = () => {
         setToggle={() => setShowConfirmDeleteSingle(false)}
         onOk={confirmDeleteSingle}
         onCancel={() => setShowConfirmDeleteSingle(false)}
-        title="Bạn có chắc chắn muốn xóa cửa hàng này không?"
-        message="Hành động này có thể được hoàn tác"
+        title="Are you sure you want to delete this?"
+        message="This action can be undone"
         okButtonText="OK"
-        cancelButtonText="Hủy"
+        cancelButtonText="Cancel"
       />
 
       <ToastContainer />

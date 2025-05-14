@@ -20,9 +20,12 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
         name: initialData.name || "",
         status: initialData.status || "",
         image: initialData.Image || initialData.image || "", 
+        
       });
+      setErrors({});
     } else {
       setFields({ name: "", status: "", image: "" });
+      setErrors({});
     }
   }, [initialData]);
 
@@ -57,10 +60,10 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
   const validateForm = () => {
     let newErrors = {};
     if (isEmpty(fields.name)) {
-      newErrors.name = "Tên là bắt buộc";
+      newErrors.name = "Name is required";
     }
     if (isEmpty(fields.status)) {
-      newErrors.status = "Trạng thái là bắt buộc";
+      newErrors.status = "Status is required";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -80,7 +83,7 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
       };
 
       let response;
-      console.log("Dữ liệu gửi:", data); 
+   
       if (initialData) {
         response = await CategoryOfServiceService.updateCategoryOfServices(
           initialData.id,
@@ -166,19 +169,19 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
             )}
             <FormControl
               type="text"
-              placeHolder="Nhập tên danh mục"
+              placeHolder="Enter Name"
               wrapInputStyle=""
               inputStyle="placeholder:text-lg text-black placeholder:font-serif"
               hasLabel
               id="name"
-              label="Tên danh mục"
+              label="Name"
               labelStyle="mb-1 font-serif"
               value={fields.name}
               onChange={(event) => handleFieldsChange("name", event.target.value)}
               onType={() => handleFieldsType("name")}
               onBlur={() =>
                 isEmpty(fields.name) &&
-                handleFieldsBlur("name", "Tên danh mục là bắt buộc")
+                handleFieldsBlur("name", "Name is required")
               }
               hasError={!!errors?.name}
               errorMessage={errors?.name}
@@ -191,20 +194,20 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
               inputStyle="placeholder:text-lg text-black placeholder:font-serif"
               hasLabel
               id="status"
-              label="Trạng thái"
+              label="Status"
               labelStyle="mb-1 font-serif"
               value={fields.status}
               onChange={(event) => handleFieldsChange("status", event.target.value)}
               onType={() => handleFieldsType("status")}
               onBlur={() =>
                 isEmpty(fields.status) &&
-                handleFieldsBlur("status", "Trạng thái là bắt buộc")
+                handleFieldsBlur("status", "Status is required")
               }
               hasError={!!errors?.status}
               errorMessage={errors?.status}
               disabled={isDisabled}
               options={[
-                { value: "", label: "Chọn trạng thái" },
+                { value: "", label: "Choose status" },
                 { value: "1", label: "Active" },
                 { value: "2", label: "Inactive" },
               ]}
@@ -222,7 +225,7 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
                   onClick={setToggle}
                   disabled={pending}
                 >
-                  Hủy
+                  Cancel
                 </button>
                 <button
                   type="submit"
@@ -243,7 +246,7 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) 
                 className="transition-all duration-700 hover:bg-black text-white bg-[#799aa1] w-full py-2 rounded font-serif font-semibold"
                 onClick={() => setToggle(false)}
               >
-                Đóng
+               Close
               </button>
             )}
           </div>

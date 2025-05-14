@@ -24,7 +24,7 @@ public class OrderEntity {
 
     private String status;
 
-    private Double totle_amount;
+    private Double total_amount;
 
     private String shipping_address;
 

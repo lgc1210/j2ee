@@ -2,14 +2,10 @@ package j2ee.j2ee.apps.category_of_service;
 
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 
 @Service
 public class CategoryOfServiceService {
@@ -32,7 +28,6 @@ public class CategoryOfServiceService {
         return dto;
     }
 
-    // Chuyển từ CategoryOfServiceDTO sang CategoryOfServiceEntity
     private CategoryOfServiceEntity toEntity(CategoryOfServiceDTO dto) {
         CategoryOfServiceEntity entity = new CategoryOfServiceEntity();
         entity.setId(dto.getId());
@@ -42,7 +37,7 @@ public class CategoryOfServiceService {
         return entity;
     }
 
-    // Create (Tạo mới category)
+    // Create
     @Transactional
     public CategoryOfServiceDTO createCategory(CategoryOfServiceDTO categoryDTO) {
         CategoryOfServiceEntity entity = toEntity(categoryDTO);
@@ -50,21 +45,21 @@ public class CategoryOfServiceService {
         return toDTO(savedEntity);
     }
 
-    // Read (Lấy tất cả categories)
+    // Lấy tất cả categories
     public List<CategoryOfServiceDTO> getAllCategories() {
         return categoryRepository.findAll().stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
-    // Read (Lấy category theo ID)
+    // Lấy category theo ID
     public CategoryOfServiceDTO getCategoryById(Integer id) {
         return categoryRepository.findById(id)
                 .map(this::toDTO)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy category với ID: " + id));
     }
 
-    // Update (Cập nhật category)
+    // Update
     @Transactional
     public CategoryOfServiceDTO updateCategory(Integer id, CategoryOfServiceDTO categoryDTO) {
 
@@ -86,7 +81,7 @@ public class CategoryOfServiceService {
         categoryRepository.deleteById(id);
     }
 
-    // Delete
+    // Deletes
     @Transactional
     public void deleteMultipleCategories(List<Integer> ids) {
         categoryRepository.deleteAllByIdIn(ids);

@@ -33,6 +33,8 @@ public class UserEntity {
     private String phone;
 
     private String password;
+    @Column(unique = true)
+    private String status;
 
     @CreatedDate
     @Column(updatable = false)

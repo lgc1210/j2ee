@@ -12,11 +12,13 @@ import j2ee.j2ee.apps.service.ServiceEntity;
 import j2ee.j2ee.apps.store.StoreEntity;
 import j2ee.j2ee.apps.user.UserEntity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/appointments")
@@ -65,7 +67,8 @@ public class AppointmentController {
             }
 
             // Validate required fields
-            if (appointmentDateStr == null || appointmentTimeStr == null || customerId == null || staffId == null || serviceId == null || storeId == null) {
+            if (appointmentDateStr == null || appointmentTimeStr == null || customerId == null || staffId == null
+                    || serviceId == null || storeId == null) {
                 return ResponseEntity.badRequest().build();
             }
 
@@ -98,7 +101,8 @@ public class AppointmentController {
 
             AppointmentEntity createdAppointment = appointment.get();
 
-            URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(createdAppointment.getId()).toUri();
+            URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
+                    .buildAndExpand(createdAppointment.getId()).toUri();
 
             return ResponseEntity.created(location).body(createdAppointment);
         } catch (Exception e) {
@@ -108,7 +112,8 @@ public class AppointmentController {
     }
 
     @GetMapping("/customer")
-    public ResponseEntity<Object> getAllByCustomerId(@RequestParam("customer_id") Long customer_id, @RequestParam("page") int page, @RequestParam("size") int size) {
+    public ResponseEntity<Object> getAllByCustomerId(@RequestParam("customer_id") Long customer_id,
+            @RequestParam("page") int page, @RequestParam("size") int size) {
         try {
             System.out.println("Customer ID: " + customer_id);
             var pageAppointments = this.appointmentService.getAllByCustomerId(customer_id, page, size);
@@ -143,4 +148,38 @@ public class AppointmentController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    @GetMapping("/filter_appointments")
+    public Map<String, Long> getAppointmentStats(
+            @RequestParam("filter") String filter,
+            @RequestParam(value = "specificFilter", required = false) String specificFilter) {
+        return appointmentService.getAppointmentStatistics(filter, specificFilter);
+    }
+
+    @GetMapping("/service-category-stats")
+    public Map<String, List<Map<String, Object>>> getServiceCategoryStats(
+            @RequestParam("timeFilter") String timeFilter,
+            @RequestParam(value = "specificFilter", defaultValue = "") String specificFilter) {
+        return appointmentService.getServiceCategoryStats(timeFilter, specificFilter);
+    }
+
+    // ------------------day-time--------------------
+    // lấy số lượng lịch hẹn theo ngày trong tuần
+    @GetMapping("/busiest-days")
+    public ResponseEntity<Map<String, Integer>> getBusiestDays(
+            @RequestParam("year") int year,
+            @RequestParam("week") int week) {
+        Map<String, Integer> busiestDays = appointmentService.getBusiestDays(year, week);
+        return ResponseEntity.ok(busiestDays);
+    }
+
+    // Endpoint lấy số lượng lịch hẹn theo khung giờ trong tuần
+    @GetMapping("/popular-time-slots")
+    public ResponseEntity<Map<String, Integer>> getPopularTimeSlots(
+            @RequestParam("year") int year,
+            @RequestParam("week") int week) {
+        Map<String, Integer> timeSlots = appointmentService.getPopularTimeSlots(year, week);
+        return ResponseEntity.ok(timeSlots);
+    }
+
 }

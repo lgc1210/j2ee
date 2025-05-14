@@ -64,6 +64,8 @@ const paths = {
 		"/admin/statistic/mostlestbookedservicecategories",
 	statisticBusiestDaysOfWeek: "/admin/statistic/busiestdaysofweek",
 	statisticPopularTimeSlotsForAppointments: "/admin/statistic/populartimeslots",
+	statistic1: "/admin/statistic/statistic1",
+	statistic2: "/admin/statistic/statistic2",
 };
 
 export default paths;

@@ -9,7 +9,7 @@ import RoleService from "../../Services/role";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { showToast } from "../../Components/Toast";
-
+import * as XLSX from "xlsx";
 const FormControl = React.lazy(() => import("../../Components/FormControl"));
 const Loading = React.lazy(() => import("../../Components/Loading"));
 const Form = React.lazy(() => import("./Form"));
@@ -38,10 +38,10 @@ const SubHeader = ({ selectedRows, handleDeleteMultiple }) => {
 				setToggle={() => setShowConfirmDelete(false)}
 				onOk={handleDeleteMultiple}
 				onCancel={() => setShowConfirmDelete(false)}
-				title='Bạn có chắc chắn muốn xóa không?'
-				message='Hành động này có thể được hoàn tác'
+				title='Are you sure you want to delete this?'
+				message='This action can be undone'
 				okButtonText='OK'
-				cancelButtonText='Hủy'
+				cancelButtonText='Cancel'
 			/>
 		</>
 	);
@@ -91,6 +91,7 @@ const Roles = () => {
 	const [selectedRows, setSelectedRows] = useState([]);
 	const [showForm, setShowForm] = useState(false);
 	const [rolesData, setRolesData] = useState([]);
+	const [filteredData, setFilteredData] = useState([]); // Thêm trạng thái filteredData
 	const [loading, setLoading] = useState(true);
 	const [editRole, setEditRole] = useState(null);
 	const [showConfirmDeleteSingle, setShowConfirmDeleteSingle] = useState(false);
@@ -103,6 +104,7 @@ const Roles = () => {
 				setLoading(true);
 				const response = await RoleService.getAllRoles();
 				setRolesData(response.data);
+				setFilteredData(response.data); // Khởi tạo filteredData
 			} catch (error) {
 				console.error("Lỗi khi lấy danh sách roles:", error);
 				showToast("Lỗi khi tải danh sách roles", "error");
@@ -113,6 +115,14 @@ const Roles = () => {
 		fetchRoles();
 	}, []);
 
+	// Lọc dữ liệu khi searchInput hoặc rolesData thay đổi
+	useEffect(() => {
+		const filtered = rolesData.filter((item) =>
+			item.name.toLowerCase().includes(searchInput.toLowerCase())
+		);
+		setFilteredData(filtered);
+	}, [searchInput, rolesData]);
+
 	const handleFieldsChange = (key, value) => {
 		setSearchInput(value);
 	};
@@ -120,6 +130,7 @@ const Roles = () => {
 	const handleRowsSelected = ({ selectedRows }) => {
 		setSelectedRows(selectedRows);
 	};
+
 	const handleDeleteMultiple = async () => {
 		const ids = selectedRows.map((row) => row.id);
 		console.log("ids:" + ids);
@@ -188,11 +199,19 @@ const Roles = () => {
 	};
 
 	const handleImport = () => {
-		alert("Chức năng Import chưa được triển khai");
+		alert("");
 	};
 
 	const handleExport = () => {
-		alert("Chức năng Export chưa được triển khai");
+		const exportData = rolesData.map((role) => ({
+			ID: role.id,
+			Name: role.name,
+		}));
+		const worksheet = XLSX.utils.json_to_sheet(exportData);
+		const workbook = XLSX.utils.book_new();
+		XLSX.utils.book_append_sheet(workbook, worksheet, "Roles");
+		XLSX.writeFile(workbook, "Roles_Export.xlsx");
+		showToast("Xuất file Excel thành công", "success");
 	};
 
 	return (
@@ -224,7 +243,7 @@ const Roles = () => {
 								type='submit'
 								className='text-sm rounded-md w-fit transition-all duration-700 hover:bg-black text-white bg-[#435d63] p-2 font-serif font-semibold'
 								onClick={handleActionsClicked}>
-								<p>Hành động</p>
+								<p>Action</p>
 							</button>
 							{showActions && (
 								<div className='overflow-hidden absolute z-10 top-full right-0 rounded-md bg-white w-fit shadow-md'>
@@ -234,17 +253,17 @@ const Roles = () => {
 											setEditRole(null);
 											setShowForm(true);
 										}}>
-										Tạo mới
+										Create
 									</button>
 									<button
 										className='p-2 px-4 hover:bg-black/10 w-full'
 										onClick={handleImport}>
-										Nhập
+										Import
 									</button>
 									<button
 										className='p-2 px-4 hover:bg-black/10 w-full'
 										onClick={handleExport}>
-										Xuất
+										Export
 									</button>
 								</div>
 							)}
@@ -275,7 +294,7 @@ const Roles = () => {
 									/>
 								}
 								columns={columns}
-								data={rolesData}
+								data={filteredData}
 								selectableRowsComponent={SelectBox}
 								selectableRowsComponentProps={{
 									style: {
@@ -300,6 +319,7 @@ const Roles = () => {
 				initialData={editRole}
 				onSubmit={handleFormSubmit}
 				isDisabled={false}
+				rolesData={rolesData}
 			/>
 
 			<Form
@@ -308,6 +328,7 @@ const Roles = () => {
 				initialData={selectedRow}
 				onSubmit={() => {}}
 				isDisabled={true}
+				rolesData={rolesData}
 			/>
 
 			<ConfirmPopup
@@ -315,10 +336,10 @@ const Roles = () => {
 				setToggle={() => setShowConfirmDeleteSingle(false)}
 				onOk={confirmDeleteSingle}
 				onCancel={() => setShowConfirmDeleteSingle(false)}
-				title='Bạn có chắc chắn muốn xóa role này không?'
-				message='Hành động này có thể được hoàn tác'
+				title='Are you sure you want to delete this?'
+				message='This action can be undone'
 				okButtonText='OK'
-				cancelButtonText='Hủy'
+				cancelButtonText='Cancel'
 			/>
 		</>
 	);

@@ -9,7 +9,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { showToast } from "../../Components/Toast/index.jsx";
 import CategoryOfServiceService from "../../Services/categoryOfService";
-
+import * as XLSX from "xlsx";
 const FormControl = React.lazy(() => import("../../Components/FormControl/index.jsx"));
 const Loading = React.lazy(() => import("../../Components/Loading/index.jsx"));
 const Form = React.lazy(() => import("./Form/index.jsx"));
@@ -38,10 +38,10 @@ const SubHeader = ({ selectedRows, handleDeleteMultiple }) => {
         setToggle={() => setShowConfirmDelete(false)}
         onOk={handleDeleteMultiple}
         onCancel={() => setShowConfirmDelete(false)}
-        title="Bạn có chắc chắn muốn xóa không?"
-        message="Hành động này có thể được hoàn tác"
+        title="Are you sure you want to delete this?"
+        message="This action can be undone"
         okButtonText="OK"
-        cancelButtonText="Hủy"
+        cancelButtonText="Cancel"
       />
     </>
   );
@@ -52,7 +52,7 @@ const SelectBox = React.forwardRef(({ ...props }) => {
     <input
       type="checkbox"
       {...props}
-      className="w-4 h-4 text-[#435d63] bg-[#435d63] border-gray-200 rounded focus:ring-[#435d63]"
+      className="w-4 h-4 caused by: org.hibernate.query.sqm.UnknownPathException: Could not resolve attribute 'create_at' of 'j2ee.j2ee.apps.order.OrderEntity' text-[#435d63] bg-[#435d63] border-gray-200 rounded focus:ring-[#435d63]"
     />
   );
 });
@@ -64,7 +64,7 @@ const Categories = () => {
       sortable: true,
       cell: (row) => (
         <img
-          src={`/assets/images/categoryOfService/${row.image}`} 
+          src={`/assets/images/categoryOfService/${row.image}`}
           alt="Category"
           style={{ width: "50px", height: "50px", objectFit: "cover" }}
         />
@@ -78,7 +78,7 @@ const Categories = () => {
     {
       name: "Status",
       sortable: true,
-      selector: (row) => (row.status === "1" ? "Active" : "Inactive"), 
+      selector: (row) => (row.status === "1" ? "Active" : "Inactive"),
     },
     {
       name: "Actions",
@@ -107,6 +107,7 @@ const Categories = () => {
   const [selectedRows, setSelectedRows] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [categoryOSsData, setCategoryOSsData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [editCategoryOS, setEditCategoryOS] = useState(null);
   const [showConfirmDeleteSingle, setShowConfirmDeleteSingle] = useState(false);
@@ -119,6 +120,7 @@ const Categories = () => {
         setLoading(true);
         const response = await CategoryOfServiceService.getAllCategoryOfServices();
         setCategoryOSsData(response.data);
+        setFilteredData(response.data); 
       } catch (error) {
         showToast("Lỗi khi tải danh sách", "error");
       } finally {
@@ -127,6 +129,14 @@ const Categories = () => {
     };
     fetchRoles();
   }, []);
+
+  // Lọc dữ liệu khi searchInput thay đổi
+  useEffect(() => {
+    const filtered = categoryOSsData.filter((item) =>
+      item.name.toLowerCase().includes(searchInput.toLowerCase())
+    );
+    setFilteredData(filtered);
+  }, [searchInput, categoryOSsData]);
 
   const handleFieldsChange = (key, value) => {
     setSearchInput(value);
@@ -171,7 +181,7 @@ const Categories = () => {
     setShowForm(true);
   };
 
-  const handleFormSubmit = async (newCategoryData) => { 
+  const handleFormSubmit = async (newCategoryData) => {
     try {
       if (editCategoryOS) {
         const response = await CategoryOfServiceService.updateCategoryOfServices(
@@ -183,11 +193,11 @@ const Categories = () => {
             categoryOfService.id === editCategoryOS.id ? response.data : categoryOfService
           )
         );
-        // showToast("Cập nhật thành công", "success");
+        showToast("Cập nhật thành công", "success");
       } else {
         const response = await CategoryOfServiceService.createCategoryOfServices(newCategoryData);
         setCategoryOSsData([...categoryOSsData, response.data]);
-        // showToast("Tạo thành công", "success");
+        showToast("Tạo thành công", "success");
       }
       setShowForm(false);
       setEditCategoryOS(null);
@@ -196,6 +206,7 @@ const Categories = () => {
       showToast("Lỗi khi lưu", "error");
     }
   };
+
   const handleRowClicked = (row) => {
     setSelectedRow(row);
   };
@@ -205,11 +216,20 @@ const Categories = () => {
   };
 
   const handleImport = () => {
-    alert("Chức năng Import chưa được triển khai");
+    alert("");
   };
 
   const handleExport = () => {
-    alert("Chức năng Export chưa được triển khai");
+    const exportData = categoryOSsData.map((item) => ({
+      ID: item.id,
+      Name: item.name,
+      Status: item.status === "1" ? "Active" : "Inactive",
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "CategoryOSs");
+    XLSX.writeFile(workbook, "CategoryOSs_Export.xlsx");
+    showToast("Xuất file Excel thành công", "success");
   };
 
   return (
@@ -242,7 +262,7 @@ const Categories = () => {
                 className="text-sm rounded-md w-fit transition-all duration-700 hover:bg-black text-white bg-[#435d63] p-2 font-serif font-semibold"
                 onClick={handleActionsClicked}
               >
-                <p>Hành động</p>
+                <p>Action</p>
               </button>
               {showActions && (
                 <div className="overflow-hidden absolute z-10 top-full right-0 rounded-md bg-white w-fit shadow-md">
@@ -253,19 +273,19 @@ const Categories = () => {
                       setShowForm(true);
                     }}
                   >
-                    Tạo mới
+                    Create
                   </button>
                   <button
                     className="p-2 px-4 hover:bg-black/10 w-full"
                     onClick={handleImport}
                   >
-                    Nhập
+                    Import
                   </button>
                   <button
                     className="p-2 px-4 hover:bg-black/10 w-full"
                     onClick={handleExport}
                   >
-                    Xuất
+                    Export
                   </button>
                 </div>
               )}
@@ -296,8 +316,8 @@ const Categories = () => {
                   />
                 }
                 columns={columns}
-                data={categoryOSsData}
-                selectableRowsComponent={SelectBox}
+                data={filteredData}
+                selectableRowscomponent={SelectBox}
                 selectableRowsComponentProps={{
                   style: {
                     backgroundColor: "white",
@@ -336,13 +356,11 @@ const Categories = () => {
         setToggle={() => setShowConfirmDeleteSingle(false)}
         onOk={confirmDeleteSingle}
         onCancel={() => setShowConfirmDeleteSingle(false)}
-        title="Bạn có chắc chắn muốn xóa này không?"
-        message="Hành động này có thể được hoàn tác"
+        title="Are you sure you want to delete this?"
+        message="This action can be undone"
         okButtonText="OK"
-        cancelButtonText="Hủy"
+        cancelButtonText="Cancel"
       />
-
-      <ToastContainer />
     </>
   );
 };
