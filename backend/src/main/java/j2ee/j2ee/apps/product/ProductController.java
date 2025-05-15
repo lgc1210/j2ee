@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.core.Authentication;
 import j2ee.j2ee.apps.user.UserEntity;
-import j2ee.j2ee.apps.user.UserRepository;
+import j2ee.j2ee.apps.user.UserService;
 
 @RestController
 @RequestMapping("/api/products")
@@ -25,7 +25,7 @@ public class ProductController {
     private ProductService productService;
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @GetMapping()
     public ResponseEntity<List<ProductEntity>> getAll() {
@@ -83,7 +83,7 @@ public class ProductController {
             System.out.println("Logged-in username: " + username);
 
             // Tìm UserEntity dựa trên email (username)
-            Optional<UserEntity> userOptional = userRepository.findByEmail(username);
+            Optional<UserEntity> userOptional = userService.getByEmail(username);
             if (userOptional.isEmpty()) {
                 return ResponseEntity.status(404).build();
             }
@@ -107,9 +107,11 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductEntity> createProduct(@RequestBody ProductEntity product) {
+    public ResponseEntity<ProductEntity> createProduct(
+            @RequestBody ProductEntity product,
+            Authentication authentication) {
         try {
-            ProductEntity createdProduct = productService.createProduct(product);
+            ProductEntity createdProduct = productService.createProduct(product, authentication);
             return ResponseEntity.ok(createdProduct);
         } catch (Exception e) {
             System.err.println("Error creating product: " + e.getMessage());

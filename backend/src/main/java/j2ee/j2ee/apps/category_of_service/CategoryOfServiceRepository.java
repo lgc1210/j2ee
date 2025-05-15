@@ -9,4 +9,5 @@ import org.springframework.stereotype.Repository;
 public interface CategoryOfServiceRepository
         extends JpaRepository<CategoryOfServiceEntity, Integer> {
     void deleteAllByIdIn(List<Integer> ids);
+    
 }

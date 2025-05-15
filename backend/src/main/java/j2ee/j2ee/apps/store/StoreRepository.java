@@ -12,4 +12,6 @@ public interface StoreRepository extends JpaRepository<StoreEntity, Long> {
     @Query("SELECT s FROM stores s WHERE s.owner.id = :userId")
     Optional<StoreEntity> findStoreByUserId(@Param("userId") Long userId);
     void deleteAllByIdIn(List<Long> ids);
+
+    
 }

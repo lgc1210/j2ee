@@ -27,7 +27,7 @@ const items = [
   },
   {
     path: paths.owneremployees,
-    name: "Employees",
+    name: "Staff",
     requiredAuth: true,
     requiredRole: ["owner"],
   },

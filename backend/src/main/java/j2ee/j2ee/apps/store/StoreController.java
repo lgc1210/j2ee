@@ -10,14 +10,14 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import j2ee.j2ee.apps.user.UserRepository;
+import j2ee.j2ee.apps.user.UserService;
 
 @RestController
 @RequestMapping("/api/stores")
 public class StoreController {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Autowired
     private StoreService storeService;
@@ -44,7 +44,7 @@ public class StoreController {
             String username = authentication.getPrincipal().toString();
             System.out.println("Logged-in username: " + username);
 
-            Optional<UserEntity> userOptional = userRepository.findByEmail(username);
+            Optional<UserEntity> userOptional = userService.getByEmail(username);
             if (userOptional.isEmpty()) {
                 return ResponseEntity.status(404).build();
             }

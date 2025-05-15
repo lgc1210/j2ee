@@ -4,10 +4,9 @@ import java.util.HashMap;
 import java.util.Optional;
 import java.util.List;
 
-import j2ee.j2ee.apps.product.ProductEntity;
-import j2ee.j2ee.apps.service.ServiceEntity;
+
 import j2ee.j2ee.apps.user.UserEntity;
-import j2ee.j2ee.apps.user.UserRepository;
+import j2ee.j2ee.apps.user.UserService;
 import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -24,7 +23,7 @@ import j2ee.j2ee.apps.user.UserEntity;
 public class ServiceController {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
     @Autowired
     private ServiceService serviceSerivce;
 
@@ -36,7 +35,7 @@ public class ServiceController {
             System.out.println("Logged-in username: " + username);
 
             // Tìm UserEntity dựa trên email (username)
-            Optional<UserEntity> userOptional = userRepository.findByEmail(username);
+            Optional<UserEntity> userOptional = userService.getByEmail(username);
             if (userOptional.isEmpty()) {
                 return ResponseEntity.status(404).build();
             }
@@ -61,9 +60,9 @@ public class ServiceController {
     }
 
     @PostMapping
-    public ResponseEntity<ServiceEntity> createService(@RequestBody ServiceEntity serviceEntity) {
+    public ResponseEntity<ServiceEntity> createService(@RequestBody ServiceEntity serviceEntity, Authentication authentication) {
         try {
-            ServiceEntity createdService = serviceSerivce.createService(serviceEntity);
+            ServiceEntity createdService = serviceSerivce.createService(serviceEntity, authentication);
             return ResponseEntity.ok(createdService);
         } catch (Exception e) {
             System.err.println("Error creating service: " + e.getMessage());
