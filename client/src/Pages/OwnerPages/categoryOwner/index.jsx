@@ -8,7 +8,7 @@ import ConfirmPopup from "../../../Components/ConfirmPopup/index.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { showToast } from "../../../Components/Toast/index.jsx";
-import CategoryService from "../../../Services/category";
+import CategoryService from "../../../Services/category/index.js";
 
 // const FormControl = React.lazy(() =>
 //   import("../../Components/FormControl/index.jsx")

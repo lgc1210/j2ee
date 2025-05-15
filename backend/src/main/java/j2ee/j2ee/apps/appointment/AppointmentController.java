@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import j2ee.j2ee.apps.payment.PaymentDTO;
+import j2ee.j2ee.apps.payment.PaymentEntity;
+import j2ee.j2ee.apps.payment.PaymentService;
 import j2ee.j2ee.apps.service.ServiceEntity;
 import j2ee.j2ee.apps.store.StoreEntity;
 import j2ee.j2ee.apps.user.UserEntity;
@@ -15,10 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/appointments")
@@ -26,6 +25,8 @@ public class AppointmentController {
 
     @Autowired
     private AppointmentService appointmentService;
+    @Autowired
+    private PaymentService paymentService;
 
     @PostMapping
     public ResponseEntity<AppointmentEntity> create(@RequestBody Map<String, Object> payload) {
@@ -180,6 +181,51 @@ public class AppointmentController {
             @RequestParam("week") int week) {
         Map<String, Integer> timeSlots = appointmentService.getPopularTimeSlots(year, week);
         return ResponseEntity.ok(timeSlots);
+    }
+
+    @GetMapping("/store/{storeId}")
+    public ResponseEntity<List<AppointmentEntity>> getByStoreId(@PathVariable Long storeId) {
+        try {
+            var appointmentList = this.appointmentService.getByStoreId(storeId);
+            if (appointmentList.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            return ResponseEntity.ok(appointmentList);
+        } catch (Exception e) {
+            System.err.println("Internal Server Error: " + e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    public String getMethodName(@RequestParam String param) {
+        return new String();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<AppointmentEntity> updateAppointmentStatus(
+            @PathVariable("id") Long appointmentId,
+            @RequestParam("status") String status,
+            @RequestBody(required = false) PaymentEntity payment) {
+
+        status = status.substring(0, 1).toUpperCase() + status.substring(1).toLowerCase();
+
+        Optional<AppointmentEntity> updatedAppointment = appointmentService.updateStatus(appointmentId, status);
+
+        AppointmentEntity appointment = updatedAppointment.orElse(null);
+
+        if (payment != null && status.equals("Completed")) {
+            payment.setAppointment(appointment);
+            if (paymentService.createPayment(payment) == null) {
+                System.err.println("Failed to create payment");
+                return ResponseEntity.internalServerError().build();
+            }
+            ;
+        }
+
+        return updatedAppointment
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
 }

@@ -3,33 +3,14 @@ package j2ee.j2ee.apps.category;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
-import j2ee.j2ee.apps.store.StoreDTO;
-import j2ee.j2ee.apps.store.StoreEntity;
-import j2ee.j2ee.apps.store.StoreRepository;
-import j2ee.j2ee.apps.user.UserEntity;
-import j2ee.j2ee.apps.user.UserRepository;
-import j2ee.j2ee.constants.ErrorMessages;
-import org.apache.catalina.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import j2ee.j2ee.apps.role.RoleEntity;
-import j2ee.j2ee.apps.role.RoleRepository;
-import j2ee.j2ee.constants.ErrorMessages;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CategoryService {
     private final CategoryRepository categoryRepository;
-    private final StoreRepository storeRepository;
 
-    @Autowired
-    public CategoryService(CategoryRepository categoryRepository, StoreRepository storeRepository) {
+    public CategoryService(CategoryRepository categoryRepository) {
         this.categoryRepository = categoryRepository;
-        this.storeRepository = storeRepository;
     }
 
     public List<CategoryEntity> getAll() {
@@ -40,7 +21,30 @@ public class CategoryService {
         return categoryRepository.findById(id);
     }
 
-    public List<CategoryEntity> getListByStoreId(Long storeId) {
-        return categoryRepository.findByStoreId(storeId);
+    public List<CategoryEntity> getAllActiveCategories() {
+        return categoryRepository.findActiveCategories();
+    }
+
+    public CategoryEntity createCategory(CategoryEntity category) {
+        return categoryRepository.save(category);
+    }
+
+    public Optional<CategoryEntity> updateCategory(Long id, CategoryEntity categoryDetails) {
+        return categoryRepository.findById(id).map(category -> {
+            category.setName(categoryDetails.getName());
+            category.setStore(categoryDetails.getStore());
+            return categoryRepository.save(category);
+        });
+    }
+
+    public Optional<CategoryEntity> deleteCategory(Long id) {
+        Optional<CategoryEntity> categoryOpt = categoryRepository.findById(id);
+        if (categoryOpt.isPresent()) {
+            CategoryEntity category = categoryOpt.get();
+            category.setDeleted_at(LocalDateTime.now());
+            categoryRepository.save(category);
+            return Optional.of(category);
+        }
+        return Optional.empty();
     }
 }

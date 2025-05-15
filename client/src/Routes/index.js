@@ -17,7 +17,6 @@ const categoryOwner = lazy(() => import("../Pages/OwnerPages/categoryOwner"));
 const appointmentOwner = lazy(() =>
 	import("../Pages/OwnerPages/appointmentOwner")
 );
-const CategoryOwner = lazy(() => import("../Pages/OwnerPages/categoryOwner"));
 const orderOwner = lazy(() => import("../Pages/OwnerPages/orderOwner"));
 const reviewOwner = lazy(() => import("../Pages/OwnerPages/reviewOwner"));
 const statisticOwner = lazy(() =>

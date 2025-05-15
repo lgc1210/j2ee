@@ -6,6 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+
+import javax.management.relation.Role;
+
+import j2ee.j2ee.apps.role.RoleEntity;
+
 @Builder
 @Data
 @AllArgsConstructor
@@ -17,6 +22,6 @@ public class UserDTO {
     private String phone;
     private LocalDate createdAt;
     private LocalDate updatedAt;
-    private Long roleId;
+    private RoleEntity role;
     private String status;
 }
