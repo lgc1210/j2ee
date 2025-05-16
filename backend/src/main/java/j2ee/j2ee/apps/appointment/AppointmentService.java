@@ -1,6 +1,5 @@
 package j2ee.j2ee.apps.appointment;
 
-import java.util.Optional;
 import j2ee.j2ee.apps.service.ServiceEntity;
 import j2ee.j2ee.apps.service.ServiceRepository;
 import j2ee.j2ee.apps.store.StoreEntity;
@@ -302,5 +301,20 @@ public class AppointmentService {
 
     public Optional<AppointmentEntity> getById(long appointmentId) {
         return this.appointmentRepository.findById(appointmentId);
+    }
+
+    public List<AppointmentEntity> getByStoreId(long storeId) {
+        return this.appointmentRepository.findByStore_Id(storeId);
+    }
+
+    public Optional<AppointmentEntity> updateStatus(Long appointmentId, String newStatus) {
+        Optional<AppointmentEntity> appointmentOpt = appointmentRepository.findById(appointmentId);
+        if (appointmentOpt.isPresent()) {
+            AppointmentEntity appointment = appointmentOpt.get();
+            appointment.setStatus(newStatus);
+            appointmentRepository.save(appointment);
+            return Optional.of(appointment);
+        }
+        return Optional.empty();
     }
 }

@@ -1,36 +1,36 @@
 package j2ee.j2ee.apps.user;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
-import j2ee.j2ee.apps.store.StoreDTO;
-import j2ee.j2ee.apps.store.StoreEntity;
 import j2ee.j2ee.constants.ErrorMessages;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import j2ee.j2ee.apps.role.RoleEntity;
 import j2ee.j2ee.apps.role.RoleRepository;
-import j2ee.j2ee.constants.ErrorMessages;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.swing.text.html.Option;
-
 @Service
 public class UserService {
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
-    private final PasswordEncoder passwordEncoder;
-
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, RoleRepository roleRepository) {
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.passwordEncoder = passwordEncoder;
+    private UserRepository userRepository;
+    @Autowired
+    private RoleRepository roleRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    public UserDTO toUserDTO(UserEntity user) {
+        UserDTO dto = new UserDTO();
+        dto.setId(user.getId());
+        dto.setName(user.getName());
+        dto.setEmail(user.getEmail());
+        dto.setPhone(user.getPhone());
+        dto.setCreatedAt(user.getCreated_at());
+        dto.setUpdatedAt(user.getUpdate_at());
+        dto.setRole(user.getRole());
+        dto.setStatus(user.getStatus());
+
+        return dto;
     }
 
     public List<UserEntity> getAll() {
@@ -70,7 +70,8 @@ public class UserService {
                     .orElseThrow(() -> new RuntimeException("Customer role not found"));
         } else {
 
-            role = roleRepository.findById(user.getRole().getId()).orElseThrow(() -> new RuntimeException("Selected role not found"));
+            role = roleRepository.findById(user.getRole().getId())
+                    .orElseThrow(() -> new RuntimeException("Selected role not found"));
         }
         user.setRole(role);
 
@@ -118,8 +119,6 @@ public class UserService {
         userRepository.deleteAllByIdIn(ids);
     }
 
-
     // Mã hóa mật khẩu
-
 
 }

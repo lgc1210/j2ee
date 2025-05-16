@@ -2,12 +2,7 @@ package j2ee.j2ee.apps.service;
 
 import j2ee.j2ee.apps.category_of_service.CategoryOfServiceEntity;
 import j2ee.j2ee.apps.store.StoreEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity(name = "services")
@@ -20,6 +15,7 @@ public class ServiceEntity {
 
     private String name;
 
+    @Column(length = 500)
     private String description;
 
     private Double price;

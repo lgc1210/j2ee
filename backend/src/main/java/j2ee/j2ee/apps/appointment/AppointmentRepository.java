@@ -13,6 +13,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AppointmentRepository extends JpaRepository<AppointmentEntity, Long> {
+        List<AppointmentEntity> findByStore_Id(Long storeId);
+
         Page<AppointmentEntity> findAllByCustomerId(Long customerId, Pageable pageable);
 
         // All time count

@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CategoryRepository extends JpaRepository<CategoryEntity, Long> {
-    @Query(value = "SELECT * FROM categories WHERE store_id = :storeId", nativeQuery = true)
-    List<CategoryEntity> findByStoreId(@Param("storeId") Long storeId);
+    @Query("SELECT c FROM categories c WHERE c.deleted_at IS NULL")
+    List<CategoryEntity> findActiveCategories();
 }
