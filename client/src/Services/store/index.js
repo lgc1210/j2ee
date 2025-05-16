@@ -15,7 +15,7 @@ class StoreService {
 	};
 
 	// Xóa nhiều Store
-	deleteMultipleStores = async (storeIds) => {
+	static deleteMultipleStores = async (storeIds) => {
 		return await apiInstance.delete(`${baseURL}/stores/delete-multiple`, {
 			data: storeIds,
 			headers: {
@@ -24,8 +24,31 @@ class StoreService {
 		});
 	};
 	// Import Stores
-	importStores = async (stores) => {
+	static importStores = async (stores) => {
 		return await apiInstance.post(`${baseURL}/stores/import`, stores, {
+			headers: { "Content-Type": "application/json" },
+		});
+	};
+	// Lấy Store  theo ID
+	static getStoreById = async (roleId) => {
+		return await apiInstance.get(`${baseURL}/stores/${roleId}`, {
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
+	};
+
+	static getStoreBylogin = async () => {
+		return await apiInstance.get(`${baseURL}/stores/mystore`, {
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
+	};
+
+	// Cập nhật Store
+	static updateStore = async (storeId, payload) => {
+		return await apiInstance.put(`${baseURL}/stores/${storeId}`, payload, {
 			headers: {
 				"Content-Type": "application/json",
 			},

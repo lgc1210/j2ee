@@ -64,7 +64,8 @@ public class AvailabilityService {
         for (TimeSlotDTO slot : allTimeSlots) {
             boolean isSlotAvailable = false;
             for (UserEntity staff : staffList) {
-                List<AppointmentEntity> staffAppointments = appointmentRepository.findStaffAndAppointmentDate(staff, appointment_date);
+                List<AppointmentEntity> staffAppointments = appointmentRepository.findStaffAndAppointmentDate(staff,
+                        appointment_date);
                 System.out.println("Staff appointments: " + staffAppointments);
                 if (isTimeSlotAvailableForStaff(slot, staffAppointments)) {
                     isSlotAvailable = true;
@@ -79,8 +80,10 @@ public class AvailabilityService {
         return availableTimeSlots;
     }
 
-    // Step 2: Get available staff for a specific time slot, date, service, and store
-    public List<StaffAvailabilityDTO> getAvailableStaffForTimeSlot(long service_id, long store_id, LocalDate appointment_date, LocalTime appointment_start_time, LocalTime appointment_end_time) {
+    // Step 2: Get available staff for a specific time slot, date, service, and
+    // store
+    public List<StaffAvailabilityDTO> getAvailableStaffForTimeSlot(long service_id, long store_id,
+            LocalDate appointment_date, LocalTime appointment_start_time, LocalTime appointment_end_time) {
         Optional<ServiceEntity> serviceOptional = serviceRepository.findById(service_id);
         Optional<StoreEntity> storeOptional = storeRepository.findById(store_id);
 
@@ -100,7 +103,8 @@ public class AvailabilityService {
         List<StaffAvailabilityDTO> availableStaff = new ArrayList<>();
 
         for (UserEntity staff : staffList) {
-            List<AppointmentEntity> staffAppointments = appointmentRepository.findStaffAndAppointmentDate(staff, appointment_date);
+            List<AppointmentEntity> staffAppointments = appointmentRepository.findStaffAndAppointmentDate(staff,
+                    appointment_date);
 
             TimeSlotDTO selectedSlot = new TimeSlotDTO(appointment_start_time, appointment_end_time);
             if (isTimeSlotAvailableForStaff(selectedSlot, staffAppointments)) {
