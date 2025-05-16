@@ -28,6 +28,8 @@ public class StoreController {
             @RequestParam(name = "page") int page,
             @RequestParam(name = "size") int size) {
         try {
+            System.out.println("page " + page);
+            System.out.println("size " + size);
             Page<StoreEntity> pageStores = this.storeService.getAllStorePage(page, size);
             if (pageStores.isEmpty()) {
                 return ResponseEntity.notFound().build();

@@ -4,8 +4,6 @@ import dayjs from "dayjs";
 import moment from "moment";
 import "./index.css";
 import AppointmentService from "../../Services/appointment";
-import { FaArrowRightLong } from "react-icons/fa6";
-import { showToast } from "../../Components/Toast";
 import StoreService from "../../Services/store";
 
 const Button = React.lazy(() => import("../Button"));
@@ -17,6 +15,7 @@ const BookingSelectDate = ({
 	handleSelectDateTimeStaff,
 	selectedServiceId,
 	storeId,
+	loading,
 }) => {
 	const [value, setValue] = useState(() => dayjs(Date.now()));
 	const [selectedValue, setSelectedValue] = useState(() => dayjs(Date.now()));
@@ -25,20 +24,20 @@ const BookingSelectDate = ({
 	const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
 	const [selectedStaffId, setSelectedStaffId] = useState(null);
 	const [storeCloseTime, setStoreCloseTime] = useState(null);
+	const [fetchingTimeSlots, setFetchingTimeSlots] = useState(false);
+	const [fetchingStaff, setFetchingStaff] = useState(false);
 
 	// Fetch store details (including close_time)
 	useEffect(() => {
 		const fetchStoreDetails = async () => {
 			if (!storeId) return;
 			try {
-				const response = await StoreService.getStoreCloseTimeById(storeId); // Assume this API exists
+				const response = await StoreService.getStoreCloseTimeById(storeId);
 				if (response.status === 200 && response.data) {
-					console.log("Store close time: ", response.data);
-					setStoreCloseTime(response.data); // e.g., "19:00:00"
+					setStoreCloseTime(response.data);
 				}
 			} catch (error) {
 				console.error("Error fetching store details:", error);
-				showToast("Failed to load store details", "error");
 			}
 		};
 		fetchStoreDetails();
@@ -48,12 +47,12 @@ const BookingSelectDate = ({
 	const fetchAvailableTimeSlots = useCallback(
 		async (date) => {
 			if (!selectedServiceId || !storeId) {
-				showToast("Service or store information is missing", "error");
 				setAvailableTimeSlots([]);
 				return;
 			}
 
 			try {
+				setFetchingTimeSlots(true);
 				const formattedDate = date.format("YYYY-MM-DD");
 				const response = await AppointmentService.getAvailableTimeSlots(
 					storeId,
@@ -64,12 +63,12 @@ const BookingSelectDate = ({
 					setAvailableTimeSlots(response.data);
 				} else {
 					setAvailableTimeSlots([]);
-					showToast("No available time slots found", "warning");
 				}
 			} catch (error) {
 				console.error("Error fetching available time slots:", error);
-				showToast("Failed to load available time slots", "error");
 				setAvailableTimeSlots([]);
+			} finally {
+				setFetchingTimeSlots(false);
 			}
 		},
 		[selectedServiceId, storeId]
@@ -84,6 +83,7 @@ const BookingSelectDate = ({
 			}
 
 			try {
+				setFetchingStaff(true);
 				const formattedDate = selectedValue.format("YYYY-MM-DD");
 				const response = await AppointmentService.getAvailableStaff(
 					storeId,
@@ -96,12 +96,12 @@ const BookingSelectDate = ({
 					setAvailableStaff(response.data);
 				} else {
 					setAvailableStaff([]);
-					showToast("No staff available for this time slot", "warning");
 				}
 			} catch (error) {
 				console.error("Error fetching available staff:", error);
-				showToast("Failed to load available staff", "error");
 				setAvailableStaff([]);
+			} finally {
+				setFetchingStaff(false);
 			}
 		},
 		[selectedServiceId, storeId, selectedValue]
@@ -146,75 +146,6 @@ const BookingSelectDate = ({
 
 		return false;
 	};
-
-	const dateFullCellRender = (date) => {
-		const day = date.date();
-		const isSelected =
-			selectedValue &&
-			day === selectedValue.date() &&
-			date.month() === selectedValue.month() &&
-			date.year() === selectedValue.year();
-
-		return (
-			<div
-				style={{
-					textAlign: "center",
-					height: "6rem",
-					display: "flex",
-					alignItems: "center",
-					justifyContent: "center",
-					fontSize: "1.2rem",
-					border: "1px #fafafa solid",
-					background: isSelected ? "#fff" : "#f5f5f5",
-					...(isSelected && {
-						border: "1px #ccc solid",
-						margin: "auto",
-						position: "relative",
-					}),
-				}}
-				onMouseEnter={(e) => {
-					if (!isSelected) {
-						e.currentTarget.style.background = "#e6e6e6";
-					}
-				}}
-				onMouseLeave={(e) => {
-					if (!isSelected) {
-						e.currentTarget.style.background = "#f5f5f5";
-					}
-				}}>
-				{isSelected && (
-					<div
-						style={{
-							position: "absolute",
-							width: "40px",
-							height: "40px",
-							border: "2px #000 solid",
-							top: "50%",
-							left: "50%",
-							transform: "translate(-50%, -50%)",
-							zIndex: -1,
-						}}
-					/>
-				)}
-				<span style={{ position: "relative", zIndex: 1 }}>{day}</span>
-			</div>
-		);
-	};
-
-	const headerRender = ({ value }) => (
-		<div
-			style={{
-				background: "#383838",
-				color: "#fff",
-				fontSize: "1.1rem",
-				padding: "18px",
-				textAlign: "center",
-				letterSpacing: "0.1rem",
-				textTransform: "uppercase",
-			}}>
-			{value.format("MMMM YYYY")}
-		</div>
-	);
 
 	const handleTimeSelection = (slot) => {
 		setSelectedTimeSlot(slot);
@@ -269,38 +200,46 @@ const BookingSelectDate = ({
 	};
 
 	return (
-		<Suspense fallback={<div>Loading...</div>}>
-			<section className='md:py-36 py-28 md:px-0 px-6'>
-				<div className='container mx-auto'>
-					<div className='flex flex-col items-center gap-8 relative z-10'>
-						<p className='text-[#799aa1] font-sans text-xl text-center'>
-							Online Reservation
-						</p>
-						<p className='lg:text-7xl text-3xl font-serif text-center 2xl:w-1/2 w-full'>
-							Booking
-						</p>
-						<p className='absolute top-0 right-0 left-0 text-center -translate-y-1/3 leading-none font-sans text-7xl md:text-9xl lg:text-[250px] text-[rgba(0,0,0,.04)] capitalize font-bold'>
-							Calendar
-						</p>
+		<Suspense
+			fallback={
+				<div className='flex justify-center items-center py-10'>
+					<div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#435D63]'></div>
+				</div>
+			}>
+			<div className='max-w-6xl mx-auto'>
+				<div className='mb-16 text-center relative'>
+					<h2 className='text-3xl font-serif mb-3 text-gray-800 relative z-10'>
+						Schedule Your Appointment
+					</h2>
+					<div className='w-24 h-1 bg-[#435D63] mx-auto mb-4'></div>
+					<p className='text-gray-600 max-w-2xl mx-auto'>
+						Select your preferred date and time, and we'll pair you with the
+						perfect specialist.
+					</p>
+					<div className='absolute top-0 right-0 left-0 text-center -translate-y-1/2 leading-none font-sans text-8xl text-gray-100/40 capitalize font-bold select-none'>
+						Calendar
 					</div>
+				</div>
 
-					<div className='mt-20'>
-						<div>
-							<Alert
-								message={`You selected date: ${selectedValue?.format(
-									"YYYY-MM-DD"
-								)}`}
-								type='info'
-							/>
+				<div className='bg-white shadow-sm rounded-xl overflow-hidden mb-12'>
+					<div className='flex flex-col lg:flex-row'>
+						{/* Calendar section */}
+						<div className='lg:w-7/12 w-full'>
+							<div className='p-4 bg-[#435D63] text-white text-center'>
+								<h3 className='text-xl font-medium'>
+									{selectedValue?.format("MMMM YYYY")}
+								</h3>
+							</div>
+
 							<ConfigProvider
 								theme={{
 									components: {
 										Calendar: {
-											colorBgContainer: "#f5f5f5",
-											colorBgHeader: "#333",
-											colorTextHeading: "#fff",
-											fullPanelHeaderTextAlign: "center",
-											fullPanelHeaderPadding: "4px 0",
+											colorPrimary: "#435D63",
+											colorBgContainer: "#ffffff",
+											colorBorderSecondary: "#f0f0f0",
+											fontSizeHeading5: 16,
+											borderRadiusLG: 0,
 										},
 									},
 								}}>
@@ -308,43 +247,118 @@ const BookingSelectDate = ({
 									value={value}
 									onSelect={onSelect}
 									onPanelChange={onPanelChange}
-									fullCellRender={dateFullCellRender}
-									headerRender={headerRender}
 									disabledDate={disabledDate}
-									className='custom-calendar'
+									fullscreen={false}
+									className='minimalist-calendar'
+									headerRender={() => null} // Hide default header
 								/>
 							</ConfigProvider>
 						</div>
-						<div>
+
+						{/* Selections section */}
+						<div className='lg:w-5/12 w-full bg-gray-50 p-6'>
+							<div className='bg-white rounded-lg p-4 shadow-sm mb-6'>
+								<div className='flex items-center mb-3'>
+									<svg
+										className='w-5 h-5 text-[#435D63] mr-2'
+										xmlns='http://www.w3.org/2000/svg'
+										viewBox='0 0 24 24'
+										fill='none'
+										stroke='currentColor'
+										strokeWidth='2'
+										strokeLinecap='round'
+										strokeLinejoin='round'>
+										<rect
+											x='3'
+											y='4'
+											width='18'
+											height='18'
+											rx='2'
+											ry='2'></rect>
+										<line x1='16' y1='2' x2='16' y2='6'></line>
+										<line x1='8' y1='2' x2='8' y2='6'></line>
+										<line x1='3' y1='10' x2='21' y2='10'></line>
+									</svg>
+									<span className='font-medium'>Selected Date</span>
+								</div>
+								<p className='text-gray-700 text-lg'>
+									{selectedValue?.format("dddd, MMMM D, YYYY")}
+								</p>
+							</div>
+
 							<BookingSelectTime
 								timeSlots={availableTimeSlots}
 								selectedTimeSlot={selectedTimeSlot}
 								onSelectTimeSlot={handleTimeSelection}
+								isLoading={fetchingTimeSlots}
 							/>
+
 							{selectedTimeSlot && (
 								<BookingSelectStaff
 									availableStaff={availableStaff}
 									selectedStaffId={selectedStaffId}
 									onSelectStaff={handleStaffSelection}
+									isLoading={fetchingStaff}
 								/>
 							)}
 						</div>
 					</div>
-
-					<div className='mt-20'>
-						<Button
-							disable={!canProceed}
-							text='Confirm'
-							Icon={FaArrowRightLong}
-							iconSize={14}
-							buttonStyle={`justify-center gap-2 mt-10 mx-auto lg:[&]:py-6 lg:[&]:px-16 lg:[&]:text-lg ${
-								!canProceed ? "opacity-50 cursor-not-allowed" : ""
-							}`}
-							onClick={handleConfirm}
-						/>
-					</div>
 				</div>
-			</section>
+
+				<div className='text-center'>
+					<button
+						disabled={!canProceed || loading}
+						onClick={handleConfirm}
+						className={`
+              px-10 py-4 bg-[#435D63] text-white rounded-lg font-medium
+              transition-all duration-300 inline-flex items-center gap-2
+              ${
+								!canProceed || loading
+									? "opacity-50 cursor-not-allowed bg-gray-400"
+									: "hover:bg-[#364a4f] shadow-sm"
+							}
+            `}>
+						{loading ? (
+							<>
+								<svg
+									className='animate-spin h-5 w-5 mr-2'
+									xmlns='http://www.w3.org/2000/svg'
+									fill='none'
+									viewBox='0 0 24 24'>
+									<circle
+										className='opacity-25'
+										cx='12'
+										cy='12'
+										r='10'
+										stroke='currentColor'
+										strokeWidth='4'></circle>
+									<path
+										className='opacity-75'
+										fill='currentColor'
+										d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'></path>
+								</svg>
+								Processing...
+							</>
+						) : (
+							<>
+								Confirm Booking
+								<svg
+									className='w-5 h-5'
+									xmlns='http://www.w3.org/2000/svg'
+									viewBox='0 0 24 24'
+									fill='none'
+									stroke='currentColor'
+									strokeWidth='2'
+									strokeLinecap='round'
+									strokeLinejoin='round'>
+									<line x1='5' y1='12' x2='19' y2='12'></line>
+									<polyline points='12 5 19 12 12 19'></polyline>
+								</svg>
+							</>
+						)}
+					</button>
+				</div>
+			</div>
 		</Suspense>
 	);
 };

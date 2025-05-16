@@ -180,9 +180,9 @@ const Booking = () => {
 				return <StoresChoosingWrap handleSelectStore={handleSelectStore} />;
 			case 1:
 				return (
-					<div className='container mx-auto py-10 md:px-0 px-6'>
+					<div className='container mx-auto py-10 px-4 md:px-0'>
 						<BookingService
-							handleSetStep={handleSetStep} // Add this prop
+							handleSetStep={handleSetStep}
 							setSelectedServiceId={handleSelectService}
 							storeId={selectedStoreId}
 						/>
@@ -190,7 +190,7 @@ const Booking = () => {
 				);
 			case 2:
 				return (
-					<div className='container mx-auto py-10 md:px-0 px-6'>
+					<div className='container mx-auto py-10 px-4 md:px-0'>
 						<BookingSelectDate
 							handleInfoChange={handleInfoChange}
 							handleSelectDateTimeStaff={handleSelectDateTimeAndStaff}
@@ -202,12 +202,12 @@ const Booking = () => {
 				);
 			case 3:
 				return (
-					<div className='container mx-auto py-20 md:px-0 px-6 text-center'>
-						<div className='bg-green-50 border border-green-200 p-10 max-w-xl mx-auto'>
-							<div className='w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6'>
+					<div className='container mx-auto py-16 px-4 md:px-0 max-w-3xl'>
+						<div className='bg-white shadow-md rounded-lg p-8 border-t-4 border-green-500'>
+							<div className='w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-8'>
 								<svg
 									xmlns='http://www.w3.org/2000/svg'
-									className='h-8 w-8 text-green-600'
+									className='h-10 w-10 text-green-600'
 									fill='none'
 									viewBox='0 0 24 24'
 									stroke='currentColor'>
@@ -219,18 +219,21 @@ const Booking = () => {
 									/>
 								</svg>
 							</div>
-							<h2 className='text-3xl font-serif mb-4'>Booking Confirmed!</h2>
-							<p className='text-lg mb-6'>
-								Your appointment has been successfully scheduled.
+							<h2 className='text-3xl font-serif text-center mb-4 text-gray-800'>
+								Booking Confirmed
+							</h2>
+							<p className='text-lg text-center text-gray-600 mb-8'>
+								Your appointment has been successfully scheduled. We've sent a
+								confirmation to your email.
 							</p>
 							<div className='flex flex-col sm:flex-row gap-4 justify-center'>
 								<button
-									className='px-6 py-3 bg-[#779AA1] text-white hover:bg-[#5d7a80] transition'
+									className='px-6 py-3 bg-[#435D63] text-white font-medium rounded hover:bg-[#364a4f] transition duration-300 shadow-sm'
 									onClick={() => navigate(paths.profileBooking)}>
 									View My Appointments
 								</button>
 								<button
-									className='px-6 py-3 bg-white border border-[#779AA1] text-[#779AA1] hover:bg-[#f0f5f6] transition'
+									className='px-6 py-3 bg-white border border-[#435D63] text-[#435D63] font-medium rounded hover:bg-gray-50 transition duration-300'
 									onClick={handleResetBooking}>
 									Book Another Appointment
 								</button>
@@ -243,6 +246,8 @@ const Booking = () => {
 		}
 	};
 
+	const stepLabels = ["Select Store", "Choose Service", "Schedule Appointment"];
+
 	return (
 		<Suspense
 			fallback={
@@ -252,50 +257,73 @@ const Booking = () => {
 					hasLoadingText
 				/>
 			}>
+			<Banner
+				imageBanner={BookingImageBanner}
+				titleBanner='Book Your Appointment'
+				pathBanner='Booking'
+			/>
+
 			{step < 3 && (
-				<div className='fixed top-28 left-0 right-0 z-20 mx-auto max-w-xl px-4'>
-					<div className='bg-white rounded-full shadow-md py-2 px-6 border border-[#779aa18e]'>
+				<div className='container mx-auto max-w-3xl px-4 -mt-8 relative z-20 mb-12'>
+					<div className='bg-white rounded-xl shadow-md px-6 py-8'>
 						<div className='flex justify-between items-center'>
-							{["Store", "Service", "Date/Time"].map((label, idx) => (
+							{stepLabels.map((label, idx) => (
 								<div
 									key={idx}
-									className={`flex flex-col items-center justify-center ${
-										idx <= step ? "text-[#779AA1]" : "text-gray-400"
-									} ${idx < step ? "cursor-pointer" : "cursor-default"}`}
+									className={`flex flex-col items-center justify-center relative ${
+										idx <= step ? "text-[#435D63] font-medium" : "text-gray-400"
+									} ${
+										idx < step
+											? "cursor-pointer hover:text-[#5d7a80]"
+											: "cursor-default"
+									}`}
 									onClick={() => idx < step && handleSetStep(idx)}>
 									<div
-										className={`w-8 h-8 rounded-full flex items-center justify-center mb-1 ${
+										className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all ${
 											idx < step
-												? "bg-[#779AA1] text-white"
+												? "bg-[#435D63] text-white"
 												: idx === step
-												? "border-2 border-[#779AA1] text-[#779AA1]"
+												? "border-2 border-[#435D63] text-[#435D63]"
 												: "border-2 border-gray-300 text-gray-400"
 										}`}>
-										{idx + 1}
+										{idx < step ? (
+											<svg
+												xmlns='http://www.w3.org/2000/svg'
+												className='h-5 w-5'
+												fill='none'
+												viewBox='0 0 24 24'
+												stroke='currentColor'>
+												<path
+													strokeLinecap='round'
+													strokeLinejoin='round'
+													strokeWidth={2}
+													d='M5 13l4 4L19 7'
+												/>
+											</svg>
+										) : (
+											idx + 1
+										)}
 									</div>
-									<span className='text-xs block'>{label}</span>
+									<span className='text-sm block text-center'>{label}</span>
 								</div>
 							))}
 						</div>
-						<div className='absolute left-0 right-0 flex justify-between px-8 mt-[-22px] z-[-1]'>
+
+						{/* Progress line */}
+						<div className='flex w-full mt-4 mb-2'>
 							<div
-								className={`h-0.5 flex-1 ${
-									step > 0 ? "bg-[#779AA1]" : "bg-gray-300"
+								className={`h-1 flex-1 rounded-full ${
+									step >= 1 ? "bg-[#435D63]" : "bg-gray-200"
 								}`}></div>
+							<div className='w-10'></div>
 							<div
-								className={`h-0.5 flex-1 ${
-									step > 1 ? "bg-[#779AA1]" : "bg-gray-300"
+								className={`h-1 flex-1 rounded-full ${
+									step >= 2 ? "bg-[#435D63]" : "bg-gray-200"
 								}`}></div>
 						</div>
 					</div>
 				</div>
 			)}
-
-			<Banner
-				imageBanner={BookingImageBanner}
-				titleBanner='Online Booking'
-				pathBanner='Booking'
-			/>
 
 			{renderBookingStep()}
 		</Suspense>

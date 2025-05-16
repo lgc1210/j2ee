@@ -4,8 +4,10 @@ const baseURL = process.env.REACT_APP_API;
 
 class StoreService {
 	// Lấy tất cả store
-	static getAll = async (page = 0, size = 5) => {
-		return await apiInstance.get(`${baseURL}/stores?page=${page}&size=${size}`);
+	static getAll = async ({ page, pageSize }) => {
+		return await apiInstance.get(`${baseURL}/stores`, {
+			params: { page, size: pageSize },
+		});
 	};
 
 	static getStoreCloseTimeById = async (store_id) => {
