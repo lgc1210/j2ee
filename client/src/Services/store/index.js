@@ -4,9 +4,9 @@ const baseURL = process.env.REACT_APP_API;
 
 class StoreService {
 	// Lấy tất cả store
-	static getAll = async ({ page, pageSize }) => {
+	static getAll = async ({ page, pageSize, categoryOfServiceId }) => {
 		return await apiInstance.get(`${baseURL}/stores`, {
-			params: { page, size: pageSize },
+			params: { page, size: pageSize, categoryOfServiceId },
 		});
 	};
 

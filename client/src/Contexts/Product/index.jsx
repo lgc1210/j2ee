@@ -68,7 +68,6 @@ const Product = ({ children }) => {
 	const fetchProductDetails = useCallback(async (productId) => {
 		try {
 			setLoadingProductDetails(true);
-
 			const response = await ProductService.getProductDetails(productId);
 			console.log("Product details: ", response);
 			if (response.status === 200) {
@@ -87,11 +86,14 @@ const Product = ({ children }) => {
 				fetchProductList,
 				productList,
 				loadingProductList,
+
 				fetchProductDetails,
 				productDetails,
 				loadingProductDetails,
+
 				setSelectedStoreId,
 				selectedStoreId,
+
 				setNameFilter,
 				nameFilter,
 				setCategoryFilter,

@@ -1,14 +1,19 @@
 package j2ee.j2ee.apps.store;
 
+import org.apache.coyote.Request;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import j2ee.j2ee.apps.user.UserEntity;
 
 import org.springframework.http.ResponseEntity;
+
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import j2ee.j2ee.apps.user.UserRepository;
@@ -19,18 +24,24 @@ public class StoreController {
 
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private StoreService storeService;
 
     @GetMapping
-    public ResponseEntity<Object> getAll(
-            @RequestParam(name = "page") int page,
-            @RequestParam(name = "size") int size) {
+    public ResponseEntity<Object> getAll(@RequestParam(name = "page") int page, @RequestParam(name = "size") int size, @RequestParam(name = "categoryOfServiceId", required = false) Long categoryOfServiceId) {
         try {
-            System.out.println("page " + page);
-            System.out.println("size " + size);
+            if (categoryOfServiceId != null) {
+                List<StoreEntity> filteredStores = storeService.filterByCategoryOfServiceId(categoryOfServiceId);
+                Map<String, Object> response = new HashMap<>();
+                response.put("stores", filteredStores);
+                response.put("totalElements", filteredStores.size());
+                response.put("filtered", true);
+
+                return ResponseEntity.ok(response);
+            }
+
             Page<StoreEntity> pageStores = this.storeService.getAllStorePage(page, size);
+
             if (pageStores.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }

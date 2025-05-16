@@ -1,11 +1,33 @@
 import React from "react";
-
-const FormControl = React.lazy(() => import("../FormControl"));
+import CategoryOfServiceService from "../../Services/categoryOfService";
 
 const BookingHeader = ({ selectedService, setSelectedService }) => {
+	const [categories, setCategories] = React.useState([]);
+	const [selectedCategoryId, setSelectedCategoryId] = React.useState(null);
+	const [loading, setLoading] = React.useState();
+
+	React.useEffect(() => {
+		const fetchCategories = async () => {
+			try {
+				setLoading(true);
+				const response =
+					await CategoryOfServiceService.getAllCategoryOfServices();
+				if (response?.status === 200) {
+					setCategories(response?.data);
+				}
+			} catch (error) {
+				console.log("Error fetching category", error);
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		fetchCategories();
+	}, []);
+
 	return (
 		<header className='bg-white border-b border-gray-100 shadow-sm sticky top-0 z-30'>
-			<div className='container mx-auto px-4'>
+			<div className='container mx-auto px-4 md:px-6 lg:px-8'>
 				<div className='flex items-center justify-between h-16 md:h-20'>
 					<div className='flex items-center space-x-1'>
 						<div className='w-2 h-8 bg-[#435D63] rounded-full'></div>
@@ -19,13 +41,18 @@ const BookingHeader = ({ selectedService, setSelectedService }) => {
 							<select
 								className='appearance-none bg-transparent border border-gray-200 rounded-full pl-4 pr-10 py-2 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#435D63]/20 focus:border-[#435D63] cursor-pointer transition-all duration-200 min-w-[180px]'
 								value={selectedService}
-								onChange={(e) => setSelectedService(e.target.value)}>
+								onChange={(e) => setSelectedCategoryId(e.target.value)}>
 								<option value=''>All Services</option>
-								<option value='haircut'>Hair Cut</option>
-								<option value='spa'>Spa Treatment</option>
-								<option value='nail'>Nail Service</option>
-								<option value='facial'>Facial Care</option>
-								<option value='massage'>Massage</option>
+								{categories?.map((item) => {
+									return (
+										<option
+											key={item?.id}
+											value={item?.id}
+											className='capitalize'>
+											{item?.name}
+										</option>
+									);
+								})}
 							</select>
 							<div className='pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500'>
 								<svg
@@ -43,7 +70,9 @@ const BookingHeader = ({ selectedService, setSelectedService }) => {
 							</div>
 						</div>
 
-						<button className='bg-[#435D63] hover:bg-[#364a4f] text-white text-sm font-medium px-4 py-2 rounded-full transition-colors duration-200 hidden md:flex items-center'>
+						<button
+							className='bg-[#435D63] hover:bg-[#364a4f] text-white text-sm font-medium px-4 py-2 rounded-full transition-colors duration-200 hidden md:flex items-center'
+							onClick={() => setSelectedService(selectedCategoryId)}>
 							<svg
 								xmlns='http://www.w3.org/2000/svg'
 								className='h-4 w-4 mr-1'

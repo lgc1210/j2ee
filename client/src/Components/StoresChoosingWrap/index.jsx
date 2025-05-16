@@ -11,7 +11,7 @@ const StoresChoosingWrap = ({ handleSelectStore }) => {
 	const [loading, setLoading] = useState(false);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [totalPages, setTotalPages] = useState(1);
-	const [selectedService, setSelectedService] = useState("");
+	const [selectedService, setSelectedService] = useState(null);
 
 	const PAGE_SIZE = 9;
 
@@ -19,11 +19,14 @@ const StoresChoosingWrap = ({ handleSelectStore }) => {
 		async (page) => {
 			try {
 				setLoading(true);
-				const response = await StoreService.getAll({
+				const payload = {
 					page: page - 1,
 					pageSize: PAGE_SIZE,
-					service: selectedService || undefined,
-				});
+				};
+				if (selectedService) {
+					payload["categoryOfServiceId"] = selectedService;
+				}
+				const response = await StoreService.getAll(payload);
 				if (response.status === 200) {
 					const { stores, totalPages } = response?.data;
 					setStoreList(stores);
@@ -40,7 +43,7 @@ const StoresChoosingWrap = ({ handleSelectStore }) => {
 
 	useEffect(() => {
 		fetchStoreList(currentPage);
-	}, [fetchStoreList, currentPage]);
+	}, [fetchStoreList, currentPage, selectedService]);
 
 	const handlePageChange = useCallback(
 		(page) => {

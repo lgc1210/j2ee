@@ -16,6 +16,9 @@ public interface StoreRepository extends JpaRepository<StoreEntity, Long> {
 
     Optional<StoreEntity> findById(long id);
 
+    @Query("FROM stores s JOIN services se ON s.id = se.store.id WHERE se.category_of_service.id = :category_of_service_id")
+    List<StoreEntity> filterByCategoryOfServiceId(@Param("category_of_service_id") Long category_of_service_id);
+
     @Query("SELECT s FROM stores s WHERE s.owner.id = :userId")
     Optional<StoreEntity> findStoreByUserId(@Param("userId") Long userId);
 

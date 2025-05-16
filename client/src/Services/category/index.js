@@ -4,7 +4,7 @@ const baseURL = process.env.REACT_APP_API;
 
 class CategoryService {
 	// Lấy tất cả users
-	getAllCategory = async () => {
+	static getAllCategory = async () => {
 		return await apiInstance.get(`${baseURL}/categories`, {
 			headers: {
 				"Content-Type": "application/json",
@@ -30,4 +30,4 @@ class CategoryService {
 	// };
 }
 
-export default new CategoryService();
+export default CategoryService;

@@ -28,6 +28,10 @@ public class StoreService {
 
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
+    public List<StoreEntity> filterByCategoryOfServiceId(Long category_of_service_id) {
+        return this.storeRepository.filterByCategoryOfServiceId(category_of_service_id);
+    }
+
     public Page<StoreEntity> getAllStorePage(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "name"));
         return this.storeRepository.findAllPage(pageable);

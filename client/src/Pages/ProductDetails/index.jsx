@@ -22,8 +22,6 @@ const ProductDetails = () => {
 	const { fetchProductDetails, productDetails } = useProduct();
 	const { cart, handleChangeQuantity } = useCart();
 
-	console.log("Quantity: ", quantity);
-
 	useEffect(() => {
 		if (productId) {
 			fetchProductDetails(productId);
