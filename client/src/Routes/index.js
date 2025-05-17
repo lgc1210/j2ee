@@ -179,14 +179,6 @@ const routes = [
 	},
 	{
 		isPublic: false,
-		url: paths.products,
-		Layout: AdminLayout,
-		Page: Products,
-		requiredRole: ["admin"],
-	},
-
-	{
-		isPublic: false,
 		url: paths.stores,
 		Layout: AdminLayout,
 		Page: Stores,
@@ -277,19 +269,11 @@ const routes = [
 		Page: statisticOwner,
 		requiredRole: ["owner"],
 	},
-
 	{
 		isPublic: false,
 		url: paths.categories,
 		Layout: AdminLayout,
 		Page: Categories,
-		requiredRole: ["admin"],
-	},
-	{
-		isPublic: false,
-		url: paths.discounts,
-		Layout: AdminLayout,
-		Page: Discounts,
 		requiredRole: ["admin"],
 	},
 	{
