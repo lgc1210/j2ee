@@ -1,14 +1,13 @@
 import React, { lazy, Suspense } from "react";
 import { useProduct } from "../../Contexts/Product";
-import Button from "../Button";
 import { FaAngleDown } from "react-icons/fa6";
 
 const SortingProduct = lazy(() => import("../SortingProduct"));
-const Loading = lazy(() => import("../../Components/Loading"));
+const Loading = lazy(() => import("../Loading"));
 const Products = lazy(() => import("../Products"));
 
 const ProductList = () => {
-	const { hasMore, setPage } = useProduct();
+	const { hasMore, setPage, productList } = useProduct();
 
 	const handleShowMore = () => {
 		if (hasMore) {
@@ -27,21 +26,16 @@ const ProductList = () => {
 			}>
 			<section>
 				<div className='mb-8'>
-					<SortingProduct />
+					<SortingProduct productList={productList} />
 				</div>
 				<div>
-					<Products />
+					<Products productList={productList} />
 					{hasMore && (
-						<div className='mt-20'>
-							<Button
-								text='Show More'
-								Icon={FaAngleDown}
-								iconSize={14}
-								textStyle='!text-sm'
-								buttonStyle={`flex-col justify-center gap-1 hover:gap-2.5 mt-10 mx-auto lg:[&]:py-2 lg:[&]:px-8 lg:[&]:text-lg`}
-								onClick={handleShowMore}
-							/>
-						</div>
+						<button
+							onClick={handleShowMore}
+							className='mt-10 mx-auto flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300'>
+							Show More <FaAngleDown size={14} />
+						</button>
 					)}
 				</div>
 			</section>

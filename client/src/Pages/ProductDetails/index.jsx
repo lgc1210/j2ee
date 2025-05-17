@@ -4,6 +4,8 @@ import ShopImageBanner from "../../assets/images/banner/uby-yanes-0ABufdkXgPI-un
 import { BsCartPlus } from "react-icons/bs";
 import { useProduct } from "../../Contexts/Product";
 import { useCart } from "../../Contexts/Cart";
+import { toVND } from "../../Utils/vietnamCurrency";
+import { showToast } from "../../Components/Toast";
 
 const FormControl = lazy(() => import("../../Components/FormControl"));
 const Button = lazy(() => import("../../Components/Button"));
@@ -20,7 +22,7 @@ const ProductDetails = () => {
 		"https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod2.jpg"
 	);
 	const { fetchProductDetails, productDetails } = useProduct();
-	const { cart, handleChangeQuantity } = useCart();
+	const { handleChangeQuantity } = useCart();
 
 	useEffect(() => {
 		if (productId) {
@@ -35,7 +37,7 @@ const ProductDetails = () => {
 		const rect = image.getBoundingClientRect();
 		const x = ((event.clientX - rect.left) / rect.width) * 100;
 		const y = ((event.clientY - rect.top) / rect.height) * 100;
-		setPosition({ x, y, scale: 2 });
+		setPosition({ x, y, scale: 1.5 });
 	};
 
 	const handleMouseLeave = () => {
@@ -43,13 +45,20 @@ const ProductDetails = () => {
 	};
 
 	const changeQuantity = (value) => {
-		const changedValue = quantity > 0 && value > 0 ? value : 1;
+		const changedValue = quantity > 0 && value > 0 ? parseInt(value) : 1;
 		setQuantity(changedValue);
 	};
 
 	const handleAddToCart = async () => {
 		await handleChangeQuantity(productId, quantity);
+		showToast("Added");
 	};
+
+	const thumbnailImages = [
+		"https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod2-1000x1000.jpg",
+		"https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod4-1000x1000.jpg",
+		"https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod1-800x800.jpg",
+	];
 
 	return (
 		<Suspense
@@ -60,132 +69,104 @@ const ProductDetails = () => {
 					hasLoadingText
 				/>
 			}>
-			<section>
+			<section className='bg-gray-50'>
 				<Banner
 					imageBanner={ShopImageBanner}
 					titleBanner='Shop'
 					pathBanner='Shop'
 				/>
 
-				<div className='md:py-36 py-28 md:px-0 px-6'>
+				<div className='py-16 md:py-24 px-6'>
 					<div className='container mx-auto'>
-						{/* Product */}
-						<div className='grid md:grid-cols-2 gap-20'>
-							{/* Product Image */}
-							<div className=''>
+						<div className='grid md:grid-cols-2 gap-12'>
+							<div>
 								<div
-									className='overflow-hidden'
+									className='relative overflow-hidden rounded-lg shadow-md'
 									onMouseMove={handleMouseMove}
 									onMouseLeave={handleMouseLeave}>
 									<img
 										ref={imageRef}
 										src={productDetails?.image || mainImage}
 										alt={productDetails?.name || "Product Detail Name"}
-										className='transition-transform duration-700 w-full h-full object-cover'
+										className='w-full h-[500px] object-cover transition-transform duration-300'
 										style={{
 											transformOrigin: `${position.x}% ${position.y}%`,
 											transform: `scale(${position.scale})`,
 										}}
 									/>
 								</div>
-								{/* List of images */}
-								<div className='flex items-center justify-start gap-4 mt-14'>
-									<div
-										className=''
-										onClick={() =>
-											setMainImage(
-												"https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod2-1000x1000.jpg"
-											)
-										}>
-										<img
-											src='https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod2-1000x1000.jpg'
-											alt='Another Product'
-											className='max-w-36 w-full h-full object-center object-cover'
-										/>
-									</div>
-									<div
-										className='opacity-50 hover:opacity-100 cursor-pointer'
-										onClick={() =>
-											setMainImage(
-												"https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod4-1000x1000.jpg"
-											)
-										}>
-										<img
-											src='https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod4-1000x1000.jpg'
-											alt='Another Product'
-											className='max-w-36 w-full h-full object-center object-cover'
-										/>
-									</div>
-									<div
-										className='opacity-50 hover:opacity-100 cursor-pointer'
-										onClick={() =>
-											setMainImage(
-												"https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod1-800x800.jpg"
-											)
-										}>
-										<img
-											src='https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod1-800x800.jpg'
-											alt='Another Product'
-											className='max-w-36 w-full h-full object-center object-cover'
-										/>
-									</div>
+								<div className='flex items-center justify-start gap-4 mt-6'>
+									{thumbnailImages.map((src, index) => (
+										<button
+											key={index}
+											onClick={() => setMainImage(src)}
+											className={`w-24 h-24 rounded-md overflow-hidden border-2 ${
+												mainImage === src
+													? "border-[#435D63]"
+													: "border-transparent"
+											} hover:opacity-100 transition-opacity duration-300 ${
+												mainImage !== src ? "opacity-70" : ""
+											}`}>
+											<img
+												src={src}
+												alt={`Thumbnail ${index + 1}`}
+												className='w-full h-full object-cover'
+											/>
+										</button>
+									))}
 								</div>
 							</div>
 
-							{/* Product's Information */}
-							<div>
-								<div className='flex flex-col gap-6'>
-									<p className='font-serif text-4xl'>
-										{productDetails?.name || "Loading..."}
-									</p>
-									<p className='text-2xl font-semibold'>
-										${productDetails?.price || "0.00"}
-									</p>
-									<p className='text-lg text-zinc-600 lg:w-3/4 lg:text-start text-justify leading-loose'>
-										{productDetails?.description || "No description available."}
-									</p>
-								</div>
-								<div className='flex items-center justify-start gap-4 my-8'>
+							<div className='flex flex-col gap-6'>
+								<h1 className='text-3xl md:text-4xl font-bold text-gray-800'>
+									{productDetails?.name || "Loading..."}
+								</h1>
+								<p className='text-2xl font-semibold text-gray-900'>
+									{toVND(productDetails?.price) || "0.00"}
+								</p>
+								<p className='text-gray-600 text-lg leading-relaxed'>
+									{productDetails?.description || "No description available."}
+								</p>
+								<div className='flex items-center gap-4 mt-4'>
 									<FormControl
 										type='number'
-										wrapInputStyle='border-zinc-400 w-1/6'
-										inputStyle='text-center text-lg w-full'
+										wrapInputStyle='border-gray-300 w-24 rounded-md'
+										inputStyle='text-center text-lg w-full py-2'
 										value={quantity}
 										onChange={(event) => changeQuantity(event.target.value)}
 									/>
 									<Button
 										text='Add To Cart'
 										Icon={BsCartPlus}
-										iconStyle='text-white [&]:group-hover:text-black'
-										buttonStyle='[&]:py-4.5 bg-[#779AA1] [&]:border-[#779AA1] [&]:hover:border-black'
-										textStyle='text-white me-2 [&]:group-hover:text-black'
-										hoverStyle='[&]:bg-white'
+										iconStyle='text-white group-hover:!text-white'
+										buttonStyle='py-3 px-6 bg-[#435D63] !text-white rounded-md hover:bg-white hover:border-[#435D63] border border-transparent group'
+										textStyle='text-white group-hover:!text-white mr-2'
 										onClick={handleAddToCart}
 									/>
 								</div>
-								<div className='flex flex-col gap-2'>
-									<p className='text-lg text-zinc-600'>
+								<div className='flex flex-col gap-2 mt-6'>
+									<p className='text-gray-600'>
 										Category:{" "}
-										<span className='underline hover:no-underline cursor-pointer text-[#779AA1] transition-all duration-700'>
+										<span className='text-[#435D63] hover:underline cursor-pointer transition-colors duration-300'>
 											{productDetails?.category?.name || "Organic"}
 										</span>
 									</p>
-									<p className='text-lg text-zinc-600'>
+									<p className='text-gray-600'>
 										Tags:{" "}
-										<span className='underline hover:no-underline cursor-pointer text-[#779AA1] transition-all duration-700'>
+										<span className='text-[#435D63] hover:underline cursor-pointer transition-colors duration-300'>
 											cream
 										</span>
-										,
-										<span className='underline hover:no-underline cursor-pointer text-[#779AA1] transition-all duration-700'>
-											{" "}
+										,{" "}
+										<span className='text-[#435D63] hover:underline cursor-pointer transition-colors duration-300'>
 											face
 										</span>
 									</p>
 								</div>
 							</div>
 						</div>
-						{/* Description */}
-						<ProductDescription />
+						<div className='mt-16'>
+							<ProductDescription />
+						</div>
 					</div>
 				</div>
 			</section>

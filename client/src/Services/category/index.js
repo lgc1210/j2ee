@@ -11,23 +11,6 @@ class CategoryService {
 			},
 		});
 	};
-
-	// // Lấy user theo ID
-	// getUserById = async (userId) => {
-	// 	return await apiInstance.get(`${baseURL}/users/${userId}`, {
-	// 		headers: {
-	// 			"Content-Type": "application/json",
-	// 		},
-	// 	});
-	// };
-	// // Lấy user theo roleId
-	// getUsersByRoleId = async (roleId) => {
-	// 	return await apiInstance.get(`${baseURL}/users/getlistbyroleid/${roleId}`, {
-	// 		headers: {
-	// 			"Content-Type": "application/json",
-	// 		},
-	// 	});
-	// };
 }
 
 export default CategoryService;

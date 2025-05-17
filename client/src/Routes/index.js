@@ -34,6 +34,7 @@ const Contact = lazy(() => import("../Pages/Contact"));
 const ProductDetails = lazy(() => import("../Pages/ProductDetails"));
 const Cart = lazy(() => import("../Pages/Cart"));
 const Service = lazy(() => import("../Pages/Service"));
+const Checkout = lazy(() => import("../Pages/Checkout"));
 
 // Admin Pages
 const Dashboard = lazy(() => import("../Pages/Dashboard"));
@@ -88,6 +89,12 @@ const routes = [
 		url: paths.shop,
 		Layout: CustomerLayout,
 		Page: Shop,
+	},
+	{
+		isPublic: false,
+		url: paths.checkout,
+		Layout: null,
+		Page: Checkout,
 	},
 	{
 		isPublic: true,
