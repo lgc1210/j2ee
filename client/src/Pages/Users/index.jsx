@@ -371,8 +371,6 @@ const Users = () => {
 				okButtonText='OK'
 				cancelButtonText='Cancel'
 			/>
-
-			<ToastContainer />
 		</>
 	);
 };

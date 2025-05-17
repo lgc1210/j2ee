@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import j2ee.j2ee.apps.payment.PaymentDTO;
 import j2ee.j2ee.apps.payment.PaymentEntity;
 import j2ee.j2ee.apps.payment.PaymentService;
 import j2ee.j2ee.apps.service.ServiceEntity;
@@ -113,8 +112,8 @@ public class AppointmentController {
     }
 
     @GetMapping("/customer")
-    public ResponseEntity<Object> getAllByCustomerId(@RequestParam("customer_id") Long customer_id,
-            @RequestParam("page") int page, @RequestParam("size") int size) {
+    public ResponseEntity<Object> getAllByCustomerId(@RequestParam Long customer_id,
+            @RequestParam int page, @RequestParam int size) {
         try {
             System.out.println("Customer ID: " + customer_id);
             var pageAppointments = this.appointmentService.getAllByCustomerId(customer_id, page, size);
