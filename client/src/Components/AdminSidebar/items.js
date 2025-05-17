@@ -14,6 +14,12 @@ const items = [
 		requiredRole: ["admin"],
 	},
 	{
+		path: paths.stores,
+		name: "Stores",
+		requiredAuth: true,
+		requiredRole: ["admin"],
+	},
+	{
 		path: paths.categories,
 		name: "Categories",
 		requiredAuth: true,

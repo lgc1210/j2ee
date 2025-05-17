@@ -1,8 +1,6 @@
 package j2ee.j2ee.apps.store;
 
-import org.apache.coyote.Request;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import j2ee.j2ee.apps.user.UserEntity;
@@ -28,7 +26,10 @@ public class StoreController {
     private StoreService storeService;
 
     @GetMapping
-    public ResponseEntity<Object> getAll(@RequestParam(name = "page") int page, @RequestParam(name = "size") int size, @RequestParam(name = "categoryOfServiceId", required = false) Long categoryOfServiceId) {
+    public ResponseEntity<Object> getAll(
+            @RequestParam(required = false) int page,
+            @RequestParam(required = false) int size,
+            @RequestParam(required = false) Long categoryOfServiceId) {
         try {
             if (categoryOfServiceId != null) {
                 List<StoreEntity> filteredStores = storeService.filterByCategoryOfServiceId(categoryOfServiceId);
@@ -36,22 +37,17 @@ public class StoreController {
                 response.put("stores", filteredStores);
                 response.put("totalElements", filteredStores.size());
                 response.put("filtered", true);
-
                 return ResponseEntity.ok(response);
             }
-
             Page<StoreEntity> pageStores = this.storeService.getAllStorePage(page, size);
-
             if (pageStores.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
-
             HashMap<String, Object> response = new HashMap<>();
             response.put("stores", pageStores.getContent());
             response.put("totalPages", pageStores.getTotalPages());
             response.put("totalElements", pageStores.getTotalElements());
             response.put("currentPage", pageStores.getNumber());
-
             return ResponseEntity.ok().body(response);
         } catch (Exception e) {
             System.err.println("Internal Server Error: " + e.getMessage());

@@ -5,8 +5,6 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +42,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Optional<UserEntity>> getById(@PathVariable(value = "id") long id) {
+    public ResponseEntity<Optional<UserEntity>> getById(@PathVariable long id) {
         try {
             var user = userService.getById(id);
             if (!user.isPresent()) {
@@ -69,23 +67,19 @@ public class UserController {
         return user.isPresent() ? ResponseEntity.ok(user.get()) : ResponseEntity.notFound().build();
     }
 
-    @PostMapping("createUser")
+    @PostMapping("/createUser")
     public ResponseEntity<UserEntity> create(@RequestBody UserEntity user) {
         try {
+            System.out.println("USER" + user);
             if (user == null)
                 return ResponseEntity.badRequest().build();
-
             Optional<UserEntity> doesEmailExist = userService.getByEmail(user.getEmail());
             Optional<UserEntity> doesPhoneExist = userService.getByPhone(user.getPhone());
-            System.out.println("Email exists: " + doesEmailExist.isPresent());
-            System.out.println("Phone exists: " + doesPhoneExist.isPresent());
             if (doesEmailExist.isPresent() || doesPhoneExist.isPresent())
                 return ResponseEntity.status(HttpStatus.CONFLICT).build();
             UserEntity createdUser = userService.create(user);
-
             URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                     .buildAndExpand(createdUser.getId()).toUri();
-
             return ResponseEntity.created(uri).body(createdUser);
         } catch (Exception e) {
             System.err.println("Internal Server Error: " + e.getMessage());
@@ -135,8 +129,7 @@ public class UserController {
                 return ResponseEntity.badRequest().build();
             }
 
-            Optional<UserEntity> updatedUser =
-                    userService.changePassword(id, currentPassword, newPassword);
+            Optional<UserEntity> updatedUser = userService.changePassword(id, currentPassword, newPassword);
             if (!updatedUser.isPresent()) {
                 return ResponseEntity.badRequest().body("Incorrect current password");
             }
@@ -178,7 +171,5 @@ public class UserController {
             return ResponseEntity.badRequest().body("Lỗi khi xóa: " + e.getMessage());
         }
     }
-
-
 
 }
