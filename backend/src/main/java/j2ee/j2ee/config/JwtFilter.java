@@ -32,7 +32,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // Skip filter for public endpoints
         if (uri.equals("/api/auth/login") || uri.equals("/api/auth/register")
-                || uri.equals("/api/auth/logout")) {
+                || uri.equals("/api/auth/logout") || uri.startsWith("/uploads/")) {
             filterChain.doFilter(request, response);
             return;
         }

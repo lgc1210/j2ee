@@ -12,7 +12,7 @@ class ServiceService {
 		});
 	};
 
-	static getAllCategories = async () => {
+	static getAllCategoriesOfService = async () => {
 		return await apiInstance.get(`${baseURL}/categoryOfServices`, {
 			headers: {
 				"Content-Type": "application/json",

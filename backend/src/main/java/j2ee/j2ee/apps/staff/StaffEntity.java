@@ -18,6 +18,7 @@ public class StaffEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    private String status;
     @ManyToOne
     @JoinColumn(name = "store_id", referencedColumnName = "id")
     private StoreEntity store;

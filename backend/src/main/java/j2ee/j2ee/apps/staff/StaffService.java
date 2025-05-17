@@ -10,7 +10,10 @@ import j2ee.j2ee.apps.category_of_service.CategoryOfServiceRepository;
 import j2ee.j2ee.apps.store.StoreEntity;
 import j2ee.j2ee.apps.user.UserEntity;
 import j2ee.j2ee.apps.user.UserRepository;
+import j2ee.j2ee.apps.user.UserService;
 import j2ee.j2ee.apps.store.StoreRepository;
+
+import java.time.LocalDate;
 import java.util.List;
 @Service
 public class StaffService {
@@ -20,59 +23,73 @@ public class StaffService {
     private UserRepository userRepository;
     @Autowired
     private StoreRepository storeRepository;
-   
+    @Autowired
+    private UserService userService;
    
 
     public List<StaffEntity> getAllStaffByUserId(long userId) {
         return staffRepository.findAllByStaffId(userId);
     }
 
-    public StaffEntity createStaff(StaffEntity serviceEntity,Authentication authentication) {
-        
-        String username = authentication.getPrincipal().toString();
-        System.out.println("Logged-in username: " + username);
+    public StaffEntity createStaff(StaffEntity staffEntity) {
+    return staffRepository.save(staffEntity);
+}
 
-        
-        UserEntity user = userRepository.findByEmail(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        
-        StoreEntity store = storeRepository.findStoreByUserId(user.getId())
-                .orElseThrow(() -> new RuntimeException("Store not found for the logged-in user"));
-
-        
-
-       
-        serviceEntity.setStore(store);
-        return staffRepository.save(serviceEntity);
+        public StaffEntity updateStaff(Long staffId, StaffEntity staffEntity) {
+        Optional<StaffEntity> existingStaffOpt = staffRepository.findById(staffId);
+        if (existingStaffOpt.isPresent()) {
+            StaffEntity existingStaff = existingStaffOpt.get();
+    
+            // Cập nhật tên, dịch vụ, trạng thái
+            existingStaff.setService(staffEntity.getService());
+            existingStaff.setStatus(staffEntity.getStatus());
+    
+            // Cập nhật thông tin user (name, phone)
+            UserEntity user = existingStaff.getStaff();
+            if (user != null && staffEntity.getStaff() != null) {
+                user.setName(staffEntity.getStaff().getName());
+                user.setPhone(staffEntity.getStaff().getPhone());
+                userRepository.save(user);
+            }
+    
+            return staffRepository.save(existingStaff);
+        } else {
+            throw new RuntimeException("Staff not found");
+        }
     }
-
-    //     public StaffEntity updateService(Long serviceId, StaffEntity serviceEntity) {
-    //     Optional<StaffEntity> existingService = staffRepository.findById(serviceId);
-    //     CategoryOfServiceEntity CategoryService = CategoryOfServiceRepository.findById(serviceEntity.getCategory_of_service().getId())
-    //             .orElseThrow(() -> new RuntimeException("Category not found"));
-    //     if (existingService.isPresent()) {
-    //         ServiceEntity serviceToUpdate = existingService.get();
-    //         serviceToUpdate.setName(serviceEntity.getName());
-    //         serviceToUpdate.setDescription(serviceEntity.getDescription());
-    //         serviceToUpdate.setPrice(serviceEntity.getPrice());
-    //         serviceToUpdate.setDuration(serviceEntity.getDuration());
-    //         serviceToUpdate.setStatus(serviceEntity.getStatus());
-    //         serviceToUpdate.setCategory_of_service(CategoryService);
-    //         return serviceRepository.save(serviceToUpdate);
-    //     }
-    //     return null;
-    // }
 
     public Optional<StaffEntity> getById(long id) {
         return this.staffRepository.findById(id);
     }
 
-    public void deleteStaff(long staffId) {
-        staffRepository.deleteById(staffId);
+    
+
+    public boolean deleteStaff(long staffId) {
+        Optional<StaffEntity> staffOpt = staffRepository.findById(staffId);
+        if (staffOpt.isPresent()) {
+            StaffEntity staff = staffOpt.get();
+            UserEntity user = staff.getStaff();
+            if (user != null) {
+                user.setDelete_at(LocalDate.now());
+                userRepository.save(user);
+            }
+            staffRepository.deleteById(staffId);
+            return true;
+        }
+        return false;
     }
 
-    public void deleteMultipleStaff(List<Long> staffIds) {
-        staffRepository.deleteAllById(staffIds);
+    public boolean deleteMultipleStaff(List<Long> staffIds) {
+    List<StaffEntity> staffs = staffRepository.findAllById(staffIds);
+    if (staffs.isEmpty()) return false;
+    for (StaffEntity staff : staffs) {
+        UserEntity user = staff.getStaff();
+        if (user != null) {
+            user.setDelete_at(LocalDate.now());
+            userRepository.save(user);
+        }
     }
+    staffRepository.deleteAllById(staffIds);
+    return true;
+}
 }

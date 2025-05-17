@@ -33,7 +33,7 @@ const Form = ({
     // Lấy danh sách stores và categories từ API
     const fetchData = async () => {
       try {
-        const categoryResponse = await ServiceService.getAllCategories();
+        const categoryResponse = await ServiceService.getAllCategoriesOfService();
         setCategories(categoryResponse.data);
       } catch (error) {
         console.error("Lỗi khi tải dữ liệu:", error);
@@ -41,7 +41,7 @@ const Form = ({
     };
     fetchData();
 
-    // Nếu có dữ liệu ban đầu (chỉnh sửa service)
+    
     if (initialData) {
       setFields({
         name: initialData.name || "",

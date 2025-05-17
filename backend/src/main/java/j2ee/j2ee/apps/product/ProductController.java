@@ -1,5 +1,6 @@
 package j2ee.j2ee.apps.product;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,11 +13,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.core.Authentication;
 import j2ee.j2ee.apps.user.UserEntity;
 import j2ee.j2ee.apps.user.UserService;
-
+import org.springframework.web.multipart.MultipartFile;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
@@ -136,6 +143,23 @@ public class ProductController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+     @PostMapping("/upload")
+public Map<String, String> uploadFile(@RequestParam("image") MultipartFile file) throws IOException {
+    // Lấy đường dẫn tuyệt đối đến thư mục uploads ở gốc dự án
+    String uploadDir = System.getProperty("user.dir") + File.separator + "uploads" + File.separator;
+    File dir = new File(uploadDir);
+    if (!dir.exists()) {
+        dir.mkdirs(); // Tạo thư mục nếu chưa có
+    }
+    String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+    File dest = new File(uploadDir + fileName);
+    file.transferTo(dest);
+
+    Map<String, String> result = new HashMap<>();
+    result.put("image", fileName);
+    return result;
+}
 
     @DeleteMapping("/{product_id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable(value = "product_id") long productId) {

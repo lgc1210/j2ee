@@ -63,7 +63,7 @@ const StaffOwner = () => {
   const columns = [
     {
       name: "Tên Nhân viên",
-      selector: (row) => row.name,
+      selector: (row) => row.staff?.name,
       sortable: true,
     },
     {
@@ -110,12 +110,13 @@ const StaffOwner = () => {
   const [editStaff, setEditStaff] = useState(null);
   const [showConfirmDeleteSingle, setShowConfirmDeleteSingle] = useState(false);
   const [staffIdToDelete, setStaffIdToDelete] = useState(null);
-
+  const [viewOnly, setViewOnly] = useState(false);
   useEffect(() => {
     const fetchStaffs = async () => {
       try {
         setLoading(true);
         const response = await StaffService.getAllStaffs();
+        console.log(response.data);
         setStaffData(response.data);
       } catch (error) {
         showToast("Lỗi khi tải danh sách nhân viên", "error");
@@ -173,34 +174,35 @@ const StaffOwner = () => {
     setShowForm(true);
   };
 
+  const handleRowClick = (row) => {
+  setEditStaff(row);
+  setShowForm(true);
+  setViewOnly(true); 
+};
+
   const handleFormSubmit = async (newStaffData) => {
-    try {
-      if (editStaff) {
-        const response = await StaffService.updateStaff(
-          editStaff.id,
-          newStaffData
-        );
-        setStaffData(
-          staffData.map((staff) =>
-            staff.id === editStaff.id ? response.data : staff
-          )
-        );
-        showToast("Cập nhật thành công", "success");
-      } else {
-        const response = await StaffService.createStaff(newStaffData);
-        setStaffData([...staffData, response.data]);
-        showToast("Tạo thành công", "success");
-      }
-      setShowForm(false);
-      setEditStaff(null);
-    } catch (error) {
-      console.error("Lỗi khi lưu:", error);
-      showToast("Lỗi khi lưu nhân viên", "error");
+  try {
+    if (editStaff) {
+      await StaffService.updateStaff(editStaff.id, newStaffData);
+     
+      const response = await StaffService.getAllStaffs();
+      setStaffData(response.data);
+      showToast("Cập nhật thành công", "success");
+    } else {
+      await StaffService.createStaff(newStaffData);
+      const response = await StaffService.getAllStaffs();
+      setStaffData(response.data);
+      showToast("Tạo thành công", "success");
     }
-  };
+    setShowForm(false);
+    setEditStaff(null);
+  } catch (error) {
+    showToast("Lỗi khi tạo nhân viên", "error");
+  }
+};
 
   const filteredData = staffData.filter((staff) =>
-  (staff.name || "").toLowerCase().includes(searchInput.toLowerCase())
+  staff.staff?.name.toLowerCase().includes(searchInput.toLowerCase())
 );
 
   return (
@@ -244,6 +246,7 @@ const StaffOwner = () => {
                 striped
                 pagination
                 onSelectedRowsChange={handleRowsSelected}
+                onRowClicked={handleRowClick}
                 subHeader={selectedRows.length > 0}
                 subHeaderComponent={
                   <SubHeader
@@ -265,10 +268,11 @@ const StaffOwner = () => {
         setToggle={() => {
           setShowForm(false);
           setEditStaff(null);
+          setViewOnly(false);
         }}
         initialData={editStaff}
         onSubmit={handleFormSubmit}
-        isDisabled={false}
+        isDisabled={viewOnly}
       />
 
       <ConfirmPopup

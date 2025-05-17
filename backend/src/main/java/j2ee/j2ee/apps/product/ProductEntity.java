@@ -37,6 +37,8 @@ public class ProductEntity {
 
     private String status;
 
+    private String image;
+
     @ManyToOne
     @JoinColumn(name = "store_id", referencedColumnName = "id")
     private StoreEntity store;

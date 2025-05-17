@@ -1,6 +1,9 @@
 package j2ee.j2ee.apps.category;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import j2ee.j2ee.apps.category.CategoryEntity;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -10,9 +13,8 @@ public class CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    // Lấy tất cả danh mục
-    public List<CategoryEntity> getAllCategories() {
-        return categoryRepository.findAll();
+    public List<CategoryEntity> getAllByLoggedInUser(long userId) {
+        return categoryRepository.findAllByLoggedInUser(userId);
     }
 
     // Lấy danh mục theo ID

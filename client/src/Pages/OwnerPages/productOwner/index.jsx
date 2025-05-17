@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from "react";
 import DataTable from "react-data-table-component";
-import { isEmpty } from "../../../Utils/validation.js";
 import { CiSearch } from "react-icons/ci";
 import { FaRegEdit } from "react-icons/fa";
 import { IoTrashOutline } from "react-icons/io5";
 import ConfirmPopup from "../../../Components/ConfirmPopup/index.jsx";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { showToast } from "../../../Components/Toast/index.jsx";
 import ProductService from "../../../Services/product";
 
@@ -21,9 +18,7 @@ const Form = React.lazy(() => import("./Form/index.jsx"));
 const SubHeader = ({ selectedRows, handleDeleteMultiple }) => {
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
-  if (selectedRows.length === 0) {
-    return null;
-  }
+  if (selectedRows.length === 0) return null;
 
   return (
     <>
@@ -36,7 +31,6 @@ const SubHeader = ({ selectedRows, handleDeleteMultiple }) => {
           />
         </button>
       </div>
-
       <ConfirmPopup
         toggle={showConfirmDelete}
         setToggle={() => setShowConfirmDelete(false)}
@@ -51,56 +45,76 @@ const SubHeader = ({ selectedRows, handleDeleteMultiple }) => {
   );
 };
 
-const SelectBox = React.forwardRef(({ ...props }) => {
-  return (
-    <input
-      type="checkbox"
-      {...props}
-      className="w-4 h-4 text-[#435d63] bg-[#435d63] border-gray-200 rounded focus:ring-[#435d63]"
-    />
-  );
-});
+const SelectBox = React.forwardRef((props, ref) => (
+  <input
+    ref={ref}
+    type="checkbox"
+    {...props}
+    className="w-4 h-4 text-[#435d63] bg-[#435d63] border-gray-200 rounded focus:ring-[#435d63]"
+  />
+));
 
 const ProductOwner = () => {
   const columns = [
     {
-      name: "Name",
+      name: "Ảnh",
+      selector: (row) => row.image,
+      cell: (row) =>
+        row.image ? (
+          <img
+            src={
+              row.image.startsWith("http")
+                ? row.image
+                : `http://localhost:8080/uploads/${row.image}`
+            }
+            alt={row.name}
+           className="w-[150px] h-[150px] p-1 rounded-lg object-cover"
+          />
+        ) : (
+          <span className="text-gray-400 italic">Không có ảnh</span>
+        ),
+      width: "120px",
+      ignoreRowClick: true,
+      allowOverflow: true,
+    },
+    {
+      name: "Tên sản phẩm",
       selector: (row) => row.name,
       sortable: true,
     },
     {
-      name: "Description",
+      name: "Mô tả",
       selector: (row) => row.description,
       sortable: true,
     },
     {
-        name:"weight",
-        selector: (row) => row.weight,
-        sortable: true,
+      name: "Khối lượng",
+      selector: (row) => row.weight,
+      sortable: true,
     },
     {
-      name: "Old Price",
+      name: "Giá cũ",
       selector: (row) => row.old_price,
       sortable: true,
     },
     {
-      name: "Price",
+      name: "Giá",
       selector: (row) => row.price,
       sortable: true,
     },
     {
-      name: "Status",
+      name: "Trạng thái",
       selector: (row) => row.status,
       sortable: true,
     },
     {
-      name: "Stock Quantity",
+      name: "Tồn kho",
       selector: (row) => row.stock_quantity,
       sortable: true,
     },
     {
-      name: "Category",
-      selector: (row) => row.category?.name, 
+      name: "Danh mục",
+      selector: (row) => row.category?.name,
       sortable: true,
     },
     {
@@ -125,23 +139,20 @@ const ProductOwner = () => {
   ];
 
   const [searchInput, setSearchInput] = useState("");
-  const [errors, setErrors] = useState("");
-  const [showActions, setShowActions] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [ProductData, setProductData] = useState([]);
+  const [productData, setProductData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editProduct, setEditProduct] = useState(null);
   const [showConfirmDeleteSingle, setShowConfirmDeleteSingle] = useState(false);
-  const [ProductIdToDelete, setProductIdToDelete] = useState(null);
+  const [productIdToDelete, setProductIdToDelete] = useState(null);
   const [selectedRow, setSelectedRow] = useState(null);
 
   useEffect(() => {
-    const fetchStores = async () => {
+    const fetchProducts = async () => {
       try {
         setLoading(true);
         const response = await ProductService.getAllbyStoreId();
-        console.log(response.data);
         setProductData(response.data);
       } catch (error) {
         showToast("Lỗi khi tải danh sách", "error");
@@ -149,7 +160,7 @@ const ProductOwner = () => {
         setLoading(false);
       }
     };
-    fetchStores();
+    fetchProducts();
   }, []);
 
   const handleFieldsChange = (key, value) => {
@@ -165,37 +176,33 @@ const ProductOwner = () => {
     try {
       await ProductService.deleteMultipleProducts(ids);
       setProductData(
-        ProductData.filter((product) => !ids.includes(product.id))
+        productData.filter((product) => !ids.includes(product.id))
       );
       setSelectedRows([]);
       showToast("Xóa nhiều thành công", "success");
     } catch (error) {
-      console.error("Lỗi khi xóa nhiều:", error);
       showToast("Lỗi khi xóa nhiều", "error");
     }
   };
 
-  const handleDeleteSingle = (userId) => {
-    setProductIdToDelete(userId);
+  const handleDeleteSingle = (id) => {
+    setProductIdToDelete(id);
     setShowConfirmDeleteSingle(true);
   };
 
   const confirmDeleteSingle = async () => {
     try {
-      await ProductService.deleteProduct(ProductIdToDelete);
-      setProductData(
-        ProductData.filter((store) => store.id !== ProductIdToDelete)
-      );
+      await ProductService.deleteProduct(productIdToDelete);
+      setProductData(productData.filter((p) => p.id !== productIdToDelete));
       setShowConfirmDeleteSingle(false);
       showToast("Xóa thành công", "success");
     } catch (error) {
-      console.error("Lỗi khi xóa:", error);
       showToast("Lỗi khi xóa", "error");
     }
   };
 
-  const handleEdit = (store) => {
-    setEditProduct(store);
+  const handleEdit = (product) => {
+    setEditProduct(product);
     setShowForm(true);
   };
 
@@ -207,25 +214,20 @@ const ProductOwner = () => {
           newProductData
         );
         setProductData(
-          ProductData.map((product) =>
+          productData.map((product) =>
             product.id === editProduct.id ? response.data : product
           )
         );
         showToast("Cập nhật thành công", "success");
       } else {
         const response = await ProductService.createProduct(newProductData);
-        setProductData([...ProductData, response.data]);
+        setProductData([...productData, response.data]);
         showToast("Tạo thành công", "success");
       }
       setShowForm(false);
       setEditProduct(null);
     } catch (error) {
-      console.error("Lỗi khi lưu:", error);
-      const errorMessage =
-        typeof error === "string"
-          ? error
-          : error.message || "Lỗi không xác định";
-      showToast(`Lỗi khi lưu: ${errorMessage}`, "error");
+      showToast("Lỗi khi lưu", "error");
     }
   };
 
@@ -233,11 +235,7 @@ const ProductOwner = () => {
     setSelectedRow(row);
   };
 
-  const handleActionsClicked = () => {
-    setShowActions(!showActions);
-  };
-
-  const filteredData = ProductData.filter((product) =>
+  const filteredData = productData.filter((product) =>
     product.name.toLowerCase().includes(searchInput.toLowerCase())
   );
 
@@ -249,44 +247,28 @@ const ProductOwner = () => {
             <div className="min-w-fit max-w-md">
               <FormControl
                 type="text"
-                placeHolder="Search here..."
+                placeHolder="Tìm kiếm sản phẩm..."
                 wrapInputStyle="!border-black/10 rounded-md focus-within:!border-[#435d63] transition-all"
                 inputStyle="font-serif placeholder:text-lg text-black placeholder:font-serif !p-4 !py-2"
                 id="search"
                 onChange={(event) =>
                   handleFieldsChange("search", event.target.value)
                 }
-                hasButton
                 Icon={CiSearch}
                 iconSize={24}
                 iconStyle="transition-all text-[#435d63] hover:text-black mx-4"
-                hasError={errors?.searchInput}
-                errorMessage={errors?.searchInput}
               />
             </div>
-
-            <div className="relative">
-              <button
-                type="button"
-                className="text-sm rounded-md w-fit transition-all duration-700 hover:bg-black text-white bg-[#435d63] p-2 font-serif font-semibold"
-                onClick={handleActionsClicked}
-              >
-                <p>Hành động</p>
-              </button>
-              {showActions && (
-                <div className="overflow-hidden absolute z-10 top-full right-0 rounded-md bg-white w-fit shadow-md">
-                  <button
-                    className="p-2 px-4 hover:bg-black/10 w-full"
-                    onClick={() => {
-                      setEditProduct(null);
-                      setShowForm(true);
-                    }}
-                  >
-                    Tạo mới
-                  </button>
-                </div>
-              )}
-            </div>
+            <button
+              type="button"
+              className="text-sm rounded-md w-fit transition-all duration-700 hover:bg-black text-white bg-[#435d63] p-2 font-serif font-semibold"
+              onClick={() => {
+                setEditProduct(null);
+                setShowForm(true);
+              }}
+            >
+              Tạo mới
+            </button>
           </header>
 
           <main className="mt-4 rounded-md shadow-md overflow-hidden">
@@ -294,11 +276,6 @@ const ProductOwner = () => {
               <Loading />
             ) : (
               <DataTable
-                customStyles={{
-                  subHeader: {
-                    style: { padding: "0", margin: "0", minHeight: "0" },
-                  },
-                }}
                 pointerOnHover
                 highlightOnHover
                 selectableRows
@@ -315,13 +292,6 @@ const ProductOwner = () => {
                 columns={columns}
                 data={filteredData}
                 selectableRowsComponent={SelectBox}
-                selectableRowsComponentProps={{
-                  style: {
-                    backgroundColor: "white",
-                    borderColor: "#435d63",
-                    accentColor: "#435d63",
-                  },
-                }}
                 onRowClicked={handleRowClicked}
               />
             )}
@@ -329,6 +299,7 @@ const ProductOwner = () => {
         </div>
       </section>
 
+      {/* Form thêm/sửa */}
       <Form
         toggle={showForm}
         setToggle={() => {
@@ -340,6 +311,7 @@ const ProductOwner = () => {
         isDisabled={false}
       />
 
+      {/* Form xem chi tiết */}
       <Form
         toggle={!!selectedRow}
         setToggle={() => setSelectedRow(null)}
@@ -353,7 +325,7 @@ const ProductOwner = () => {
         setToggle={() => setShowConfirmDeleteSingle(false)}
         onOk={confirmDeleteSingle}
         onCancel={() => setShowConfirmDeleteSingle(false)}
-        title="Bạn có chắc chắn muốn xóa Product này không?"
+        title="Bạn có chắc chắn muốn xóa sản phẩm này không?"
         message="Hành động này có thể được hoàn tác"
         okButtonText="OK"
         cancelButtonText="Hủy"

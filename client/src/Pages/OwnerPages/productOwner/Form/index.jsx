@@ -25,14 +25,15 @@ const Form = ({
     stock_quantity: "",
     status: "",
     category: "",
-    weight: "", // Thêm trường weight
+    weight: "",
+    image: "", // URL ảnh
   });
   const [categories, setCategories] = useState([]);
   const [errors, setErrors] = useState({});
   const [pending, setPending] = useState(false);
+  const [imageFile, setImageFile] = useState(null); // Lưu file ảnh
 
   useEffect(() => {
-    // Lấy danh sách category từ API
     const fetchCategories = async () => {
       try {
         const response = await ProductService.getAllCategories();
@@ -43,7 +44,6 @@ const Form = ({
     };
     fetchCategories();
 
-    // Nếu có dữ liệu ban đầu (chỉnh sửa sản phẩm)
     if (initialData) {
       setFields({
         name: initialData.name || "",
@@ -53,8 +53,10 @@ const Form = ({
         stock_quantity: initialData.stock_quantity || "",
         status: initialData.status || "",
         category: initialData.category?.id || "",
-        weight: initialData.weight || "", // Gán giá trị weight nếu có
+        weight: initialData.weight || "",
+        image: initialData.image || "",
       });
+      setImageFile(null);
     }
   }, [initialData]);
 
@@ -65,14 +67,25 @@ const Form = ({
     }
   };
 
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const res = await ProductService.uploadImage(file);
+      setFields((prev) => ({ ...prev, image: res.data.image }));
+    } catch (error) {
+      showToast("Lỗi upload ảnh", "error");
+    }
+  };
   const validateForm = () => {
     let newErrors = {};
     if (isEmpty(fields.name)) newErrors.name = "Tên sản phẩm là bắt buộc";
     if (isEmpty(fields.price)) newErrors.price = "Giá là bắt buộc";
     if (isEmpty(fields.stock_quantity))
       newErrors.stock_quantity = "Số lượng tồn kho là bắt buộc";
-    if (isEmpty(fields.category)) newErrors.category = "Danh mục Sản Phẩm là bắt buộc";
-    if (isEmpty(fields.weight)) newErrors.weight = "Khối lượng là bắt buộc"; // Thêm kiểm tra weight
+    if (isEmpty(fields.category))
+      newErrors.category = "Danh mục Sản Phẩm là bắt buộc";
+    if (isEmpty(fields.weight)) newErrors.weight = "Khối lượng là bắt buộc";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -83,6 +96,14 @@ const Form = ({
 
     setPending(true);
     try {
+      let imageUrl = fields.image;
+      // Nếu cần upload ảnh lên server, thực hiện ở đây và lấy imageUrl trả về
+      // Ví dụ:
+      // if (imageFile) {
+      //   const uploadRes = await ProductService.uploadImage(imageFile);
+      //   imageUrl = uploadRes.data.url;
+      // }
+
       const data = {
         name: fields.name,
         description: fields.description,
@@ -90,7 +111,8 @@ const Form = ({
         old_price: parseFloat(fields.old_price) || null,
         stock_quantity: parseInt(fields.stock_quantity, 10),
         status: fields.status,
-        weight: parseFloat(fields.weight), 
+        weight: parseFloat(fields.weight),
+        image: imageUrl, // Gửi URL hoặc base64
         category: { id: parseInt(fields.category, 10) },
       };
 
@@ -98,7 +120,6 @@ const Form = ({
       if (initialData) {
         response = await ProductService.updateProduct(initialData.id, data);
       } else {
-        console.log("data", data);
         response = await ProductService.createProduct(data);
       }
 
@@ -107,7 +128,6 @@ const Form = ({
         setToggle(false);
       }
     } catch (error) {
-      console.error("Lỗi khi lưu:", error);
       showToast("Lỗi khi lưu sản phẩm", "error");
     } finally {
       setPending(false);
@@ -225,6 +245,33 @@ const Form = ({
               errorMessage={errors?.weight}
               disabled={isDisabled}
             />
+
+            <FormControl
+              type="file"
+              placeHolder="Chọn ảnh sản phẩm"
+              hasLabel
+              id="image"
+              label="Ảnh sản phẩm"
+              onChange={handleImageChange}
+              hasError={!!errors?.image}
+              errorMessage={errors?.image}
+              disabled={isDisabled}
+            />
+            {fields.image && (
+              <div className="mt-2">
+                <img
+                  src={`http://localhost:8080/uploads/${fields.image}`}
+                  alt="Ảnh sản phẩm"
+                  style={{
+                    maxWidth: 120,
+                    maxHeight: 120,
+                    borderRadius: 8,
+                    objectFit: "cover",
+                  }}
+                />
+                <div className="text-xs text-gray-600 mt-1">{fields.image}</div>
+              </div>
+            )}
 
             <FormControl
               type="select"

@@ -3,7 +3,8 @@ import { isEmpty } from "../../../../Utils/validation";
 import { IoClose } from "react-icons/io5";
 import { showToast } from "../../../../Components/Toast";
 import StaffService from "../../../../Services/staff";
-
+import ServiceService from "../../../../Services/service";
+import StoreService from "../../../../Services/store";
 const FormControl = React.lazy(() =>
   import("../../../../Components/FormControl")
 );
@@ -22,36 +23,95 @@ const Form = ({
     service: "",
     status: "",
     store: "",
+    email: "",
+    phone: "",
+    password: "",
+    role: "0",
   });
-  const [stores, setStores] = useState([]);
   const [errors, setErrors] = useState({});
   const [pending, setPending] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [currentStoreId, setCurrentStoreId] = useState("");
+  const [currentStoreName, setCurrentStoreName] = useState("");
+  const [servicesOfStore, setServicesOfStore] = useState([]);
 
   useEffect(() => {
-    
+    const fetchStoreAndServices = async () => {
+      try {
+        const storeRes = await StoreService.getStoreBylogin();
+        const store = storeRes.data;
+        setCurrentStoreId(store.id?.toString() || "");
+        setCurrentStoreName(store.name || "");
 
-    // Nếu có dữ liệu ban đầu (chỉnh sửa staff)
-    if (initialData) {
+        const servicesRes = await ServiceService.getAllServices();
+        const allServices = servicesRes.data || [];
+        const filteredServices = allServices.filter(
+          (sv) => sv.store?.id?.toString() === store.id?.toString()
+        );
+        setServicesOfStore(filteredServices);
+
+        if (!initialData) {
+          setFields((prev) => ({
+            ...prev,
+            store: store.id?.toString() || "",
+          }));
+        }
+      } catch (error) {
+        setCurrentStoreId("");
+        setCurrentStoreName("");
+        setServicesOfStore([]);
+      }
+    };
+
+    fetchStoreAndServices();
+  }, [initialData]);
+  useEffect(() => {
+    if (!toggle) {
       setFields({
-        name: initialData.name || "",
-        service: initialData.service?.id || "",
+        name: "",
+        service: "",
+        status: "",
+        email: "",
+        phone: "",
+        password: "",
+        role: "0",
+      });
+      setErrors({});
+      setPending(false);
+      setShowPassword(false);
+    }
+  }, [toggle]);
+  useEffect(() => {
+    if (initialData && currentStoreId) {
+      setFields({
+        name: initialData.staff?.name || initialData.name || "",
+        service: initialData.service?.id?.toString() || "",
         status: initialData.status || "",
-        store: initialData.store?.id || "",
+        store: initialData.store?.id?.toString() || currentStoreId,
+        email: initialData.staff?.email || "",
+        phone: initialData.staff?.phone || "",
+        password: "",
+        role: "0",
       });
     }
-  }, [initialData]);
+  }, [initialData, currentStoreId]);
 
   const handleFieldsChange = (key, value) => {
-    if (!isDisabled) {
-      setFields((prev) => ({ ...prev, [key]: value }));
-      setErrors((prev) => ({ ...prev, [key]: "" }));
-    }
+    setFields((prev) => ({ ...prev, [key]: value }));
+    setErrors((prev) => ({ ...prev, [key]: "" }));
   };
 
   const validateForm = () => {
     let newErrors = {};
     if (isEmpty(fields.name)) newErrors.name = "Tên nhân viên là bắt buộc";
     if (isEmpty(fields.store)) newErrors.store = "Cửa hàng là bắt buộc";
+    if (isEmpty(fields.service)) newErrors.service = "Dịch vụ là bắt buộc";
+    if (!initialData) {
+      if (isEmpty(fields.email)) newErrors.email = "Email là bắt buộc";
+      if (isEmpty(fields.phone)) newErrors.phone = "Số điện thoại là bắt buộc";
+      if (isEmpty(fields.password)) newErrors.password = "Mật khẩu là bắt buộc";
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -62,12 +122,31 @@ const Form = ({
 
     setPending(true);
     try {
-      const data = {
-        name: fields.name,
-        service: { id: parseInt(fields.service, 10) },
-        status: fields.status,
-        store: { id: parseInt(fields.store, 10) },
-      };
+      let data;
+      if (initialData) {
+        data = {
+          service: { id: parseInt(fields.service, 10) },
+          status: fields.status,
+          store: { id: parseInt(fields.store, 10) },
+          staff: {
+            name: fields.name,
+            phone: fields.phone,
+          },
+        };
+      } else {
+        data = {
+          status: fields.status,
+          store: { id: parseInt(fields.store, 10) },
+          service: { id: parseInt(fields.service, 10) },
+          staff: {
+            name: fields.name,
+            email: fields.email,
+            phone: fields.phone,
+            password: fields.password,
+            role: { id: 0 },
+          },
+        };
+      }
 
       let response;
       if (initialData) {
@@ -81,8 +160,8 @@ const Form = ({
         setToggle(false);
       }
     } catch (error) {
-      console.error("Lỗi khi lưu:", error);
       showToast("Lỗi khi lưu nhân viên", "error");
+      console.error("Lỗi khi lưu:", error);
     } finally {
       setPending(false);
     }
@@ -114,6 +193,7 @@ const Form = ({
           </div>
 
           <div className="space-y-4">
+            {/* Tên nhân viên: luôn cho sửa */}
             <FormControl
               type="text"
               placeHolder="Nhập tên nhân viên"
@@ -129,6 +209,111 @@ const Form = ({
               disabled={isDisabled}
             />
 
+            {/* Số điện thoại: chỉ cho sửa khi edit, thêm mới thì nằm trong block dưới */}
+            {initialData && (
+              <FormControl
+                type="text"
+                placeHolder="Nhập số điện thoại"
+                hasLabel
+                id="phone"
+                label="Số điện thoại"
+                value={fields.phone}
+                onChange={(event) =>
+                  handleFieldsChange("phone", event.target.value)
+                }
+                hasError={!!errors?.phone}
+                errorMessage={errors?.phone}
+                disabled={isDisabled}
+              />
+            )}
+
+            {/* Các trường tài khoản chỉ hiện khi thêm mới */}
+            {!initialData && (
+              <>
+                <FormControl
+                  type="email"
+                  placeHolder="Nhập email"
+                  hasLabel
+                  id="email"
+                  label="Email"
+                  value={fields.email}
+                  onChange={(event) =>
+                    handleFieldsChange("email", event.target.value)
+                  }
+                  hasError={!!errors?.email}
+                  errorMessage={errors?.email}
+                  disabled={isDisabled}
+                />
+                <FormControl
+                  type="text"
+                  placeHolder="Nhập số điện thoại"
+                  hasLabel
+                  id="phone"
+                  label="Số điện thoại"
+                  value={fields.phone}
+                  onChange={(event) =>
+                    handleFieldsChange("phone", event.target.value)
+                  }
+                  hasError={!!errors?.phone}
+                  errorMessage={errors?.phone}
+                  disabled={isDisabled}
+                />
+                <div className="relative">
+                  <FormControl
+                    type={showPassword ? "text" : "password"}
+                    placeHolder="Nhập mật khẩu"
+                    hasLabel
+                    id="password"
+                    label="Mật khẩu"
+                    value={fields.password}
+                    onChange={(event) =>
+                      handleFieldsChange("password", event.target.value)
+                    }
+                    hasError={!!errors?.password}
+                    errorMessage={errors?.password}
+                    disabled={isDisabled}
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-9 text-sm text-blue-600"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    tabIndex={-1}
+                  >
+                    {showPassword ? "Ẩn" : "Hiện"}
+                  </button>
+                </div>
+                <FormControl
+                  type="select"
+                  placeHolder="Chọn vai trò"
+                  hasLabel
+                  id="role"
+                  label="Vai trò"
+                  value="0"
+                  disabled={true}
+                  options={[{ value: "0", label: "Nhân viên" }]}
+                />
+                <FormControl
+                  type="select"
+                  placeHolder="Chọn cửa hàng"
+                  hasLabel
+                  id="store"
+                  label="Cửa hàng"
+                  value={currentStoreId ? currentStoreId.toString() : ""}
+                  onChange={() => {}}
+                  hasError={!!errors?.store}
+                  errorMessage={errors?.store}
+                  disabled={true}
+                  options={[
+                    {
+                      value: currentStoreId,
+                      label: currentStoreName || `Cửa hàng ${currentStoreId}`,
+                    },
+                  ]}
+                />
+              </>
+            )}
+
+            {/* Dịch vụ: luôn cho sửa */}
             <FormControl
               type="select"
               placeHolder="Chọn dịch vụ"
@@ -142,12 +327,13 @@ const Form = ({
               hasError={!!errors?.service}
               errorMessage={errors?.service}
               disabled={isDisabled}
-              options={[
-                { value: "1", label: "Dịch vụ 1" },
-                { value: "2", label: "Dịch vụ 2" },
-                { value: "3", label: "Dịch vụ 3" },
-              ]}
+              options={servicesOfStore.map((service) => ({
+                value: service.id,
+                label: service.name,
+              }))}
             />
+
+            {/* Trạng thái: luôn cho sửa */}
             <FormControl
               type="select"
               placeHolder="Chọn trạng thái"
@@ -162,26 +348,6 @@ const Form = ({
               options={[
                 { value: "active", label: "Active" },
                 { value: "inactive", label: "Inactive" },
-              ]}
-            />
-            <FormControl
-              type="select"
-              placeHolder="Chọn cửa hàng"
-              hasLabel
-              id="store"
-              label="Cửa hàng"
-              value={fields.store || ""}
-              onChange={(event) =>
-                handleFieldsChange("store", event.target.value)
-              }
-              hasError={!!errors?.store}
-              errorMessage={errors?.store}
-              disabled={isDisabled}
-              options={[
-                ...stores.map((store) => ({
-                  value: store.id,
-                  label: store.name,
-                })),
               ]}
             />
           </div>

@@ -15,7 +15,7 @@ class ProductService {
 
 	// Lấy tất cả danh mục sản phẩm
 	static getAllCategories = async () => {
-		return await apiInstance.get(`${baseURL}/categories`, {
+		return await apiInstance.get(`${baseURL}/categories/ListCategory`, {
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -67,6 +67,13 @@ class ProductService {
             },
         });
     };
+
+    static uploadImage = async (file) => {
+    const formData = new FormData();
+    formData.append("image", file); 
+
+    return await apiInstance.post(`${baseURL}/products/upload`, formData);
+}
 
 }
 export default ProductService;

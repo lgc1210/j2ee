@@ -63,7 +63,7 @@ public class UserService {
 
     public UserEntity create(UserEntity user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-
+        
         RoleEntity role;
         if (user.getRole() == null) {
 

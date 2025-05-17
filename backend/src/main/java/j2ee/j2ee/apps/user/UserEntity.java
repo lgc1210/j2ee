@@ -41,6 +41,9 @@ public class UserEntity {
     @LastModifiedDate
     private LocalDate update_at;
 
+    
+    private LocalDate delete_at;
+
     @ManyToOne
     @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)
     private RoleEntity role;
