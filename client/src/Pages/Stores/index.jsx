@@ -1,32 +1,31 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import DataTable from "react-data-table-component";
-import { isEmpty } from "../../Utils/validation.js";
 import { CiSearch } from "react-icons/ci";
 import { FaRegEdit } from "react-icons/fa";
-import { IoTrashOutline } from "react-icons/io5";
-import ConfirmPopup from "../../Components/ConfirmPopup/index.jsx";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { showToast } from "../../Components/Toast/index.jsx";
+import { IoTrashOutline, IoEyeOutline } from "react-icons/io5";
+import { FiDownload } from "react-icons/fi";
+import ConfirmPopup from "../../Components/ConfirmPopup";
+import { showToast } from "../../Components/Toast";
 import StoreService from "../../Services/store";
 import * as XLSX from "xlsx";
-const FormControl = React.lazy(() =>
-	import("../../Components/FormControl/index.jsx")
-);
-const Loading = React.lazy(() => import("../../Components/Loading/index.jsx"));
-const Form = React.lazy(() => import("./Form/index.jsx"));
+import { Link } from "react-router-dom";
+import paths from "../../Constants/paths";
+
+const FormControl = React.lazy(() => import("../../Components/FormControl"));
+const Loading = React.lazy(() => import("../../Components/Loading"));
+const Form = React.lazy(() => import("./Form"));
 
 const SubHeader = ({ selectedRows, handleDeleteMultiple }) => {
 	const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
-	if (selectedRows.length === 0) {
-		return null;
-	}
+	if (selectedRows.length === 0) return null;
 
 	return (
 		<>
-			<div className='w-full p-5 bg-gray-100 flex items-center justify-between'>
-				<span>{selectedRows.length} mục được chọn</span>
+			<div className='w-full p-3 bg-slate-50 flex items-center justify-between shadow-sm rounded-md'>
+				<span className='font-medium text-slate-700'>
+					{selectedRows.length} items selected
+				</span>
 				<button onClick={() => setShowConfirmDelete(true)}>
 					<IoTrashOutline
 						size={36}
@@ -40,120 +39,175 @@ const SubHeader = ({ selectedRows, handleDeleteMultiple }) => {
 				setToggle={() => setShowConfirmDelete(false)}
 				onOk={handleDeleteMultiple}
 				onCancel={() => setShowConfirmDelete(false)}
-				title='Are you sure you want to delete this?'
-				message='This action can be undone'
-				okButtonText='OK'
+				title='Delete Multiple Stores'
+				message='Are you sure you want to delete the selected stores? This action cannot be undone.'
+				okButtonText='Delete'
 				cancelButtonText='Cancel'
 			/>
 		</>
 	);
 };
 
-const SelectBox = React.forwardRef(({ ...props }) => {
-	return (
-		<input
-			type='checkbox'
-			{...props}
-			className='w-4 h-4 text-[#435d63] bg-[#435d63] border-gray-200 rounded focus:ring-[#435d63]'
-		/>
-	);
-});
-
 const Stores = () => {
-	const columns = [
-		{
-			name: "Image",
-			sortable: true,
-			cell: (row) => (
-				<img
-					// src={row.image ? `/assets/images/store/${row.image}` : "/assets/images/store/default.jpg"}
-					alt={row.name || "Store"}
-					style={{ width: "50px", height: "50px", objectFit: "cover" }}
-					onError={(e) => (e.target.src = "/assets/images/store/default.jpg")}
-				/>
-			),
-		},
-		{
-			name: "Name",
-			sortable: true,
-			selector: (row) => row.name,
-		},
-		{
-			name: "Description",
-			sortable: true,
-			selector: (row) => row.description || "N/A",
-		},
-		{
-			name: "Address",
-			sortable: true,
-			selector: (row) => row.address || "N/A",
-		},
-		{
-			name: "Owner",
-			sortable: true,
-			selector: (row) => {
-				return row.ownerId?.name || "N/A";
-			},
-		},
-		{
-			name: "Status",
-			sortable: true,
-			selector: (row) => (row.status === "1" ? "Active" : "Inactive"),
-		},
-		{
-			name: "Actions",
-			center: true,
-			cell: (row) => (
-				<div className='flex gap-2'>
-					<FaRegEdit
-						className='cursor-pointer'
-						size={18}
-						onClick={() => handleEdit(row)}
-					/>
-					<IoTrashOutline
-						className='cursor-pointer'
-						size={18}
-						onClick={() => handleDeleteSingle(row.id)}
-					/>
-				</div>
-			),
-			ignoreRowClick: true,
-		},
-	];
-
 	const [searchInput, setSearchInput] = useState("");
 	const [errors, setErrors] = useState("");
-	const [showActions, setShowActions] = useState(false);
 	const [selectedRows, setSelectedRows] = useState([]);
 	const [showForm, setShowForm] = useState(false);
 	const [storesData, setStoresData] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [editStore, setEditStore] = useState(null);
-	const [showConfirmDeleteSingle, setShowConfirmDeleteSingle] = useState(false);
-	const [storeIdToDelete, setStoreIdToDelete] = useState(null);
-	const [selectedRow, setSelectedRow] = useState(null);
 
 	useEffect(() => {
-		const fetchStores = async () => {
+		const fetchData = async () => {
 			try {
 				setLoading(true);
-				const response = await StoreService.getAllStores();
-				setStoresData(response.data);
+				const response = await StoreService.getAllForAdmin();
+				setStoresData(response.data || []);
 			} catch (error) {
-				showToast("Lỗi khi tải danh sách cửa hàng", "error");
+				setStoresData([]);
+				showToast("Error loading store list", "error");
 			} finally {
 				setLoading(false);
 			}
 		};
-		fetchStores();
+		fetchData();
 	}, []);
+
+	const columns = useMemo(() => {
+		return [
+			{
+				name: "Image",
+				cell: (row) => (
+					<div className='py-2'>
+						<img
+							src={
+								row.imageBase64 ||
+								"https://phutungnhapkhauchinhhang.com/wp-content/uploads/2020/06/default-thumbnail.jpg"
+							}
+							alt={row.name || "Store"}
+							className='w-14 h-14 rounded-md object-cover border'
+						/>
+					</div>
+				),
+			},
+			{
+				name: "Name",
+				sortable: true,
+				selector: (row) => row.name,
+				cell: (row) => <div className='py-2 text-slate-800'>{row?.name}</div>,
+			},
+			{
+				name: "Owner",
+				sortable: true,
+				selector: (row) => row.owner?.name,
+				cell: (row) => (
+					<Link
+						to={paths.userDetails.replace(":id", row?.owner?.id)}
+						className='py-2 text-slate-600 hover:underline cursor-pointer'>
+						{row.owner?.name || "N/A"}
+					</Link>
+				),
+			},
+			{
+				name: "Status",
+				sortable: true,
+				selector: (row) => row?.status,
+				cell: (row) => (
+					<div className='py-2'>
+						<span
+							className={`px-2 py-1 text-xs font-medium rounded-full capitalize ${
+								row?.status?.toLowerCase() === "active"
+									? "bg-[#435d63]/10 text-[#435d63]"
+									: "bg-red-400/10 text-red-500"
+							}`}>
+							{row?.status}
+						</span>
+					</div>
+				),
+			},
+			{
+				name: "Actions",
+				cell: (row) => {
+					return (
+						<div className='flex gap-3 py-2'>
+							<Link
+								to={{
+									pathname: paths?.storeDetails?.replace(":id", row?.id),
+								}}
+								className='p-1 transition-colors hover:bg-black/10 rounded'>
+								<IoEyeOutline size={20} />
+							</Link>
+							<button
+								className='p-1 transition-colors hover:bg-black/10 rounded'
+								onClick={() => handleEdit(row)}>
+								<FaRegEdit size={16} />
+							</button>
+						</div>
+					);
+				},
+				ignoreRowClick: true,
+			},
+		];
+	}, []);
+
+	const customStyles = useMemo(() => {
+		return {
+			subHeader: {
+				style: { padding: "0", margin: "0", minHeight: "0" },
+			},
+			headRow: {
+				style: {
+					backgroundColor: "#f8fafc",
+					borderBottomWidth: "1px",
+					borderBottomColor: "#e2e8f0",
+					borderBottomStyle: "solid",
+					color: "#475569",
+					fontSize: "0.875rem",
+					fontWeight: "600",
+				},
+			},
+			rows: {
+				style: {
+					minHeight: "60px",
+					fontSize: "0.875rem",
+					"&:not(:last-of-type)": {
+						borderBottomStyle: "solid",
+						borderBottomWidth: "1px",
+						borderBottomColor: "#f1f5f9",
+					},
+					"&:hover": {
+						backgroundColor: "#f8fafc",
+						cursor: "pointer",
+					},
+				},
+			},
+			pagination: {
+				style: {
+					borderTopWidth: "1px",
+					borderTopColor: "#e2e8f0",
+					borderTopStyle: "solid",
+				},
+			},
+		};
+	}, []);
+
+	const filteredData = useMemo(() => {
+		return storesData.filter((store) => {
+			return (
+				store?.name?.toLowerCase().includes(searchInput.toLowerCase()) ||
+				(store?.description || "")
+					.toLowerCase()
+					.includes(searchInput.toLowerCase()) ||
+				(store?.owner?.name || "")
+					.toLowerCase()
+					.includes(searchInput.toLowerCase()) ||
+				(store?.address || "").toLowerCase().includes(searchInput.toLowerCase())
+			);
+		});
+	}, [searchInput, storesData]);
 
 	const handleFieldsChange = (key, value) => {
 		setSearchInput(value);
-	};
-
-	const handleRowsSelected = ({ selectedRows }) => {
-		setSelectedRows(selectedRows);
 	};
 
 	const handleDeleteMultiple = async () => {
@@ -162,27 +216,10 @@ const Stores = () => {
 			await StoreService.deleteMultipleStores(ids);
 			setStoresData(storesData.filter((store) => !ids.includes(store.id)));
 			setSelectedRows([]);
-			showToast("Xóa nhiều thành công", "success");
+			showToast("Deleted Successfully", "success");
 		} catch (error) {
-			console.error("Lỗi khi xóa nhiều:", error);
-			showToast("Lỗi khi xóa nhiều", "error");
-		}
-	};
-
-	const handleDeleteSingle = (storeId) => {
-		setStoreIdToDelete(storeId);
-		setShowConfirmDeleteSingle(true);
-	};
-
-	const confirmDeleteSingle = async () => {
-		try {
-			await StoreService.deleteStore(storeIdToDelete);
-			setStoresData(storesData.filter((store) => store.id !== storeIdToDelete));
-			setShowConfirmDeleteSingle(false);
-			showToast("Xóa thành công", "success");
-		} catch (error) {
-			console.error("Lỗi khi xóa:", error);
-			showToast("Lỗi khi xóa", "error");
+			console.error("Error deleting multiple stores:", error);
+			showToast("Delete failed", "error");
 		}
 	};
 
@@ -191,180 +228,125 @@ const Stores = () => {
 		setShowForm(true);
 	};
 
-	const handleFormSubmit = async (newStoreData) => {
+	const handleFormSubmit = async (data) => {
 		try {
+			const transformedData = {
+				name: data.name,
+				description: data.description,
+				address: data.address,
+				phone: data.phone,
+				open_time: data.open_time,
+				close_time: data.close_time,
+				status: data.status,
+			};
+			const formData = new FormData();
+			formData.append(
+				"store",
+				new Blob([JSON.stringify(transformedData)], {
+					type: "application/json",
+				})
+			);
+			if (data.image) {
+				formData.append("image", data.image);
+			}
+
 			if (editStore) {
-				const response = await StoreService.updateStore(
-					editStore.id,
-					newStoreData
-				);
+				const response = await StoreService.updateStore(editStore.id, formData);
 				setStoresData(
 					storesData.map((store) =>
 						store.id === editStore.id ? response.data : store
 					)
 				);
-			} else {
-				const response = await StoreService.createStore(newStoreData);
-				setStoresData([...storesData, response.data]);
+				showToast("Updated successfully");
 			}
 			setShowForm(false);
 			setEditStore(null);
 		} catch (error) {
-			console.error("Lỗi khi lưu:", error);
-			showToast("Lỗi khi lưu", "error");
+			const errorMessage =
+				error.response?.data?.message || error.message || "Error saving store";
+			throw new Error(errorMessage); // Throw error to be caught in Form component
 		}
-	};
-
-	const handleRowClicked = (row) => {
-		setSelectedRow(row);
-	};
-
-	const handleActionsClicked = () => {
-		setShowActions(!showActions);
-	};
-
-	const handleImport = async () => {
-		const input = document.createElement("input");
-		input.type = "file";
-		input.accept = ".xlsx, .xls";
-
-		input.onchange = async (e) => {
-			const file = e.target.files[0];
-			if (!file) return;
-
-			try {
-				const reader = new FileReader();
-				reader.onload = async (event) => {
-					const data = new Uint8Array(event.target.result);
-					const workbook = XLSX.read(data, { type: "array" });
-					const sheetName = workbook.SheetNames[0];
-					const worksheet = workbook.Sheets[sheetName];
-					const jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-					const mappedData = jsonData.map((item) => ({
-						name: item.Name || "Unnamed Store",
-						description: item.Description || null,
-						address: item.Address || null,
-						phone: item.Phone || null,
-						owner: { id: item.ownerId },
-						status: item.Status || "1",
-						open_time: item["Open Time"] || null,
-						close_time: item["Close Time"] || null,
-						image: item.Image || null,
-					}));
-
-					await StoreService.importStores(mappedData);
-					const response = await StoreService.getAllStores();
-					setStoresData(Array.isArray(response.data) ? response.data : []);
-					showToast("Import dữ liệu thành công (chỉ thêm mới)", "success");
-				};
-				reader.readAsArrayBuffer(file);
-			} catch (error) {
-				console.error("Lỗi khi import:", error);
-				showToast("Lỗi khi import dữ liệu", "error");
-			}
-		};
-
-		input.click();
 	};
 
 	const handleExport = () => {
 		const exportData = storesData.map((store) => ({
-			ID: store.id,
-			Name: store.name,
-			Description: store.description || "N/A",
-			Address: store.address || "N/A",
-			Phone: store.phone || "N/A",
-			"Owner Name": store.ownerId?.name || "N/A",
-			Status: store.status === "1" ? "Active" : "Inactive",
-			"Open Time": store.openTime || "N/A",
-			"Close Time": store.closeTime || "N/A",
-			"Created At": store.createdAt || "N/A",
-			"Updated At": store.updatedAt || "N/A",
+			ID: store?.id,
+			Name: store?.name,
+			Description: store?.description || "N/A",
+			Address: store?.address || "N/A",
+			Phone: store?.phone || "N/A",
+			Owner: store?.owner?.name || "N/A",
+			Status: store?.status || "N/A",
+			"Open Time": store?.open_time || "N/A",
+			"Close Time": store?.close_time || "N/A",
+			"Created At": store?.created_at || "N/A",
+			"Updated At": store?.updated_at || "N/A",
 		}));
 		const worksheet = XLSX.utils.json_to_sheet(exportData);
 		const workbook = XLSX.utils.book_new();
 		XLSX.utils.book_append_sheet(workbook, worksheet, "Stores");
-		XLSX.writeFile(workbook, "Stores_Export.xlsx");
-		showToast("Xuất file Excel thành công", "success");
+		XLSX.writeFile(workbook, "Stores.xlsx");
 	};
-
-	const filteredData = storesData.filter((store) =>
-		(store.name || "").toLowerCase().includes(searchInput.toLowerCase())
-	);
 
 	return (
 		<>
-			<section>
-				<div>
-					<header className='bg-white rounded-md p-4 flex items-center justify-between shadow-md'>
-						<div className='min-w-fit max-w-md'>
-							<FormControl
-								type='text'
-								placeHolder='Search here...'
-								wrapInputStyle='!border-black/10 rounded-md focus-within:!border-[#435d63] transition-all'
-								inputStyle='font-serif placeholder:text-lg text-black placeholder:font-serif !p-4 !py-2'
-								id='search'
-								onChange={(event) =>
-									handleFieldsChange("search", event.target.value)
-								}
-								hasButton
-								Icon={CiSearch}
-								iconSize={24}
-								iconStyle='transition-all text-[#435d63] hover:text-black mx-4'
-								hasError={errors?.searchInput}
-								errorMessage={errors?.searchInput}
-							/>
-						</div>
-
-						<div className='relative'>
-							<button
-								type='button'
-								className='text-sm rounded-md w-fit transition-all duration-700 hover:bg-black text-white bg-[#435d63] p-2 font-serif font-semibold'
-								onClick={handleActionsClicked}>
-								<p>Action</p>
-							</button>
-							{showActions && (
-								<div className='overflow-hidden absolute z-10 top-full right-0 rounded-md bg-white w-fit shadow-md'>
-									<button
-										className='p-2 px-4 hover:bg-black/10 w-full'
-										onClick={() => {
-											setEditStore(null);
-											setShowForm(true);
-										}}>
-										Create
-									</button>
-									<button
-										className='p-2 px-4 hover:bg-black/10 w-full'
-										onClick={handleImport}>
-										Import
-									</button>
-									<button
-										className='p-2 px-4 hover:bg-black/10 w-full'
-										onClick={handleExport}>
-										Export
-									</button>
-								</div>
-							)}
-						</div>
+			<section className='px-4 py-6'>
+				<div className='max-w-6xl mx-auto'>
+					<header className='mb-6'>
+						<h1 className='text-2xl font-bold text-slate-800 mb-2'>
+							Store Management
+						</h1>
+						<p className='text-slate-500'>
+							View, create, and manage system stores
+						</p>
 					</header>
 
-					<main className='mt-4 rounded-md shadow-md overflow-hidden'>
+					<div className='bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden mb-6'>
+						<div className='p-4 flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-200'>
+							{/* Search Box */}
+							<div className='w-full md:w-96'>
+								<FormControl
+									type='text'
+									placeHolder='Search stores...'
+									wrapInputStyle='border border-slate-300 rounded-lg focus-within:border-[#435d63] focus-within:ring-1 focus-within:ring-[#435d63] transition-all'
+									inputStyle='font-sans placeholder:text-slate-400 text-slate-700 !p-2 !px-4'
+									id='search'
+									onChange={(event) =>
+										handleFieldsChange("search", event.target.value)
+									}
+									hasButton
+									Icon={CiSearch}
+									iconSize={20}
+									iconStyle='text-slate-400 mx-3 hover:text-[#435d63]'
+									hasError={errors?.searchInput}
+									errorMessage={errors?.searchInput}
+								/>
+							</div>
+
+							{/* Action Buttons */}
+							<div className='flex items-center gap-2 w-full md:w-auto justify-end'>
+								<button
+									className='flex items-center gap-1 px-3 py-2 bg-slate-100 text-slate-700 hover:scale-[0.98] rounded-lg hover:bg-slate-200 transition-all'
+									onClick={handleExport}>
+									<FiDownload size={16} />
+									<span className='hidden sm:inline'>Export</span>
+								</button>
+							</div>
+						</div>
+
 						{loading ? (
-							<Loading />
+							<div className='flex items-center justify-center py-16'>
+								<Loading />
+							</div>
 						) : (
 							<DataTable
-								customStyles={{
-									subHeader: {
-										style: { padding: "0", margin: "0", minHeight: "0" },
-									},
-								}}
-								pointerOnHover
+								customStyles={customStyles}
+								responsive
 								highlightOnHover
-								selectableRows
 								striped
 								pagination
-								onSelectedRowsChange={handleRowsSelected}
+								paginationPerPage={10}
+								paginationRowsPerPageOptions={[10, 25, 50, 100]}
 								subHeader={selectedRows.length > 0}
 								subHeaderComponent={
 									<SubHeader
@@ -372,20 +354,16 @@ const Stores = () => {
 										handleDeleteMultiple={handleDeleteMultiple}
 									/>
 								}
-								columns={columns}
+								noDataComponent={
+									<div className='p-10 text-center text-slate-500'>
+										No users found
+									</div>
+								}
 								data={filteredData}
-								selectableRowsComponent={SelectBox}
-								selectableRowsComponentProps={{
-									style: {
-										backgroundColor: "white",
-										borderColor: "#435d63",
-										accentColor: "#435d63",
-									},
-								}}
-								onRowClicked={handleRowClicked}
+								columns={columns}
 							/>
 						)}
-					</main>
+					</div>
 				</div>
 			</section>
 
@@ -398,25 +376,6 @@ const Stores = () => {
 				initialData={editStore}
 				onSubmit={handleFormSubmit}
 				isDisabled={false}
-			/>
-
-			<Form
-				toggle={!!selectedRow}
-				setToggle={() => setSelectedRow(null)}
-				initialData={selectedRow}
-				onSubmit={() => {}}
-				isDisabled={true}
-			/>
-
-			<ConfirmPopup
-				toggle={showConfirmDeleteSingle}
-				setToggle={() => setShowConfirmDeleteSingle(false)}
-				onOk={confirmDeleteSingle}
-				onCancel={() => setShowConfirmDeleteSingle(false)}
-				title='Are you sure you want to delete this?'
-				message='This action can be undone'
-				okButtonText='OK'
-				cancelButtonText='Cancel'
 			/>
 		</>
 	);

@@ -70,13 +70,9 @@ class UserService {
 		}
 	};
 
-	// Xóa một Store
+	// Delete user
 	deleteUser = async (userId) => {
-		return await apiInstance.delete(`${baseURL}/users/${userId}`, {
-			headers: {
-				"Content-Type": "application/json",
-			},
-		});
+		return await apiInstance.delete(`${baseURL}/users/${userId}`);
 	};
 
 	// Xóa nhiều Store

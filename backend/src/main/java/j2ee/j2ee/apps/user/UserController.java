@@ -5,6 +5,7 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,8 +32,7 @@ public class UserController {
     public ResponseEntity<List<UserEntity>> getAll() {
         try {
             var userList = userService.getAll();
-            if (userList.size() == 0)
-                return ResponseEntity.notFound().build();
+            if (userList.size() == 0) return ResponseEntity.notFound().build();
 
             return ResponseEntity.ok(userList);
         } catch (Exception e) {
@@ -70,16 +70,17 @@ public class UserController {
     @PostMapping("/createUser")
     public ResponseEntity<UserEntity> create(@RequestBody UserEntity user) {
         try {
-            System.out.println("USER" + user);
-            if (user == null)
-                return ResponseEntity.badRequest().build();
+            if (user == null) return ResponseEntity.badRequest().build();
+
+            // Check whether the email or phone is registered or not
             Optional<UserEntity> doesEmailExist = userService.getByEmail(user.getEmail());
             Optional<UserEntity> doesPhoneExist = userService.getByPhone(user.getPhone());
             if (doesEmailExist.isPresent() || doesPhoneExist.isPresent())
                 return ResponseEntity.status(HttpStatus.CONFLICT).build();
+
             UserEntity createdUser = userService.create(user);
-            URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
-                    .buildAndExpand(createdUser.getId()).toUri();
+            URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(createdUser.getId()).toUri();
+
             return ResponseEntity.created(uri).body(createdUser);
         } catch (Exception e) {
             System.err.println("Internal Server Error: " + e.getMessage());
@@ -88,8 +89,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> update(@PathVariable(name = "id") long id,
-            @RequestBody UserEntity user) {
+    public ResponseEntity<Object> update(@PathVariable(name = "id") long id, @RequestBody UserEntity user) {
         try {
             if (user == null) {
                 return ResponseEntity.badRequest().build();
@@ -105,12 +105,10 @@ public class UserController {
             return ResponseEntity.ok(updatedUser);
         } catch (RuntimeException e) {
             if (e.getMessage().equals(ErrorMessages.EMAIL_CONFLICT)) {
-                return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body(ErrorMessages.EMAIL_CONFLICT);
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorMessages.EMAIL_CONFLICT);
             }
             if (e.getMessage().equals(ErrorMessages.PHONE_CONFLICT)) {
-                return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body(ErrorMessages.PHONE_CONFLICT);
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorMessages.PHONE_CONFLICT);
             }
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Failed to update user");
         } catch (Exception e) {
@@ -120,8 +118,7 @@ public class UserController {
     }
 
     @PostMapping("/{id}/changepassword")
-    public ResponseEntity<?> changePassword(@PathVariable(name = "id") long id,
-            @RequestBody Map<String, String> request) {
+    public ResponseEntity<?> changePassword(@PathVariable(name = "id") long id, @RequestBody Map<String, String> request) {
         try {
             String currentPassword = request.get("currentPassword");
             String newPassword = request.get("newPassword");
@@ -146,7 +143,7 @@ public class UserController {
         return ResponseEntity.ok(userService.getUsersByRoleId(roleId));
     }
 
-    // Delete (Xóa một store)
+    // Delete user
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         try {
@@ -157,7 +154,7 @@ public class UserController {
         }
     }
 
-    // Delete (Xóa nhiều stores)
+    // Delete multiple stores at the same time
     @DeleteMapping("/delete-multiple")
     @Transactional
     public ResponseEntity<String> deleteMultipleUsers(@RequestBody List<Long> ids) {
@@ -171,5 +168,4 @@ public class UserController {
             return ResponseEntity.badRequest().body("Lỗi khi xóa: " + e.getMessage());
         }
     }
-
 }

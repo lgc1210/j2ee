@@ -20,9 +20,7 @@ const Form = React.lazy(() => import("./Form"));
 const SubHeader = ({ selectedRows, handleDeleteMultiple }) => {
 	const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
-	if (selectedRows.length === 0) {
-		return null;
-	}
+	if (selectedRows.length === 0) return null;
 
 	return (
 		<>
@@ -30,11 +28,11 @@ const SubHeader = ({ selectedRows, handleDeleteMultiple }) => {
 				<span className='font-medium text-slate-700'>
 					{selectedRows.length} items selected
 				</span>
-				<button
-					onClick={() => setShowConfirmDelete(true)}
-					className='flex items-center gap-1 px-3 py-1 text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-all'>
-					<IoTrashOutline size={18} />
-					<span>Delete</span>
+				<button onClick={() => setShowConfirmDelete(true)}>
+					<IoTrashOutline
+						size={36}
+						className='cursor-pointer rounded-full bg-red-100 hover:bg-red-200 text-red-500 p-2'
+					/>
 				</button>
 			</div>
 
@@ -57,7 +55,7 @@ const SelectBox = React.forwardRef(({ ...props }) => {
 		<input
 			type='checkbox'
 			{...props}
-			className='w-4 h-4 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500'
+			className='w-4 h-4 !text-[#435d63] !bg-[#435d63] border-gray-200 rounded !focus:ring-[#435d63]'
 		/>
 	);
 });
@@ -142,7 +140,7 @@ const Users = () => {
 						<div className='flex gap-3 py-2'>
 							<Link
 								to={{
-									pathname: `${paths.users}/${row?.id}`,
+									pathname: paths.userDetails.replace(":id", row?.id),
 								}}
 								className='p-1 transition-colors hover:bg-black/10 rounded'>
 								<IoEyeOutline size={20} />
@@ -167,6 +165,9 @@ const Users = () => {
 
 	const customStyles = useMemo(() => {
 		return {
+			subHeader: {
+				style: { padding: "0", margin: "0", minHeight: "0" },
+			},
 			headRow: {
 				style: {
 					backgroundColor: "#f8fafc",
@@ -231,13 +232,14 @@ const Users = () => {
 
 	const confirmDeleteSingle = async () => {
 		try {
-			await UserService.deleteUser(userIdToDelete);
-			setUsersData(usersData.filter((user) => user.id !== userIdToDelete));
+			const response = await UserService.deleteUser(userIdToDelete);
+			response?.status === 200 &&
+				setUsersData(usersData.filter((user) => user.id !== userIdToDelete));
 			setShowConfirmDeleteSingle(false);
-			showToast("User deleted successfully", "success");
+			showToast("Deleted successfully", "success");
 		} catch (error) {
 			console.error("Error deleting user:", error);
-			showToast("Error deleting user", "error");
+			showToast("Delete failed", "error");
 		}
 	};
 
@@ -449,9 +451,16 @@ const Users = () => {
 							<DataTable
 								customStyles={customStyles}
 								responsive
-								pointerOnHover
 								highlightOnHover
 								selectableRows
+								selectableRowsComponentProps={{
+									style: {
+										backgroundColor: "white",
+										borderColor: "#435d63",
+										accentColor: "#435d63",
+									},
+								}}
+								striped
 								pagination
 								paginationPerPage={10}
 								paginationRowsPerPageOptions={[10, 25, 50, 100]}
@@ -463,14 +472,14 @@ const Users = () => {
 										handleDeleteMultiple={handleDeleteMultiple}
 									/>
 								}
-								columns={columns}
-								data={filteredData}
 								selectableRowsComponent={SelectBox}
 								noDataComponent={
 									<div className='p-10 text-center text-slate-500'>
 										No users found
 									</div>
 								}
+								columns={columns}
+								data={filteredData}
 							/>
 						)}
 					</div>

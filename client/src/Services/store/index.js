@@ -3,11 +3,26 @@ import apiInstance from "../../Config/api";
 const baseURL = process.env.REACT_APP_API;
 
 class StoreService {
-	// Lấy tất cả store
+	// Get all stores for customer with pagination
 	static getAll = async ({ page, pageSize, categoryOfServiceId }) => {
 		return await apiInstance.get(`${baseURL}/stores`, {
 			params: { page, size: pageSize, categoryOfServiceId },
 		});
+	};
+
+	// Get all stores for admin with no pagination
+	static getAllForAdmin = async () => {
+		return await apiInstance.get(`${baseURL}/stores/admin`);
+	};
+
+	// Get store for ownerId
+	static getStoreByOwnerId = async (ownerId) => {
+		return await apiInstance.get(`${baseURL}/stores/admin/owners/${ownerId}`);
+	};
+
+	// Get store by id
+	static getStoreById = async (storeId) => {
+		return await apiInstance.get(`${baseURL}/stores/${storeId}`);
 	};
 
 	static getStoreCloseTimeById = async (store_id) => {
@@ -31,14 +46,6 @@ class StoreService {
 			headers: { "Content-Type": "application/json" },
 		});
 	};
-	// Lấy Store  theo ID
-	static getStoreById = async (roleId) => {
-		return await apiInstance.get(`${baseURL}/stores/${roleId}`, {
-			headers: {
-				"Content-Type": "application/json",
-			},
-		});
-	};
 
 	static getStoreBylogin = async () => {
 		return await apiInstance.get(`${baseURL}/stores/mystore`, {
@@ -52,9 +59,14 @@ class StoreService {
 	static updateStore = async (storeId, payload) => {
 		return await apiInstance.put(`${baseURL}/stores/${storeId}`, payload, {
 			headers: {
-				"Content-Type": "application/json",
+				"Content-Type": "multipart/form-data",
 			},
 		});
+	};
+
+	// Delete Store
+	static deleteStore = async (storeId) => {
+		return await apiInstance.delete(`${baseURL}/stores/${storeId}`);
 	};
 }
 

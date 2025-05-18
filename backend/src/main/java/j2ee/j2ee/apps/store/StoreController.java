@@ -1,12 +1,15 @@
 package j2ee.j2ee.apps.store;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.repository.query.Param;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import j2ee.j2ee.apps.user.UserEntity;
 
 import org.springframework.http.ResponseEntity;
 
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +18,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import j2ee.j2ee.apps.user.UserRepository;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/stores")
@@ -25,6 +29,7 @@ public class StoreController {
     @Autowired
     private StoreService storeService;
 
+    // Get stores to render for customer with pagination
     @GetMapping
     public ResponseEntity<Object> getAll(
             @RequestParam(required = false) int page,
@@ -49,6 +54,48 @@ public class StoreController {
             response.put("totalElements", pageStores.getTotalElements());
             response.put("currentPage", pageStores.getNumber());
             return ResponseEntity.ok().body(response);
+        } catch (Exception e) {
+            System.err.println("Internal Server Error: " + e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    // Get stores to render for admin without pagination
+    @GetMapping("/admin")
+    public ResponseEntity<List<StoreEntity>> getAllForAdmin() {
+        try {
+            Optional<List<StoreEntity>> storeList = this.storeService.getAllForAdmin();
+            if (!storeList.isPresent())
+                return ResponseEntity.notFound().build();
+            return ResponseEntity.ok().body(storeList.get());
+        } catch (Exception e) {
+            System.err.println("Internal Server Error: " + e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    // Get stores to render for admin without pagination
+    @GetMapping("/{storeId}")
+    public ResponseEntity<StoreEntity> getById(@PathVariable Long storeId) {
+        try {
+            Optional<StoreEntity> store = this.storeService.getById(storeId);
+            if (!store.isPresent())
+                return ResponseEntity.notFound().build();
+            return ResponseEntity.ok().body(store.get());
+        } catch (Exception e) {
+            System.err.println("Internal Server Error: " + e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    // Get stores to render for admin without pagination
+    @GetMapping("/admin/owners/{ownerId}")
+    public ResponseEntity<StoreEntity> getStoreByOwnerId(@PathVariable Long ownerId) {
+        try {
+            Optional<StoreEntity> store = this.storeService.getByOwnerId(ownerId);
+            if (!store.isPresent())
+                return ResponseEntity.notFound().build();
+            return ResponseEntity.ok().body(store.get());
         } catch (Exception e) {
             System.err.println("Internal Server Error: " + e.getMessage());
             return ResponseEntity.internalServerError().build();
@@ -98,12 +145,22 @@ public class StoreController {
         }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<StoreEntity> updateStoreOwner(@PathVariable Long id, @RequestBody StoreEntity updatedStore) {
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<StoreEntity> updateStoreOwner(
+            @PathVariable Long id,
+            @RequestPart("store") StoreEntity storeEntity,
+            @RequestPart(value = "image", required = false) MultipartFile image
+    ) {
         try {
-            // Gọi service để xử lý logic cập nhật
-            StoreEntity savedStore = storeService.updateStore(id, updatedStore);
-            return ResponseEntity.ok(savedStore);
+            if (image != null && !image.isEmpty()) {
+                storeEntity.setImage(image.getBytes());
+            }
+
+            storeEntity.setOpen_time(LocalTime.parse(storeEntity.getOpen_time().toString()));
+            storeEntity.setClose_time(LocalTime.parse(storeEntity.getClose_time().toString()));
+
+            StoreEntity updatedStore = storeService.updateStoreOwner(id, storeEntity);
+            return ResponseEntity.ok().body(updatedStore);
         } catch (RuntimeException e) {
             System.err.println("Error updating store: " + e.getMessage());
             return ResponseEntity.badRequest().build();
@@ -118,5 +175,19 @@ public class StoreController {
     public ResponseEntity<String> importStores(@RequestBody List<StoreEntity> stores) {
         storeService.importStores(stores);
         return ResponseEntity.ok("Import successful");
+    }
+
+    // Delete store (change status)
+    @DeleteMapping("/{storeId}")
+    public ResponseEntity<Object> softDelete(@PathVariable Long storeId) {
+        try {
+            Optional<StoreEntity> updatedStore = this.storeService.softDeleteById(storeId);
+            if (!updatedStore.isPresent())
+                return ResponseEntity.notFound().build();
+            return ResponseEntity.ok().body(updatedStore);
+        } catch (Exception e) {
+            System.err.println("Internal Server Error: " + e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }

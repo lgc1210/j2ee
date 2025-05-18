@@ -41,6 +41,7 @@ const paths = {
 	users: "/admin/users",
 	userDetails: "/admin/users/:id",
 	stores: "/admin/stores",
+	storeDetails: "/admin/stores/:id",
 	products: "/admin/products",
 	categories: "/admin/categories",
 	discounts: "/admin/discounts",

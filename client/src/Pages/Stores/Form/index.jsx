@@ -1,446 +1,415 @@
-import React, { useState, useEffect } from "react";
-import { isEmpty } from "../../../Utils/validation";
+import React, { useState, useEffect, useCallback } from "react";
+import { isEmpty, isPhone } from "../../../Utils/validation";
 import { IoClose } from "react-icons/io5";
 import { showToast } from "../../../Components/Toast";
-import StoreService from "../../../Services/store";
-import UserService from "../../../Services/user";
 
 const FormControl = React.lazy(() => import("../../../Components/FormControl"));
 const Overlay = React.lazy(() => import("../../../Components/Overlay"));
 const Loading = React.lazy(() => import("../../../Components/Loading"));
 
-const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false }) => {
-  const [fields, setFields] = useState({
-    name: "",
-    description: "",
-    address: "",
-    phone: "",
-    createdAt: "",
-    updateAt: "",
-    openTime: "",
-    closeTime: "",
-    ownerId:  "" ,
-    status: "",
-    image: "",
-  });
-  const [file, setFile] = useState(null);
-  const [errors, setErrors] = useState({});
-  const [pending, setPending] = useState(false);
-  const [owners, setOwners] = useState([]);
+const defaultFields = {
+	name: "",
+	description: "",
+	address: "",
+	phone: "",
+	open_time: "",
+	close_time: "",
+	status: "",
+	image: "",
+};
 
-  useEffect(() => {
-    if (initialData) {
-      setFields({
-        name: initialData.name || "",
-        description: initialData.description || "",
-        address: initialData.address || "",
-        phone: initialData.phone || "",
-        createdAt: initialData.createdAt || "",
-        updateAt: initialData.updateAt || "",
-        openTime: initialData.openTime || "",
-        closeTime: initialData.closeTime || "",
+const Form = ({
+	toggle,
+	setToggle,
+	initialData,
+	onSubmit,
+	isDisabled = false,
+}) => {
+	const [fields, setFields] = useState(defaultFields);
+	const [file, setFile] = useState(null);
+	const [errors, setErrors] = useState({});
+	const [pending, setPending] = useState(false);
 
-        ownerId: initialData.ownerId.id || "",
-        status: initialData.status || "",
-        image: initialData.image || "",
-      });
-      setErrors({});
+	useEffect(() => {
+		setFields(
+			initialData ? { ...defaultFields, ...initialData } : defaultFields
+		);
+		setErrors({});
+	}, [initialData]);
 
-    } else {
-      setFields({
-        name: "",
-        description: "",
-        address: "",
-        phone: "",
-        createdAt: "",
-        updateAt: "",
-        openTime: "",
-        closeTime: "",
-        ownerId: "",
-        status: "",
-        image: "",
-      });
-      setErrors({});
-    }
-  }, [initialData]);
- console.log("name:" + fields.ownerId.id)
-  useEffect(() => {
-    const fetchOwners = async () => {
-      try {
-        const response = await UserService.getUsersByRoleId(2);
-        const ownersData = response.data;
-        setOwners(Array.isArray(ownersData) ? ownersData : []);
-      } catch (error) {
-        console.error("Lỗi khi lấy danh sách chủ cửa hàng:", error);
-        showToast("Không thể tải danh sách chủ cửa hàng", "error");
-        setOwners([]);
-      }
-    };
-    fetchOwners();
-  }, []);
-  const handleFieldsChange = (key, value) => {
-    if (!isDisabled) {
-      if (key === "ownerId") {
-        console.log("Selected ownerId value:", value);
-        setFields((prev) => ({ ...prev, ownerId: value })); 
-      } else {
-        setFields((prev) => ({ ...prev, [key]: value }));
-      }
-      setErrors((prev) => ({ ...prev, [key]: "" }));
-    }
-  };
+	const handleFieldsChange = (key, value) => {
+		if (!isDisabled) {
+			setFields((prev) => ({ ...prev, [key]: value }));
+			setErrors((prev) => ({ ...prev, [key]: "" }));
+		}
+	};
 
-  const handleFileChange = (e) => {
-    if (!isDisabled && e.target.files[0]) {
-      const selectedFile = e.target.files[0];
-      setFile(selectedFile);
-      setFields((prev) => ({ ...prev, image: selectedFile.name }));
-      setErrors((prev) => ({ ...prev, image: "" }));
-    }
-  };
+	const handleFileChange = (e) => {
+		if (!isDisabled && e.target.files[0]) {
+			const selectedFile = e.target.files[0];
+			setFile(selectedFile);
+			setFields((prev) => ({ ...prev, image: selectedFile }));
+			setErrors((prev) => ({ ...prev, image: "" }));
+		}
+	};
 
-  const handleFieldsType = (key) => {
-    if (!isDisabled) {
-      setErrors((prev) => ({ ...prev, [key]: "" }));
-    }
-  };
+	const handleFieldsType = (key) => {
+		if (!isDisabled) {
+			setErrors((prev) => ({ ...prev, [key]: "" }));
+		}
+	};
 
-  const handleFieldsBlur = (key, message) => {
-    if (!isDisabled) {
-      setErrors((prev) => ({ ...prev, [key]: message }));
-    }
-  };
+	const handleFieldsBlur = (key, message) => {
+		if (!isDisabled) {
+			setErrors((prev) => ({ ...prev, [key]: message }));
+		}
+	};
 
-  const validateForm = () => {
-    let newErrors = {};
-    if (isEmpty(fields.name)) newErrors.name = "Name is required";
-    if (isEmpty(fields.phone)) newErrors.phone = "Phone number is required";
-    if (isEmpty(fields.description)) newErrors.description = "Description is required";
-    if (isEmpty(fields.address)) newErrors.address = "Address is required";
-    if (isEmpty(fields.status)) newErrors.status = "Status is required";
-    if (isEmpty(fields.ownerId.id)) newErrors.ownerId = "Store owner is required";
-    if (isEmpty(fields.openTime)) newErrors.openTime = "Opening time is required";
-    if (isEmpty(fields.closeTime)) newErrors.closeTime = "Closing time is required";
-    if (fields.phone) {
-      const phoneRegex = /^\d+$/; 
-      if (!phoneRegex.test(fields.phone)) {
-        newErrors.phone = "Phone number must contain only digits";
-      } else if (fields.phone.length !== 10) {
-        newErrors.phone = "Phone number must be exactly 10 digits";
-      }
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+	const validateForm = () => {
+		let newErrors = {};
+		if (isEmpty(fields.name)) newErrors.name = "Name is required";
+		if (isEmpty(fields.phone)) newErrors.phone = "Phone number is required";
+		else if (!isPhone(fields.phone))
+			newErrors.phone = "Phone number is invalid";
+		if (isEmpty(fields.description))
+			newErrors.description = "Description is required";
+		if (isEmpty(fields.address)) newErrors.address = "Address is required";
+		if (isEmpty(fields.status)) newErrors.status = "Status is required";
+		if (isEmpty(fields.open_time))
+			newErrors.open_time = "Opening time is required";
+		if (isEmpty(fields.close_time))
+			newErrors.close_time = "Closing time is required";
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (isDisabled || !validateForm() || pending) return;
+		setErrors(newErrors);
+		return Object.keys(newErrors).length === 0;
+	};
 
-    setPending(true);
-    try {
-   
-      const data = {
-        name: fields.name,
-        description: fields.description,
-        address: fields.address,
-        phone: fields.phone,
-        createdAt: null,
-        updateAt: null,
-        openTime: fields.openTime,
-        closeTime: fields.closeTime,
-        ownerId: fields.ownerId ? { id: Number(fields.ownerId) } : null,
-        status: fields.status,
-        image: fields.image || undefined,
-      };
-      console.log("data1: "+data );
+	const handleSubmit = async (e) => {
+		e.preventDefault();
+		if (isDisabled || pending) return;
 
-      let response;
-      if (initialData) {
-        response = await StoreService.updateStore(initialData.id, data);
-      } else {
-        response = await StoreService.createStore(data);
-      }
+		if (!validateForm()) {
+			showToast("Please fix the errors in the form", "error");
+			return;
+		}
 
-      if (response && response.data) {
-        onSubmit(response.data);
-        showToast(initialData ? "Cập nhật thành công" : "Tạo thành công", "success");
-        setToggle(false);
-      }
-    } catch (error) {
-      console.error("Lỗi khi lưu:", error);
-      showToast(
-        "Lỗi khi lưu: " + (error.response?.data?.message || error.message),
-        "error"
-      );
-    } finally {
-      setPending(false);
-    }
-  };
+		setPending(true);
+		try {
+			const data = {
+				name: fields.name,
+				description: fields.description,
+				address: fields.address,
+				phone: fields.phone,
+				open_time: fields.open_time,
+				close_time: fields.close_time,
+				status: fields.status,
+				image: fields.image || undefined,
+			};
 
-  return (
-    <>
-      <Overlay toggle={toggle} setToggle={setToggle} />
-      <section
-        className={`
-          ${
-            toggle ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-          } fixed inset-0 z-40 flex justify-center pt-8 pb-4 overflow-y-auto`}
-      >
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white max-w-md w-full rounded p-6 min-h-fit"
-        >
-          <div className="flex items-center justify-between w-full mb-4">
-            <p className="font-semibold text-lg">
-              {isDisabled
-                ? "Thông tin cửa hàng"
-                : initialData
-                ? "Chỉnh sửa cửa hàng"
-                : "Tạo cửa hàng"}
-            </p>
-            <IoClose size={26} className="cursor-pointer" onClick={setToggle} />
-          </div>
+			await onSubmit(data);
+			handleClose();
+		} catch (error) {
+			const errorMessage =
+				error.response?.data?.message || error.message || "Error saving store";
+			showToast(errorMessage, "error");
+		} finally {
+			setPending(false);
+		}
+	};
 
-          <div className="space-y-4">
-            {!isDisabled && (
-              <div>
-                <label className="block mb-1 font-serif font-medium">Ảnh cửa hàng</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="w-full p-2 border rounded"
-                  disabled={isDisabled}
-                />
-              </div>
-            )}
+	const handleClose = () => {
+		setFields(defaultFields);
+		setErrors({});
+		setToggle(false);
+	};
 
-            {fields.image && (
-              <div className="mt-4">
-                <label className="block mb-1 font-serif font-medium">Xem trước ảnh</label>
-                <img
-                  src={file ? URL.createObjectURL(file) : fields.image}
-                  alt={fields.name || "Store Image"}
-                  className="w-32 h-32 object-cover rounded-md"
-                
-                />
-              </div>
-            )}
+	return (
+		<>
+			<Overlay toggle={toggle} setToggle={handleClose} />
+			<section
+				className={`
+          				fixed inset-0 z-40 flex justify-center pt-8 pb-4 overflow-y-auto transition-opacity duration-300 
+						${
+							toggle
+								? "opacity-100 pointer-events-auto"
+								: "opacity-0 pointer-events-none"
+						}`}>
+				<form
+					onSubmit={handleSubmit}
+					className='bg-white max-w-md w-full rounded-lg shadow-lg p-6 min-h-fit border border-gray-100'>
+					<div className='flex items-center justify-between w-full mb-6 border-b border-gray-100 pb-4'>
+						<div className='flex items-center'>
+							<div className='w-1 h-6 bg-[#435d63] rounded mr-2'></div>
+							<p className='font-semibold text-lg text-gray-800'>
+								{isDisabled
+									? "Store Information"
+									: initialData
+									? "Edit Store"
+									: "Create Store"}
+							</p>
+						</div>
+						<button
+							type='button'
+							className='text-gray-400 hover:text-[#435d63] transition-colors p-1 rounded-full hover:bg-gray-100'
+							onClick={handleClose}>
+							<IoClose size={24} />
+						</button>
+					</div>
 
-            <FormControl
-              type="text"
-              placeHolder="Enter Name"
-              wrapInputStyle=""
-              inputStyle="placeholder:text-lg text-black placeholder:font-serif"
-              hasLabel
-              id="name"
-              label="Name"
-              labelStyle="mb-1 font-serif"
-              value={fields.name}
-              onChange={(event) => handleFieldsChange("name", event.target.value)}
-              onType={() => handleFieldsType("name")}
-              onBlur={() =>
-                isEmpty(fields.name) && handleFieldsBlur("name", "Name is required")
-              }
-              hasError={!!errors?.name}
-              errorMessage={errors?.name}
-              disabled={isDisabled}
-            />
+					<div className='space-y-5'>
+						{!isDisabled && (
+							<div className='mb-2'>
+								<label className='block mb-1.5 text-sm font-medium text-gray-700'>
+									Store Image
+								</label>
+								<div className='flex items-center gap-2'>
+									<input
+										type='file'
+										accept='image/*'
+										onChange={handleFileChange}
+										className='w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#435d63]/20 text-sm'
+										disabled={isDisabled}
+										id='storeImage'
+									/>
+								</div>
+							</div>
+						)}
 
-            <FormControl
-              type="textarea"
-             placeHolder="Enter description"
-              wrapInputStyle=""
-              inputStyle="placeholder:text-lg text-black placeholder:font-serif"
-              hasLabel
-              id="description"
-              label="Description"
-              labelStyle="mb-1 font-serif"
-              value={fields.description}
-              onChange={(event) => handleFieldsChange("description", event.target.value)}
-              onType={() => handleFieldsType("description")}
-              onBlur={() =>
-                isEmpty(fields.description) && handleFieldsBlur("description", "Description is required")
-              }
-              disabled={isDisabled}
-              hasError={!!errors?.description}
-              errorMessage={errors?.description}
-          
-            />
-          
+						{(fields.image || fields.imageBase64) && (
+							<div className='mb-2'>
+								<label className='block mb-1.5 text-sm font-medium text-gray-700'>
+									Image Preview
+								</label>
+								<div className='border border-gray-200 rounded-lg p-2 w-32 h-32'>
+									<img
+										src={
+											file
+												? URL.createObjectURL(file)
+												: fields.image || fields.imageBase64
+										}
+										alt={fields.name || "Store Image"}
+										className='w-full h-full object-cover rounded-md'
+									/>
+								</div>
+							</div>
+						)}
 
-            <FormControl
-              type="text"
-              placeHolder="Enter address"
-              wrapInputStyle=""
-              inputStyle="placeholder:text-lg text-black placeholder:font-serif"
-              hasLabel
-              id="address"
-              label="Address"
-              labelStyle="mb-1 font-serif"
-              value={fields.address}
-              onChange={(event) => handleFieldsChange("address", event.target.value)}
-              onType={() => handleFieldsType("address")}
-              onBlur={() =>
-                isEmpty(fields.address) && handleFieldsBlur("address", "Address is required")
-              }
-              disabled={isDisabled}
-              hasError={!!errors?.address}
-              errorMessage={errors?.address}
-            />
+						<FormControl
+							type='text'
+							placeHolder='Enter store name'
+							wrapInputStyle='focus-within:ring-2 focus-within:ring-[#435d63]/20 border-gray-200 rounded-lg'
+							inputStyle='placeholder:text-gray-400 text-gray-700 placeholder:text-sm'
+							hasLabel
+							id='name'
+							label='Store Name'
+							labelStyle='mb-1.5 text-sm font-medium text-gray-700'
+							value={fields.name}
+							onChange={(event) =>
+								handleFieldsChange("name", event.target.value)
+							}
+							onType={() => handleFieldsType("name")}
+							onBlur={() => {
+								if (isEmpty(fields.name)) {
+									handleFieldsBlur("name", "Store name is required");
+								}
+							}}
+							hasError={!!errors?.name}
+							errorMessage={errors?.name}
+							disabled={isDisabled}
+						/>
 
-            <FormControl
-              type="text"
-              placeHolder="Enter phone"
-              wrapInputStyle=""
-              inputStyle="placeholder:text-lg text-black placeholder:font-serif"
-              hasLabel
-              id="phone"
-              label="Phone"
-              labelStyle="mb-1 font-serif"
-              value={fields.phone}
-              onChange={(event) => handleFieldsChange("phone", event.target.value)}
-              onType={() => handleFieldsType("phone")}
-              onBlur={() =>
-                isEmpty(fields.phone) &&
-                handleFieldsBlur("phone", "Phone is required")
-              }
-              disabled={isDisabled}
-              hasError={!!errors?.phone}
-              errorMessage={errors?.phone}
-            />
+						<FormControl
+							type='textarea'
+							placeHolder='Enter store description'
+							wrapInputStyle='focus-within:ring-2 focus-within:ring-[#435d63]/20 border-gray-200 rounded-lg'
+							inputStyle='placeholder:text-gray-400 text-gray-700 placeholder:text-sm'
+							hasLabel
+							id='description'
+							label='Description'
+							labelStyle='mb-1.5 text-sm font-medium text-gray-700'
+							value={fields.description}
+							onChange={(event) =>
+								handleFieldsChange("description", event.target.value)
+							}
+							onType={() => handleFieldsType("description")}
+							onBlur={() => {
+								if (isEmpty(fields.description)) {
+									handleFieldsBlur("description", "Description is required");
+								}
+							}}
+							hasError={!!errors?.description}
+							errorMessage={errors?.description}
+							disabled={isDisabled}
+						/>
 
-            <FormControl
-              type="time"
-              wrapInputStyle=""
-              inputStyle="placeholder:text-lg text-black placeholder:font-serif"
-              hasLabel
-              id="openTime"
-              label="Opening time"
-              labelStyle="mb-1 font-serif"
-              value={fields.openTime}
-              onChange={(event) => handleFieldsChange("openTime", event.target.value)}
-              onType={() => handleFieldsType("openTime")}
-              onBlur={() =>
-                isEmpty(fields.openTime) &&
-                handleFieldsBlur("openTime", "Opening time is required ")
-              }
-              hasError={!!errors?.openTime}
-              errorMessage={errors?.openTime}
-              disabled={isDisabled}
-            />
+						<FormControl
+							type='text'
+							placeHolder='Enter address'
+							wrapInputStyle='focus-within:ring-2 focus-within:ring-[#435d63]/20 border-gray-200 rounded-lg'
+							inputStyle='placeholder:text-gray-400 text-gray-700 placeholder:text-sm'
+							hasLabel
+							id='address'
+							label='Address'
+							labelStyle='mb-1.5 text-sm font-medium text-gray-700'
+							value={fields.address}
+							onChange={(event) =>
+								handleFieldsChange("address", event.target.value)
+							}
+							onType={() => handleFieldsType("address")}
+							onBlur={() => {
+								if (isEmpty(fields.address)) {
+									handleFieldsBlur("address", "Address is required");
+								}
+							}}
+							hasError={!!errors?.address}
+							errorMessage={errors?.address}
+							disabled={isDisabled}
+						/>
 
-            <FormControl
-              type="time"
-              wrapInputStyle=""
-              inputStyle="placeholder:text-lg text-black placeholder:font-serif"
-              hasLabel
-              id="closeTime"
-              label="Closing time"
-              labelStyle="mb-1 font-serif"
-              value={fields.closeTime}
-              onChange={(event) => handleFieldsChange("closeTime", event.target.value)}
-              onType={() => handleFieldsType("closeTime")}
-              onBlur={() =>
-                isEmpty(fields.closeTime) &&
-                handleFieldsBlur("closeTime", "Closing time is required")
-              }
-              hasError={!!errors?.closeTime}
-              errorMessage={errors?.closeTime}
-              disabled={isDisabled}
-        
-            />
-<FormControl
-  type="select"
-  wrapInputStyle=""
-  inputStyle="placeholder:text-lg text-black placeholder:font-serif"
-  hasLabel
-  id="ownerId"
-  label="Owner"
-  labelStyle="mb-1 font-serif"
-  value={fields.ownerId || ""} 
-  onChange={(event) => handleFieldsChange("ownerId", event.target.value)}
-  onType={() => handleFieldsType("ownerId")}
-  onBlur={() =>
-    isEmpty(fields.ownerId) &&
-    handleFieldsBlur("ownerId", "Owner is required")
-  }
-  hasError={!!errors?.ownerId}
-  errorMessage={errors?.ownerId}
-  disabled={isDisabled}
-  options={[
-    { value: "", label: "Choose owner" },
-    ...(Array.isArray(owners) ? owners : []).map((owner) => ({
-      value: String(owner.id),
-      label: owner.name,
-    })),
-  ]}
-/>
-            <FormControl
-              type="select"
-              wrapInputStyle=""
-              inputStyle="placeholder:text-lg text-black placeholder:font-serif"
-              hasLabel
-              id="status"
-              label="Status"
-              labelStyle="mb-1 font-serif"
-              value={fields.status}
-              onChange={(event) => handleFieldsChange("status", event.target.value)}
-              onType={() => handleFieldsType("status")}
-              onBlur={() =>
-                isEmpty(fields.status) &&
-                handleFieldsBlur("status", "Status is required")
-              }
-              hasError={!!errors?.status}
-              errorMessage={errors?.status}
-              disabled={isDisabled}
-              options={[
-                { value: "", label: "Choose status" },
-                { value: "1", label: "Active" },
-                { value: "2", label: "Inactive" },
-              ]}
-            />
-          </div>
+						<FormControl
+							type='text'
+							placeHolder='Enter phone number'
+							wrapInputStyle='focus-within:ring-2 focus-within:ring-[#435d63]/20 border-gray-200 rounded-lg'
+							inputStyle='placeholder:text-gray-400 text-gray-700 placeholder:text-sm'
+							hasLabel
+							id='phone'
+							label='Phone Number'
+							labelStyle='mb-1.5 text-sm font-medium text-gray-700'
+							value={fields.phone}
+							onChange={(event) =>
+								handleFieldsChange("phone", event.target.value)
+							}
+							onType={() => handleFieldsType("phone")}
+							onBlur={() => {
+								if (isEmpty(fields.phone)) {
+									handleFieldsBlur("phone", "Phone number is required");
+								} else if (!/^\d{10}$/.test(fields.phone)) {
+									handleFieldsBlur("phone", "Phone number must be 10 digits");
+								}
+							}}
+							hasError={!!errors?.phone}
+							errorMessage={errors?.phone}
+							disabled={isDisabled}
+						/>
 
-          <div className="flex items-center gap-4 mt-6">
-            {!isDisabled && (
-              <>
-                <button
-                  type="button"
-                  className="transition-all duration-700 text-black w-full py-2 rounded font-serif font-semibold bg-gray-200 hover:bg-gray-300"
-                  onClick={setToggle}
-                  disabled={pending}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="transition-all duration-700 hover:bg-black text-white bg-[#799aa1] w-full py-2 rounded font-serif font-semibold"
-                  disabled={pending}
-                >
-                  {pending ? (
-                    <Loading customStyle="flex items-center justify-center" />
-                  ) : (
-                    <p>{initialData ? "Cập nhật" : "Tạo"}</p>
-                  )}
-                </button>
-              </>
-            )}
-            {isDisabled && (
-              <button
-                type="button"
-                className="transition-all duration-700 hover:bg-black text-white bg-[#799aa1] w-full py-2 rounded font-serif font-semibold"
-                onClick={() => setToggle(false)}
-              >
-                Close
-              </button>
-            )}
-          </div>
-        </form>
-      </section>
-    </>
-  );
+						<div className='!flex flex-wrap gap-4'>
+							<div className='flex-1'>
+								<FormControl
+									type='time'
+									wrapInputStyle=' focus-within:ring-2 focus-within:ring-[#435d63]/20 border-gray-200 rounded-lg'
+									inputStyle='placeholder:text-gray-400 text-gray-700 placeholder:text-sm'
+									hasLabel
+									id='open_time'
+									label='Opening Time'
+									labelStyle='mb-1.5 text-sm font-medium text-gray-700'
+									value={fields.open_time}
+									onChange={(event) =>
+										handleFieldsChange("open_time", event.target.value)
+									}
+									onType={() => handleFieldsType("open_time")}
+									onBlur={() => {
+										if (isEmpty(fields.open_time)) {
+											handleFieldsBlur("open_time", "Opening time is required");
+										}
+									}}
+									hasError={!!errors?.open_time}
+									errorMessage={errors?.open_time}
+									disabled={isDisabled}
+								/>
+							</div>
+
+							<div className='flex-1'>
+								<FormControl
+									type='time'
+									wrapInputStyle='focus-within:ring-2 focus-within:ring-[#435d63]/20 border-gray-200 rounded-lg'
+									inputStyle='placeholder:text-gray-400 text-gray-700 placeholder:text-sm'
+									hasLabel
+									id='close_time'
+									label='Closing Time'
+									labelStyle='mb-1.5 text-sm font-medium text-gray-700'
+									value={fields.close_time}
+									onChange={(event) =>
+										handleFieldsChange("close_time", event.target.value)
+									}
+									onType={() => handleFieldsType("close_time")}
+									onBlur={() => {
+										if (isEmpty(fields.close_time)) {
+											handleFieldsBlur(
+												"close_time",
+												"Closing time is required"
+											);
+										}
+									}}
+									hasError={!!errors?.close_time}
+									errorMessage={errors?.close_time}
+									disabled={isDisabled}
+								/>
+							</div>
+						</div>
+
+						<FormControl
+							type='select'
+							wrapInputStyle='focus-within:ring-2 focus-within:ring-[#435d63]/20 border-gray-200 rounded-lg'
+							inputStyle='text-gray-700'
+							hasLabel
+							id='status'
+							label='Status'
+							labelStyle='mb-1.5 text-sm font-medium text-gray-700'
+							value={fields.status}
+							onChange={(event) =>
+								handleFieldsChange("status", event.target.value)
+							}
+							onType={() => handleFieldsType("status")}
+							onBlur={() => {
+								if (isEmpty(fields.status)) {
+									handleFieldsBlur("status", "Status is required");
+								}
+							}}
+							hasError={!!errors?.status}
+							errorMessage={errors?.status}
+							disabled={isDisabled}
+							options={[
+								{ value: "Active", label: "Active" },
+								{ value: "Inactive", label: "Inactive" },
+							]}
+						/>
+					</div>
+
+					<div className='flex items-center gap-4 mt-8'>
+						{!isDisabled && (
+							<>
+								<button
+									type='button'
+									className='transition-all duration-300 text-gray-700 w-full py-2.5 rounded-lg font-medium border border-gray-200 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#435d63]/20'
+									onClick={handleClose}
+									disabled={pending}>
+									Cancel
+								</button>
+								<button
+									type='submit'
+									className='transition-all duration-300 text-white bg-gradient-to-r from-[#435d63] to-[#2d4046] w-full py-2.5 rounded-lg font-medium hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#435d63]/40'
+									disabled={pending}>
+									{pending ? (
+										<Loading customStyle='flex items-center justify-center' />
+									) : (
+										<span>Update</span>
+									)}
+								</button>
+							</>
+						)}
+						{isDisabled && (
+							<button
+								type='button'
+								className='transition-all duration-300 text-white bg-gradient-to-r from-[#435d63] to-[#2d4046] w-full py-2.5 rounded-lg font-medium hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#435d63]/40'
+								onClick={handleClose}>
+								Close
+							</button>
+						)}
+					</div>
+				</form>
+			</section>
+		</>
+	);
 };
 
 export default Form;

@@ -2,6 +2,9 @@ package j2ee.j2ee.apps.user;
 
 import java.util.List;
 import java.util.Optional;
+
+import j2ee.j2ee.apps.store.StoreEntity;
+import j2ee.j2ee.apps.store.StoreRepository;
 import j2ee.j2ee.constants.ErrorMessages;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,6 +19,8 @@ public class UserService {
     private UserRepository userRepository;
     @Autowired
     private RoleRepository roleRepository;
+    @Autowired
+    private StoreRepository storeRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -60,19 +65,38 @@ public class UserService {
         return Optional.of(userRepository.save(user.get()));
     }
 
+    @Transactional
     public UserEntity create(UserEntity user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+
         RoleEntity role;
         if (user.getRole() == null) {
             role = roleRepository.findById(2L) // Role: customer
                     .orElseThrow(() -> new RuntimeException("Customer role not found"));
         } else {
-            role = roleRepository.findById(
-                    user.getRole().getId())
-                    .orElseThrow(() -> new RuntimeException("Selected role not found"));
+            role = roleRepository.findById(user.getRole().getId()).orElseThrow(() -> new RuntimeException("Selected role not found"));
         }
         user.setRole(role);
-        return userRepository.save(user);
+
+        UserEntity createdUser = userRepository.save(user);
+
+        // Automatic creating store if it's an owner
+        if (role.getName().equalsIgnoreCase("owner")) {
+            StoreEntity store = new StoreEntity();
+            store.setAddress("You need to update your address");
+            store.setClose_time(null);
+            store.setOpen_time(null);
+            store.setName("Your " + user.getName() + " store");
+            store.setDescription("You need to update your address");
+            store.setImage(null);
+            store.setPhone(user.getPhone());
+            store.setStatus("active");
+            store.setOwner(user);
+
+            storeRepository.save(store);
+        }
+
+        return createdUser;
     }
 
     public List<UserEntity> getUsersByRoleId(Long roleId) {
@@ -105,10 +129,10 @@ public class UserService {
 
     @Transactional
     public void deleteUser(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new RuntimeException("Không tìm thấy  với ID: " + id);
-        }
-        userRepository.deleteById(id);
+        UserEntity entity = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy user với ID: " + id));
+        storeRepository.deleteByOwnerId(id);
+        userRepository.delete(entity);
     }
 
     @Transactional

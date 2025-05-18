@@ -17,9 +17,7 @@ const Form = React.lazy(() => import("./Form/index.jsx"));
 const SubHeader = ({ selectedRows, handleDeleteMultiple }) => {
 	const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
-	if (selectedRows.length === 0) {
-		return null;
-	}
+	if (selectedRows.length === 0) return null;
 
 	return (
 		<>
@@ -52,7 +50,7 @@ const SelectBox = React.forwardRef(({ ...props }) => {
 		<input
 			type='checkbox'
 			{...props}
-			className="w-4 h-4 caused by: org.hibernate.query.sqm.UnknownPathException: Could not resolve attribute 'create_at' of 'j2ee.j2ee.apps.order.OrderEntity' text-[#435d63] bg-[#435d63] border-gray-200 rounded focus:ring-[#435d63]"
+			className='w-4 h-4 text-[#435d63] bg-[#435d63] border-gray-200 rounded focus:ring-[#435d63]'
 		/>
 	);
 });

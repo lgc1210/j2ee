@@ -40,8 +40,9 @@ const Checkout = lazy(() => import("../Pages/Checkout"));
 const Dashboard = lazy(() => import("../Pages/Dashboard"));
 const Users = lazy(() => import("../Pages/Users"));
 const UserDetails = lazy(() => import("../Pages/Users/View"));
-const Categories = lazy(() => import("../Pages/Categories"));
 const Stores = lazy(() => import("../Pages/Stores"));
+const StoreDetails = lazy(() => import("../Pages/Stores/View"));
+const Categories = lazy(() => import("../Pages/Categories"));
 const Roles = lazy(() => import("../Pages/Roles"));
 const Statistic = lazy(() => import("../Pages/Statistic"));
 const Booking = lazy(() => import("../Pages/Booking"));
@@ -187,6 +188,13 @@ const routes = [
 		url: paths.stores,
 		Layout: AdminLayout,
 		Page: Stores,
+		requiredRole: ["admin"],
+	},
+	{
+		isPublic: false,
+		url: paths.storeDetails,
+		Layout: AdminLayout,
+		Page: StoreDetails,
 		requiredRole: ["admin"],
 	},
 	{

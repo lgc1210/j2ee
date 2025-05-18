@@ -54,8 +54,8 @@ const SidebarItem = ({ item, isActive, onClick, children }) => {
 	return (
 		<li
 			className={`group cursor-pointer rounded px-4 py-2 my-1 ${
-				isActive && children ? "" : "hover:bg-slate-500"
-			} ${isActive ? "bg-slate-300 text-[#274b60]" : "text-white"}`}
+				isActive && children ? "" : "hover:bg-slate-500 hover:text-white"
+			} ${isActive ? "bg-slate-300 text-black" : "text-white"}`}
 			onClick={handleItemClick}>
 			<div
 				className={`flex items-center justify-between ${
@@ -138,7 +138,7 @@ const AdminSidebar = () => {
 								<SidebarItem
 									key={item.path}
 									item={item}
-									isActive={location.pathname === item.path}
+									isActive={location.pathname.includes(item.path)}
 									children={item?.children}
 									onClick={() => navigate(item.path)}
 								/>

@@ -2,17 +2,19 @@ package j2ee.j2ee.apps.store;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Base64;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import j2ee.j2ee.apps.user.UserEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity(name = "stores")
 @Data
+@EntityListeners(AuditingEntityListener.class)
 public class StoreEntity {
 
     @Id
@@ -27,8 +29,6 @@ public class StoreEntity {
 
     private String phone;
 
-    private String image;
-
     private LocalDateTime created_at;
 
     private LocalDateTime updated_at;
@@ -39,7 +39,23 @@ public class StoreEntity {
 
     private String status;
 
-    @ManyToOne
+    @Lob
+    @Column(columnDefinition = "LONGBLOB")
+    @JsonIgnore
+    private byte[] image;
+
+    @Transient // Not stored in database
+    private String imageBase64;
+
+    // Getter to convert byte[] to Base64
+    public String getImageBase64() {
+        if (image != null) {
+            return "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(image);
+        }
+        return null;
+    }
+
+    @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "owner_id", referencedColumnName = "id")
     private UserEntity owner;
 }
