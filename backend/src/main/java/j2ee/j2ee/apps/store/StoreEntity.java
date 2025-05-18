@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import lombok.Data;
 
 @Entity(name = "stores")
@@ -39,7 +40,7 @@ public class StoreEntity {
 
     private String status;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "owner_id", referencedColumnName = "id")
     private UserEntity owner;
 }
