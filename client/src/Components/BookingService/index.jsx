@@ -1,4 +1,5 @@
 import React from "react";
+
 const BookingServiceList = React.lazy(() => import("./BookingServiceList"));
 
 const BookingService = ({ storeId, setSelectedServiceId, handleSetStep }) => {
@@ -31,8 +32,7 @@ const BookingService = ({ storeId, setSelectedServiceId, handleSetStep }) => {
 				<div className='mt-10 flex justify-center'>
 					<button
 						onClick={() => handleSetStep(2)}
-						className='px-8 py-3 bg-[#435D63] text-white rounded-md hover:bg-[#364a4f] 
-            transition-all duration-300 shadow-sm flex items-center'>
+						className='px-8 py-3 bg-[#435D63] text-white rounded-md hover:bg-[#364a4f] transition-all duration-300 shadow-sm flex items-center'>
 						Continue
 						<svg
 							className='w-5 h-5 ml-2'

@@ -1,4 +1,4 @@
-import React from "react";
+import { toVND } from "../../../Utils/vietnamCurrency";
 
 const BookingServiceItem = ({
 	item,
@@ -9,22 +9,20 @@ const BookingServiceItem = ({
 }) => {
 	const isSelected = selectedServiceId === item?.id;
 
+	console.log("Item: ", item);
+
 	return (
 		<div
 			className={`
         bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300
-        border overflow-hidden cursor-pointer
-        ${
-					isSelected
-						? "border-[#435D63] ring-2 ring-[#435D63]/20"
-						: "border-gray-100"
-				}
+        border overflow-hidden cursor-pointer 
+		${isSelected ? "border-[#435D63] ring-2 ring-[#435D63]/20" : "border-gray-100"}
       `}
 			onClick={() => setSelectedServiceId(item?.id)}>
 			<div className='relative'>
-				{item?.imageUrl ? (
+				{item?.imageBase64 ? (
 					<img
-						src={item.imageUrl}
+						src={item?.imageBase64}
 						alt={item.name}
 						className='w-full h-48 object-cover'
 					/>
@@ -73,7 +71,9 @@ const BookingServiceItem = ({
 						{item?.name}
 					</h3>
 					{item?.price && (
-						<span className='font-medium text-[#435D63]'>${item.price}</span>
+						<span className='font-medium text-[#435D63]'>
+							{toVND(item.price)}
+						</span>
 					)}
 				</div>
 

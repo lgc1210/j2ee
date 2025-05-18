@@ -196,7 +196,7 @@ public class StoreService {
         storeRepository.deleteAllByIdIn(ids);
     }
 
-    // -------import---------
+
 
     public void importStores(List<StoreEntity> stores) {
         LocalDateTime importTime = LocalDateTime.now();

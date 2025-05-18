@@ -140,6 +140,4 @@ public class UserService {
         userRepository.deleteAllByIdIn(ids);
     }
 
-    // Mã hóa mật khẩu
-
 }

@@ -1,5 +1,4 @@
 import React from "react";
-import Store1 from "../../assets/images/services/delfina-pan-scaled-900x1350.jpeg";
 
 const StoreChoosing = ({ store, onClick }) => {
 	return (
@@ -10,7 +9,10 @@ const StoreChoosing = ({ store, onClick }) => {
 			}}>
 			<div className='relative aspect-[4/3] overflow-hidden'>
 				<img
-					src={Store1}
+					src={
+						store?.imageBase64 ||
+						"https://phutungnhapkhauchinhhang.com/wp-content/uploads/2020/06/default-thumbnail.jpg"
+					}
 					alt={store?.name}
 					className='w-full h-full object-cover transition-transform duration-700 group-hover:scale-110'
 				/>

@@ -1,7 +1,6 @@
 import React from "react";
 import BookingServiceItem from "../BookingServiceItem";
 import ServiceService from "../../../Services/service";
-import { showToast } from "../../Toast";
 
 const BookingServiceList = ({
 	selectedServiceId,
@@ -30,9 +29,7 @@ const BookingServiceList = ({
 	}, [storeId]);
 
 	React.useEffect(() => {
-		if (storeId) {
-			fetchServices();
-		}
+		storeId && fetchServices();
 	}, [fetchServices, storeId]);
 
 	if (loading) {

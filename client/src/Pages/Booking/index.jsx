@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import Loading from "../../Components/Loading";
 import { useAuth } from "../../Contexts/Auth";
 import BookingImageBanner from "../../assets/images/Booking/female-hairstylist-drying-curly-girl-s-hair-using-big-plastic-brush-1920x1282.jpeg";
@@ -33,6 +33,7 @@ const Booking = () => {
 		staff_id: null,
 		store_id: null,
 		notes: "",
+		payment_method: null,
 	});
 
 	// Track progress in localStorage
@@ -95,6 +96,11 @@ const Booking = () => {
 		handleInfoChange("appointment_date", appointmentDate);
 		handleInfoChange("appointment_time", appointmentTime);
 		handleInfoChange("staff_id", staffId);
+		handleSetStep(3);
+	};
+
+	const handleSelectPaymentMethod = (method) => {
+		handleInfoChange("payment_method", method);
 		handleSubmitBooking();
 	};
 
@@ -103,7 +109,7 @@ const Booking = () => {
 	};
 
 	const handleSetStep = (newStep) => {
-		if (newStep === 2 && !isAuthenticated) {
+		if (newStep >= 2 && !isAuthenticated) {
 			showToast("Please login to continue with your booking", "warning");
 			navigate(paths.login, { replace: true });
 			return;
@@ -125,11 +131,11 @@ const Booking = () => {
 			staff_id: null,
 			store_id: null,
 			notes: "",
+			payment_method: null,
 		});
 	};
 
 	const handleSubmitBooking = async () => {
-		console.log("Info: ", info);
 		if (!isAuthenticated) {
 			showToast("Please login to complete your booking", "error");
 			navigate(paths.login, { replace: true });
@@ -142,6 +148,7 @@ const Booking = () => {
 			{ field: "service_id", name: "Service" },
 			{ field: "staff_id", name: "Staff Member" },
 			{ field: "store_id", name: "Store" },
+			{ field: "payment_method", name: "Payment Method" },
 		];
 
 		const missingFields = requiredFields.filter((item) => !info[item.field]);
@@ -158,15 +165,14 @@ const Booking = () => {
 			setLoading(true);
 			const response = await AppointmentService.create(info);
 			if (response.status === 201 || response.status === 200) {
-				showToast("Booking successfully created!", "success");
+				showToast("Booked successfully!", "success");
 				localStorage.removeItem("bookingState");
-				setStep(3); // Confirmation step
+				setStep(4); // Confirmation step
 			}
 		} catch (error) {
 			console.error("Error creating appointment:", error);
 			showToast(
-				error.response?.data?.message ||
-					"Failed to create booking. Please try again.",
+				error.response?.data?.message || "Booking failed. Please try again.",
 				"error"
 			);
 		} finally {
@@ -201,6 +207,28 @@ const Booking = () => {
 					</div>
 				);
 			case 3:
+				return (
+					<div className='container mx-auto py-10 px-4 md:px-0 max-w-3xl'>
+						<div className='bg-white shadow-md rounded-lg p-8'>
+							<h2 className='text-2xl font-serif text-gray-800 mb-6 text-center'>
+								Select Payment Method
+							</h2>
+							<div className='flex flex-col sm:flex-row gap-4 justify-center'>
+								<button
+									className='px-6 py-3 bg-[#435D63] text-white font-medium rounded hover:bg-[#364a4f] transition duration-300 shadow-sm'
+									onClick={() => handleSelectPaymentMethod("VNPay")}>
+									Pay with VNPay
+								</button>
+								<button
+									className='px-6 py-3 bg-white border border-[#435D63] text-[#435D63] font-medium rounded hover:bg-gray-50 transition duration-300'
+									onClick={() => handleSelectPaymentMethod("Cash")}>
+									Pay with Cash
+								</button>
+							</div>
+						</div>
+					</div>
+				);
+			case 4:
 				return (
 					<div className='container mx-auto py-16 px-4 md:px-0 max-w-3xl'>
 						<div className='bg-white shadow-md rounded-lg p-8 border-t-4 border-green-500'>
@@ -246,7 +274,12 @@ const Booking = () => {
 		}
 	};
 
-	const stepLabels = ["Select Store", "Choose Service", "Schedule Appointment"];
+	const stepLabels = [
+		"Select Store",
+		"Choose Service",
+		"Schedule Appointment",
+		"Payment Method",
+	];
 
 	return (
 		<Suspense
@@ -263,7 +296,7 @@ const Booking = () => {
 				pathBanner='Booking'
 			/>
 
-			{step < 3 && (
+			{step < 4 && (
 				<div className='container mx-auto max-w-3xl px-4 -mt-8 relative z-20 mb-12'>
 					<div className='bg-white rounded-xl shadow-md px-6 py-8'>
 						<div className='flex justify-between items-center'>
@@ -319,6 +352,11 @@ const Booking = () => {
 							<div
 								className={`h-1 flex-1 rounded-full ${
 									step >= 2 ? "bg-[#435D63]" : "bg-gray-200"
+								}`}></div>
+							<div className='w-10'></div>
+							<div
+								className={`h-1 flex-1 rounded-full ${
+									step >= 3 ? "bg-[#435D63]" : "bg-gray-200"
 								}`}></div>
 						</div>
 					</div>
