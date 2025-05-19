@@ -117,7 +117,7 @@ const AppointmentOwner = () => {
       cell: (row) => (
         <div className='flex gap-2'>
           <FaRegEdit
-            className='cursor-pointer'
+            className={`cursor-pointer ${row.status === ("Completed"||"Canceled") ? "text-gray-400 pointer-events-none" : "text-black"}`}
             size={18}
             onClick={() => handleEdit(row)}
           />

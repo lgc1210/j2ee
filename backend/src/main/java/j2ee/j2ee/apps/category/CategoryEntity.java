@@ -5,6 +5,7 @@ import j2ee.j2ee.apps.store.StoreEntity;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -30,7 +31,7 @@ public class CategoryEntity {
 
     private LocalDateTime deleted_at;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id", referencedColumnName = "id", nullable = false)
     private StoreEntity store;
 

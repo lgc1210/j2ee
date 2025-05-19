@@ -19,7 +19,6 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false, fe
       console.log("Initial",initialData);
       setAppointment(initialData);
     }
-    console.log(isDisabled);
   }, [initialData]);
 
   const handleSubmit = async (e) => {
@@ -35,7 +34,7 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false, fe
         if (appointment?.status === "Completed") {
           payment = {
             payment_date: new Date(),
-            payment_method: "Cash",
+            payment_method: "On-site payment",
             price: appointment?.service.price,
             appointment: appointment,
             staff: appointment?.staff
@@ -48,7 +47,8 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false, fe
 
         if (response && response.data) {
           console.log(response);
-          onSubmit(response.data);
+          showToast("Appointment updated!");
+          //onSubmit(response.data);
           setToggle(false);
         }
       } 
@@ -143,6 +143,19 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false, fe
             />
 
             <FormControl
+              type="text"
+              placeHolder="Staff"
+              wrapInputStyle=""
+              inputStyle="placeholder:text-lg text-black placeholder:font-serif"
+              hasLabel
+              id="staff"
+              label="Staff"
+              labelStyle="mb-1 font-serif"
+              value={initialData?.staff.name}
+              disabled={isDisabled}
+            />
+
+            <FormControl
               type="select"
               wrapInputStyle=""
               inputStyle="placeholder:text-lg text-black placeholder:font-serif"
@@ -155,7 +168,7 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false, fe
                                                   ...prev,
                                                   status: event.target.value
                                                 }))}
-              disabled={initialData?.status === "Completed" || initialData?.status === "Canceled" || isDisabled}
+              disabled={(initialData?.status === "Completed" || initialData?.status === "Canceled") ? true : false || isDisabled}
               options={[
                 { value: "", label: "Choose status" },
                 ...['Pending', 'Completed', 'Canceled'].map(item => ({
@@ -164,30 +177,6 @@ const Form = ({ toggle, setToggle, initialData, onSubmit, isDisabled = false, fe
                 }))
               ]}
             />
-
-            {
-              appointment?.status === "Completed" && initialData?.status !== "Completed" &&
-              (
-                <FormControl
-                  type="select"
-                  wrapInputStyle=""
-                  inputStyle="placeholder:text-lg text-black placeholder:font-serif"
-                  hasLabel
-                  id="status"
-                  label="Choose payment method"
-                  labelStyle="mb-1 font-serif"
-                  onChange={(event) => {}}
-                  disabled={false}
-                  options={[
-                    { value: "", label: "Choose status" },
-                    ...['Cash', 'Online Transfer'].map(item => ({
-                      value: item,
-                      label: item 
-                    }))
-                  ]}
-                />
-              )
-            }
           </div>
 
           <div className="flex items-center gap-4 mt-6">
