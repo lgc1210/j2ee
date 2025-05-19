@@ -41,11 +41,7 @@ class UserService {
 
 	// Lấy user theo ID
 	getUserById = async (userId) => {
-		return await apiInstance.get(`${baseURL}/users/${userId}`, {
-			headers: {
-				"Content-Type": "application/json",
-			},
-		});
+		return await apiInstance.get(`${baseURL}/users/${userId}`);
 	};
 	// Lấy user theo roleId
 	getUsersByRoleId = async (roleId) => {

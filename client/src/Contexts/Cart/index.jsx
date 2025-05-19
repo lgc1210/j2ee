@@ -7,19 +7,41 @@ const CartContext = React.createContext();
 
 const Cart = ({ children }) => {
 	const [cart, setCart] = React.useState([]);
+	const [cartId, setCartId] = React.useState(null);
+	const [totalPrice, setTotalPrice] = useState(0);
 	const [loadingFetchingCart, setLoadingFetchingCart] = useState(false);
 	const [pending, setPending] = React.useState(false);
 	const { user, isAuthenticated } = useAuth();
 
 	const fetchCart = useCallback(async () => {
+		if (!user?.id) {
+			setCart([]);
+			return;
+		}
+
 		try {
 			setLoadingFetchingCart(true);
-			const response = await CartService.getCartByCustomerId(user?.id);
-			if (response.status === 200) {
-				setCart(response.data || []);
+			const response = await CartService.getCartByCustomerId(user.id);
+			if (response.status === 200 && Array.isArray(response.data?.items)) {
+				let total = 0;
+				const data = response.data.items.map((item) => {
+					const productTotalPrice =
+						(item?.product?.price ?? 0) * (item?.quantity ?? 0);
+					total += productTotalPrice;
+					return {
+						...item,
+						productTotalPrice,
+					};
+				});
+				setTotalPrice(total);
+				setCart(data);
+				setCartId(response?.data?.id);
+			} else {
+				setCart([]);
 			}
 		} catch (error) {
-			console.log("Error occurs while fetching cart", error);
+			console.error("Error fetching cart:", error);
+			setCart([]);
 		} finally {
 			setLoadingFetchingCart(false);
 		}
@@ -41,7 +63,6 @@ const Cart = ({ children }) => {
 			});
 			if (response.status === 200) {
 				console.log("Cart response:", response);
-				showToast("Added successfully");
 				await fetchCart();
 			}
 		} catch (error) {
@@ -55,7 +76,7 @@ const Cart = ({ children }) => {
 	const handleDeleteFromCart = async (productId) => {
 		try {
 			setPending(true);
-			const response = await CartService.deleteFromCart(cart?.id, productId);
+			const response = await CartService.deleteFromCart(cartId, productId);
 			if (response.status === 200) {
 				showToast("Removed successfully");
 				await fetchCart();
@@ -74,6 +95,7 @@ const Cart = ({ children }) => {
 				cart,
 				pending,
 				loadingFetchingCart,
+				totalPrice,
 				handleChangeQuantity,
 				handleDeleteFromCart,
 			}}>

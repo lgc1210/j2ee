@@ -1,8 +1,6 @@
-import React, { lazy, Suspense, useEffect } from "react";
-import ShopImageBanner from "../../assets/images/banner/uby-yanes-0ABufdkXgPI-unsplash-900x900.jpg";
+import { lazy, Suspense, useEffect } from "react";
 import { useProduct } from "../../Contexts/Product";
-import Button from "../../Components/Button";
-import { FaAngleDown } from "react-icons/fa6";
+import ShopImageBanner from "../../assets/images/banner/uby-yanes-0ABufdkXgPI-unsplash-900x900.jpg";
 
 const FilterProduct = lazy(() => import("../../Components/FilterProduct"));
 const ProductList = lazy(() => import("../../Components/ProductList"));
@@ -39,13 +37,13 @@ const Shop = () => {
 					pathBanner='Shop'
 				/>
 				{selectedStoreId ? (
-					<div className='md:py-36 py-28 md:px-0 px-6'>
+					<div className='py-20 px-6'>
 						<div className='container mx-auto'>
-							<div className='grid md:grid-cols-5 gap-16'>
-								<div>
+							<div className='grid md:grid-cols-4 gap-8'>
+								<div className='md:col-span-1'>
 									<FilterProduct />
 								</div>
-								<div className='md:col-span-4'>
+								<div className='md:col-span-3'>
 									<ProductList />
 								</div>
 							</div>

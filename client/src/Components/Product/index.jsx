@@ -1,10 +1,12 @@
-import React, { lazy, Suspense } from "react";
+import React, { lazy, memo, Suspense } from "react";
 import { BsCartPlus } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
 import paths from "../../Constants/paths";
 import { useCart } from "../../Contexts/Cart";
+import { toVND } from "../../Utils/vietnamCurrency";
+import { showToast } from "../Toast";
 
-const Loading = lazy(() => import("../../Components/Loading"));
+const Loading = lazy(() => import("../Loading"));
 
 const Product = ({ product }) => {
 	const navigate = useNavigate();
@@ -20,6 +22,7 @@ const Product = ({ product }) => {
 	const handleAddToCart = async (event, productId) => {
 		event.stopPropagation();
 		await handleChangeQuantity(productId, 1);
+		showToast("Added");
 	};
 
 	return (
@@ -33,7 +36,7 @@ const Product = ({ product }) => {
 			}>
 			<li key={product?.id}>
 				<div
-					className='cursor-pointer relative group mb-6'
+					className='group relative cursor-pointer mb-6 rounded-lg overflow-hidden bg-white shadow-md hover:shadow-xl transition-shadow duration-300'
 					onClick={(event) =>
 						handleNavigateToProductDetails(product?.id, event)
 					}>
@@ -43,48 +46,48 @@ const Product = ({ product }) => {
 							"https://lesya.bslthemes.com/wp-content/uploads/2022/05/prod1-800x800.jpg"
 						}
 						alt={product?.name}
-						className='w-full h-full object-center object-cover'
+						className='w-full h-64 object-cover object-center transition-transform duration-300 group-hover:scale-105'
 					/>
 
-					{/* Sale */}
+					{/* Sale Badge */}
 					{product?._sale && (
 						<div className='absolute top-4 left-4'>
-							<p className='text-white bg-black px-2 py-3 text-center align-middle rounded-full'>
+							<span className='inline-block bg-[#435D63] text-white text-sm px-3 py-0.5 rounded-full'>
 								Sale!
-							</p>
+							</span>
 						</div>
 					)}
 
-					{/* Add to cart */}
-					<div
-						className='transition-all duration-700 group-hover:opacity-100 opacity-0 cursor-pointer bg-[#779AA1] p-2.5 absolute top-1/2 left-1/2 -translate-x-1/2 group-hover:-translate-y-1/2 rounded-full'
+					{/* Add to Cart Button */}
+					<button
+						className='absolute top-1/2 left-1/2 transform -translate-x-1/2 translate-y-1/2 group-hover:-translate-y-1/2 opacity-0 group-hover:opacity-100 bg-[#435D63] p-3 rounded-full transition-all duration-300'
 						onClick={(event) => handleAddToCart(event, product?.id)}>
 						<BsCartPlus size={24} className='text-white' />
-					</div>
+					</button>
 				</div>
 
 				<div className='text-center'>
-					<p
-						className='text-2xl mb-2 font-serif cursor-pointer hover:text-[#779AA1] transition-all duration-700'
+					<h3
+						className='text-xl font-semibold text-gray-800 hover:text-[#435D63] transition-colors duration-300 cursor-pointer'
 						onClick={(event) =>
 							handleNavigateToProductDetails(product?.id, event)
 						}>
 						{product?.name || "Unnamed Product"}
-					</p>
-					<span className='flex items-center justify-center gap-2'>
+					</h3>
+					<div className='flex items-center justify-center gap-2 mt-2'>
 						{product?.old_price && (
-							<p className='text-zinc-400 line-through font-serif'>
-								${product?.old_price}
-							</p>
+							<span className='text-gray-400 line-through font-medium'>
+								{toVND(product?.old_price)}
+							</span>
 						)}
-						<p className='text-zinc-600 text-2xl font-serif'>
-							${product?.price || "0.00"}
-						</p>
-					</span>
+						<span className='text-gray-800 text-xl font-semibold'>
+							{toVND(product?.price) || "0.00"}
+						</span>
+					</div>
 				</div>
 			</li>
 		</Suspense>
 	);
 };
 
-export default Product;
+export default memo(Product);

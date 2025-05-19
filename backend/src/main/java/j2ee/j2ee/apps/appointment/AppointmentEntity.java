@@ -17,7 +17,6 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import lombok.Data;
 
-
 @Data
 @Entity(name = "appointments")
 public class AppointmentEntity {

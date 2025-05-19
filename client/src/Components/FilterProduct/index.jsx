@@ -1,46 +1,58 @@
-import React from "react";
-import FormControl from "../FormControl";
+import React, { useEffect, useState } from "react";
 import { IoSearch } from "react-icons/io5";
 
 const FilterProduct = () => {
-  return (
-    <section>
-      {/* Search products */}
-      <FormControl
-        type='text'
-        placeHolder='Search products...'
-        wrapInputStyle='border-t-0 border-r-0 border-l-0 [&]:border-b'
-        inputStyle='px-0 text-xl font-[Manrope] placeholder:text-xl placeholder:text-zinc-600 placeholder:text-black placeholder:font-[Manrope]'
-        hasButton
-        Icon={IoSearch}
-        iconSize={24}
-        iconStyle='text-[#799AA1]'
-      />
+	const [productCategoryList, setProductCategoryList] = useState([]);
+	const [loading, setLoading] = useState(false);
 
-      {/* Category */}
-      <div className='mt-14'>
-        <div>
-          <p className='text-xl font-serif text-zinc-600'>Category</p>
-          <div className='w-full border-b border-b-gray-200 mt-2'>
-            <div className='max-w-12 h-0.5 border-b-[3px] border-b-[#779AA1]'></div>
-          </div>
-        </div>
+	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				setLoading(true);
+				// Mock fetch (replace with your API call)
+				setProductCategoryList(["Face", "Organic"]);
+			} catch (error) {
+				console.error(error);
+			} finally {
+				setLoading(false);
+			}
+		};
+		fetchData();
+	}, []);
 
-        <ul className='flex flex-col items-start gap-2 mt-8'>
-          <li>
-            <p className='text-xl font-sans font-normal text-zinc-700 hover:text-[#779AA1] cursor-pointer transition-all duration-700'>
-              Face <span className='text-zinc-500 font-'>(4)</span>
-            </p>
-          </li>
-          <li>
-            <p className='text-xl font-sans font-normal text-zinc-700 hover:text-[#779AA1] cursor-pointer transition-all duration-700'>
-              Organic <span className='text-zinc-500'>(6)</span>
-            </p>
-          </li>
-        </ul>
-      </div>
-    </section>
-  );
+	return (
+		<div className='bg-white p-6 rounded-lg shadow-lg'>
+			<div className='relative'>
+				<input
+					type='text'
+					placeholder='Search products...'
+					className='w-full py-2 pr-10 bg-transparent border-b border-gray-300 focus:outline-none focus:border-[#435D63] text-lg'
+				/>
+				<IoSearch
+					className='absolute right-2 top-2.5 text-gray-400'
+					size={24}
+				/>
+			</div>
+			<div className='mt-8'>
+				<h3 className='text-xl font-semibold text-gray-700'>Category</h3>
+				<div className='mt-2 border-b-2 border-[#435D63] w-12'></div>
+				{loading ? (
+					<p className='text-gray-500 mt-4'>Loading...</p>
+				) : (
+					<ul className='mt-6 space-y-3'>
+						{productCategoryList.map((category, index) => (
+							<li key={index}>
+								<button className='text-lg text-gray-700 hover:text-[#435D63] transition-colors duration-300'>
+									{category}{" "}
+									<span className='text-gray-400'>({index + 4})</span>
+								</button>
+							</li>
+						))}
+					</ul>
+				)}
+			</div>
+		</div>
+	);
 };
 
 export default React.memo(FilterProduct);

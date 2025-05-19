@@ -18,14 +18,12 @@ const BookingServiceList = ({
 			const response = await ServiceService.getAllByStoreId(storeId);
 			if (response.status === 200) {
 				const { services, totalElements } = response?.data;
-				setServices(services);
+				setServices(services || []);
 				setTotalElements(totalElements);
 			}
 		} catch (error) {
-			showToast(
-				"There's something wrong while fetching services of the store",
-				"error"
-			);
+			console.log("Error fetching services", error);
+			setServices([]);
 		} finally {
 			setLoading(false);
 		}

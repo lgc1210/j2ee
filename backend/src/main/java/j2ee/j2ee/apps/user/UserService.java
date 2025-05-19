@@ -62,19 +62,16 @@ public class UserService {
 
     public UserEntity create(UserEntity user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-
         RoleEntity role;
         if (user.getRole() == null) {
-
             role = roleRepository.findById(2L) // Role: customer
                     .orElseThrow(() -> new RuntimeException("Customer role not found"));
         } else {
-
-            role = roleRepository.findById(user.getRole().getId())
+            role = roleRepository.findById(
+                    user.getRole().getId())
                     .orElseThrow(() -> new RuntimeException("Selected role not found"));
         }
         user.setRole(role);
-
         return userRepository.save(user);
     }
 

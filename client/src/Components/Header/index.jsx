@@ -159,7 +159,7 @@ const Header = () => {
 					<div className='relative' onClick={() => navigate(paths.cart)}>
 						<FaCartShopping size={24} className='cursor-pointer' />
 						<span className='text-center leading-tight absolute -top-4 -right-4 bg-[#799AA1] text-white min-w-5 h-auto rounded-full'>
-							{cart?.items?.length || 0}
+							{cart?.length || 0}
 						</span>
 					</div>
 					<div className='md:block hidden'>

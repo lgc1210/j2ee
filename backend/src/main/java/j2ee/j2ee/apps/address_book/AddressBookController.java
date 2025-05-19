@@ -19,12 +19,9 @@ public class AddressBookController {
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final String externalApi = "https://provinces.open-api.vn/api/?depth=3";
-    private final AddressBookService addressBookService;
 
     @Autowired
-    public AddressBookController(AddressBookService addressBookService) {
-        this.addressBookService = addressBookService;
-    }
+    private AddressBookService addressBookService;
 
     // Get provinces API
     @GetMapping("/provinces")
@@ -43,8 +40,7 @@ public class AddressBookController {
     public ResponseEntity<Object> getAllByUserId(
             @PathVariable(value = "user_id") long user_id,
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "4") int size
-    ) {
+            @RequestParam(defaultValue = "4") int size) {
         try {
             Page<AddressBookEntity> pageAddresses = addressBookService.getAllByUserId(user_id, page, size);
             if (pageAddresses.isEmpty()) {
@@ -88,7 +84,8 @@ public class AddressBookController {
         try {
             var createdAddress = this.addressBookService.create(payload);
 
-            URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(createdAddress.getId()).toUri();
+            URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
+                    .buildAndExpand(createdAddress.getId()).toUri();
 
             return ResponseEntity.created(uri).body(createdAddress);
         } catch (Exception e) {
@@ -117,7 +114,8 @@ public class AddressBookController {
 
     // Set default address by id
     @PutMapping("/{id}")
-    public ResponseEntity<Object> setDefaultByUserId(@PathVariable(value = "id") long id, @RequestBody AddressBookEntity payload) {
+    public ResponseEntity<Object> setDefaultByUserId(@PathVariable(value = "id") long id,
+            @RequestBody AddressBookEntity payload) {
         System.out.println("Payload:" + payload.toString());
         try {
             this.addressBookService.setDefaultById(id, payload.getUser().getId());

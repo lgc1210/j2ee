@@ -34,13 +34,13 @@ const Contact = lazy(() => import("../Pages/Contact"));
 const ProductDetails = lazy(() => import("../Pages/ProductDetails"));
 const Cart = lazy(() => import("../Pages/Cart"));
 const Service = lazy(() => import("../Pages/Service"));
+const Checkout = lazy(() => import("../Pages/Checkout"));
 
 // Admin Pages
 const Dashboard = lazy(() => import("../Pages/Dashboard"));
 const Users = lazy(() => import("../Pages/Users"));
-const Products = lazy(() => import("../Pages/Products"));
+const UserDetails = lazy(() => import("../Pages/Users/View"));
 const Categories = lazy(() => import("../Pages/Categories"));
-const Discounts = lazy(() => import("../Pages/Discounts"));
 const Stores = lazy(() => import("../Pages/Stores"));
 const Roles = lazy(() => import("../Pages/Roles"));
 const Statistic = lazy(() => import("../Pages/Statistic"));
@@ -90,12 +90,17 @@ const routes = [
 		Page: Shop,
 	},
 	{
+		isPublic: false,
+		url: paths.checkout,
+		Layout: null,
+		Page: Checkout,
+	},
+	{
 		isPublic: true,
 		url: paths.notFound,
 		Layout: null,
 		Page: NotFound,
 	},
-	// Profile
 	{
 		isPublic: false,
 		url: paths.profilePersonal,
@@ -172,12 +177,11 @@ const routes = [
 	},
 	{
 		isPublic: false,
-		url: paths.products,
+		url: paths.userDetails,
 		Layout: AdminLayout,
-		Page: Products,
+		Page: UserDetails,
 		requiredRole: ["admin"],
 	},
-
 	{
 		isPublic: false,
 		url: paths.stores,
@@ -270,19 +274,11 @@ const routes = [
 		Page: statisticOwner,
 		requiredRole: ["owner"],
 	},
-
 	{
 		isPublic: false,
 		url: paths.categories,
 		Layout: AdminLayout,
 		Page: Categories,
-		requiredRole: ["admin"],
-	},
-	{
-		isPublic: false,
-		url: paths.discounts,
-		Layout: AdminLayout,
-		Page: Discounts,
 		requiredRole: ["admin"],
 	},
 	{
