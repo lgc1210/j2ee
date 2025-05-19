@@ -28,92 +28,83 @@ public class AppointmentController {
     private PaymentService paymentService;
 
     @PostMapping
-    public ResponseEntity<AppointmentEntity> create(@RequestBody Map<String, Object> payload) {
+    public ResponseEntity<AppointmentEntity> create(@RequestBody AppointmentEntity appointmentRequest) {
         try {
-            String appointmentDateStr = (String) payload.get("appointment_date");
-            String appointmentTimeStr = (String) payload.get("appointment_time");
-            String status = (String) payload.get("status");
-
-            Long customerId = null;
-            Object customerIdObj = payload.get("customer_id");
-            if (customerIdObj instanceof Integer) {
-                customerId = ((Integer) customerIdObj).longValue();
-            } else if (customerIdObj instanceof Long) {
-                customerId = (Long) customerIdObj;
-            }
-
-            Long staffId = null;
-            Object staffIdObj = payload.get("staff_id");
-            if (staffIdObj instanceof Integer) {
-                staffId = ((Integer) staffIdObj).longValue();
-            } else if (staffIdObj instanceof Long) {
-                staffId = (Long) staffIdObj;
-            }
-
-            Long serviceId = null;
-            Object serviceIdObj = payload.get("service_id");
-            if (serviceIdObj instanceof Integer) {
-                serviceId = ((Integer) serviceIdObj).longValue();
-            } else if (serviceIdObj instanceof Long) {
-                serviceId = (Long) serviceIdObj;
-            }
-
-            Long storeId = null;
-            Object storeIdObj = payload.get("store_id");
-            if (storeIdObj instanceof Integer) {
-                storeId = ((Integer) storeIdObj).longValue();
-            } else if (storeIdObj instanceof Long) {
-                storeId = (Long) storeIdObj;
-            }
+            System.out.println("Received appointment request: " + appointmentRequest);
 
             // Validate required fields
-            if (appointmentDateStr == null || appointmentTimeStr == null || customerId == null || staffId == null
-                    || serviceId == null || storeId == null) {
-                return ResponseEntity.badRequest().build();
+            if (appointmentRequest.getAppointment_date() == null ||
+                    appointmentRequest.getAppointment_time() == null ||
+                    appointmentRequest.getCustomer() == null ||
+                    appointmentRequest.getCustomer().getId() == null ||
+                    appointmentRequest.getStaff() == null ||
+                    appointmentRequest.getStaff().getId() == null ||
+                    appointmentRequest.getService() == null ||
+                    appointmentRequest.getService().getId() == null ||
+                    appointmentRequest.getStore() == null ||
+                    appointmentRequest.getStore().getId() == null) {
+                System.err.println("Missing required fields: " + appointmentRequest);
+                return ResponseEntity.badRequest().body(null);
             }
 
-            // Create AppointmentEntity
-            AppointmentEntity appointmentEntity = new AppointmentEntity();
-            appointmentEntity.setAppointment_date(LocalDate.parse(appointmentDateStr));
-            appointmentEntity.setAppointment_time(LocalTime.parse(appointmentTimeStr));
-            appointmentEntity.setStatus(status != null ? status : "Pending");
-            // Set related entities
-            UserEntity customer = new UserEntity();
-            customer.setId(customerId);
-            appointmentEntity.setCustomer(customer);
+            // Set default status if null
+            if (appointmentRequest.getStatus() == null) {
+                appointmentRequest.setStatus("Pending");
+            }
 
-            UserEntity staff = new UserEntity();
-            staff.setId(staffId);
-            appointmentEntity.setStaff(staff);
+            // Ensure related entities are minimally populated
+            UserEntity customer = appointmentRequest.getCustomer();
+            UserEntity staff = appointmentRequest.getStaff();
+            ServiceEntity service = appointmentRequest.getService();
+            StoreEntity store = appointmentRequest.getStore();
 
-            ServiceEntity service = new ServiceEntity();
-            service.setId(serviceId);
-            appointmentEntity.setService(service);
+            // Create new instances if not provided (assuming IDs are sufficient)
+            if (customer.getId() != null && customer.getName() == null) {
+                customer = new UserEntity();
+                customer.setId(appointmentRequest.getCustomer().getId());
+            }
+            if (staff.getId() != null && staff.getName() == null) {
+                staff = new UserEntity();
+                staff.setId(appointmentRequest.getStaff().getId());
+            }
+            if (service.getId() != null && service.getName() == null) {
+                service = new ServiceEntity();
+                service.setId(appointmentRequest.getService().getId());
+            }
+            if (store.getId() != null && store.getName() == null) {
+                store = new StoreEntity();
+                store.setId(appointmentRequest.getStore().getId());
+            }
 
-            StoreEntity store = new StoreEntity();
-            store.setId(storeId);
-            appointmentEntity.setStore(store);
+            appointmentRequest.setCustomer(customer);
+            appointmentRequest.setStaff(staff);
+            appointmentRequest.setService(service);
+            appointmentRequest.setStore(store);
 
-            Optional<AppointmentEntity> appointment = appointmentService.create(appointmentEntity);
+            Optional<AppointmentEntity> appointment = appointmentService.create(appointmentRequest);
             if (!appointment.isPresent()) {
-                return ResponseEntity.notFound().build();
+                System.err.println("Failed to create appointment: service returned empty");
+                return ResponseEntity.badRequest().body(null);
             }
 
             AppointmentEntity createdAppointment = appointment.get();
+            URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                    .path("/{id}")
+                    .buildAndExpand(createdAppointment.getId())
+                    .toUri();
 
-            URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
-                    .buildAndExpand(createdAppointment.getId()).toUri();
-
+            System.out.println("Created appointment: " + createdAppointment);
             return ResponseEntity.created(location).body(createdAppointment);
         } catch (Exception e) {
             System.err.println("Internal Server Error: " + e.getMessage());
-            return ResponseEntity.internalServerError().build();
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body(null);
         }
     }
 
     @GetMapping("/customer")
     public ResponseEntity<Object> getAllByCustomerId(@RequestParam Long customer_id,
-            @RequestParam int page, @RequestParam int size) {
+                                                     @RequestParam int page, @RequestParam int size) {
         try {
             System.out.println("Customer ID: " + customer_id);
             var pageAppointments = this.appointmentService.getAllByCustomerId(customer_id, page, size);
@@ -219,12 +210,10 @@ public class AppointmentController {
                 System.err.println("Failed to create payment");
                 return ResponseEntity.internalServerError().build();
             }
-            ;
         }
 
         return updatedAppointment
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
-
 }

@@ -9,16 +9,19 @@ const BookingServiceItem = ({
 }) => {
 	const isSelected = selectedServiceId === item?.id;
 
-	console.log("Item: ", item);
-
 	return (
 		<div
 			className={`
         bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300
         border overflow-hidden cursor-pointer 
-		${isSelected ? "border-[#435D63] ring-2 ring-[#435D63]/20" : "border-gray-100"}
+        ${
+					isSelected
+						? "border-[#435D63] ring-2 ring-[#435D63]/20"
+						: "border-gray-100"
+				}
       `}
-			onClick={() => setSelectedServiceId(item?.id)}>
+			onClick={() => setSelectedServiceId(item?.id, item?.price)} // Pass both id and price
+		>
 			<div className='relative'>
 				{item?.imageBase64 ? (
 					<img

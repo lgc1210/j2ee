@@ -4,8 +4,9 @@ import { useAuth } from "../../Contexts/Auth";
 import BookingImageBanner from "../../assets/images/Booking/female-hairstylist-drying-curly-girl-s-hair-using-big-plastic-brush-1920x1282.jpeg";
 import AppointmentService from "../../Services/appointment";
 import { showToast } from "../../Components/Toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import paths from "../../Constants/paths";
+import apiInstance from "../../Config/api";
 
 // Lazy loaded components
 const Banner = lazy(() => import("../../Components/Banner"));
@@ -19,6 +20,7 @@ const BookingSelectDate = lazy(() =>
 
 const Booking = () => {
 	const navigate = useNavigate();
+	const location = useLocation();
 	const [step, setStep] = useState(0);
 	const [loading, setLoading] = useState(false);
 	const [selectedServiceId, setSelectedServiceId] = useState(null);
@@ -34,7 +36,67 @@ const Booking = () => {
 		store_id: null,
 		notes: "",
 		payment_method: null,
+		price: 0,
 	});
+
+	// Handle payment result from VNPay callback
+	useEffect(() => {
+		const handleVNPayCallback = async () => {
+			const queryParams = new URLSearchParams(location.search);
+
+			if (queryParams.get("vnp_TxnRef")) {
+				setLoading(true);
+				try {
+					// Restore booking info from localStorage
+					const savedInfo = JSON.parse(
+						localStorage.getItem("bookingInfo") || "{}"
+					);
+					if (!savedInfo || !savedInfo.service_id) {
+						console.error("No valid booking info found in localStorage");
+						showToast("Booking information is missing", "error");
+						setStep(3);
+						return;
+					}
+
+					// Update info state with saved info
+					setInfo((prev) => ({
+						...prev,
+						...savedInfo,
+						payment_method: "VNPay",
+					}));
+
+					const response = await apiInstance.get(
+						`${process.env.REACT_APP_API}/vnpay/callback`,
+						{ params: Object.fromEntries(queryParams) }
+					);
+
+					console.log("VNPay callback response:", response.data);
+					console.log("Restored booking info:", savedInfo);
+
+					if (
+						response?.data?.status === "success" ||
+						queryParams.get("vnp_ResponseCode") === "00"
+					) {
+						// Call handleSubmitBooking with the restored info
+						await handleSubmitBooking(savedInfo);
+					} else {
+						showToast(
+							response.data.message || "Payment verification failed",
+							"error"
+						);
+						setStep(3);
+					}
+				} catch (error) {
+					console.error("VNPay callback error:", error.response?.data || error);
+					showToast("Error verifying payment", "error");
+					setStep(3);
+				} finally {
+					setLoading(false);
+				}
+			}
+		};
+		handleVNPayCallback();
+	}, [location]);
 
 	// Track progress in localStorage
 	useEffect(() => {
@@ -82,9 +144,10 @@ const Booking = () => {
 		handleSetStep(1);
 	};
 
-	const handleSelectService = (serviceId) => {
+	const handleSelectService = (serviceId, price) => {
 		setSelectedServiceId(serviceId);
 		handleInfoChange("service_id", serviceId);
+		handleInfoChange("price", price);
 		handleSetStep(2);
 	};
 
@@ -93,15 +156,49 @@ const Booking = () => {
 		appointmentTime,
 		staffId
 	) => {
-		handleInfoChange("appointment_date", appointmentDate);
-		handleInfoChange("appointment_time", appointmentTime);
+		// Format appointmentDate to YYYY-MM-DD
+		const formattedDate =
+			appointmentDate instanceof Date
+				? appointmentDate.toISOString().split("T")[0]
+				: appointmentDate;
+
+		// Format appointmentTime to HH:mm
+		const formattedTime = appointmentTime.match(/\d{2}:\d{2}/)
+			? appointmentTime.match(/\d{2}:\d{2}/)[0]
+			: new Date(`1970-01-01T${appointmentTime}`).toISOString().slice(11, 16);
+
+		handleInfoChange("appointment_date", formattedDate);
+		handleInfoChange("appointment_time", formattedTime);
 		handleInfoChange("staff_id", staffId);
 		handleSetStep(3);
 	};
 
-	const handleSelectPaymentMethod = (method) => {
+	const handleSelectPaymentMethod = async (method) => {
 		handleInfoChange("payment_method", method);
-		handleSubmitBooking();
+		if (method === "VNPay") {
+			if (!info.price || info.price <= 0) {
+				showToast("Service price not available", "error");
+				return;
+			}
+			try {
+				setLoading(true);
+				// Save info to localStorage before redirect
+				localStorage.setItem("bookingInfo", JSON.stringify(info));
+				const response = await apiInstance.post(
+					`${process.env.REACT_APP_API}/vnpay/create-url`,
+					{
+						amount: info.price,
+					}
+				);
+				window.location.href = response.data.paymentUrl;
+			} catch (error) {
+				console.error("VNPay payment error:", error.response?.data || error);
+				showToast("Error initiating VNPay payment", "error");
+				setLoading(false);
+			}
+		} else {
+			handleSubmitBooking(info);
+		}
 	};
 
 	const handleInfoChange = (key, value) => {
@@ -119,6 +216,7 @@ const Booking = () => {
 
 	const handleResetBooking = () => {
 		localStorage.removeItem("bookingState");
+		localStorage.removeItem("bookingInfo");
 		setStep(0);
 		setSelectedServiceId(null);
 		setSelectedStoreId(null);
@@ -132,15 +230,18 @@ const Booking = () => {
 			store_id: null,
 			notes: "",
 			payment_method: null,
+			price: 0,
 		});
 	};
 
-	const handleSubmitBooking = async () => {
+	const handleSubmitBooking = async (bookingInfo) => {
 		if (!isAuthenticated) {
 			showToast("Please login to complete your booking", "error");
 			navigate(paths.login, { replace: true });
 			return;
 		}
+
+		const infoToUse = bookingInfo || info;
 
 		const requiredFields = [
 			{ field: "appointment_date", name: "Appointment Date" },
@@ -149,9 +250,13 @@ const Booking = () => {
 			{ field: "staff_id", name: "Staff Member" },
 			{ field: "store_id", name: "Store" },
 			{ field: "payment_method", name: "Payment Method" },
+			{ field: "customer_id", name: "Customer" },
+			{ field: "price", name: "Price" },
 		];
 
-		const missingFields = requiredFields.filter((item) => !info[item.field]);
+		const missingFields = requiredFields.filter(
+			(item) => !infoToUse[item.field] && infoToUse[item.field] !== 0
+		);
 
 		if (missingFields.length > 0) {
 			const missingFieldNames = missingFields
@@ -163,14 +268,38 @@ const Booking = () => {
 
 		try {
 			setLoading(true);
-			const response = await AppointmentService.create(info);
+			console.log("Sending appointment info:", infoToUse);
+
+			const payload = {
+				appointment_date: infoToUse.appointment_date,
+				appointment_time: infoToUse.appointment_time,
+				status: infoToUse.status,
+				customer: { id: Number(infoToUse.customer_id) },
+				service: { id: Number(infoToUse.service_id) },
+				staff: { id: Number(infoToUse.staff_id) },
+				store: { id: Number(infoToUse.store_id) },
+				notes: infoToUse.notes,
+				payment_method: infoToUse.payment_method,
+				price: Number(infoToUse.price),
+			};
+			console.log("Formatted payload:", payload);
+			const response = await AppointmentService.create(payload);
+			console.log("Appointment creation response status:", response.status);
+			console.log("Appointment creation response data:", response.data);
 			if (response.status === 201 || response.status === 200) {
 				showToast("Booked successfully!", "success");
 				localStorage.removeItem("bookingState");
-				setStep(4); // Confirmation step
+				localStorage.removeItem("bookingInfo");
+				setStep(4);
+			} else {
+				console.error("Unexpected response status:", response.status);
+				showToast("Booking failed. Unexpected response from server.", "error");
 			}
 		} catch (error) {
-			console.error("Error creating appointment:", error);
+			console.error(
+				"Error creating appointment:",
+				error.response?.data || error.message || error
+			);
 			showToast(
 				error.response?.data?.message || "Booking failed. Please try again.",
 				"error"
@@ -216,12 +345,14 @@ const Booking = () => {
 							<div className='flex flex-col sm:flex-row gap-4 justify-center'>
 								<button
 									className='px-6 py-3 bg-[#435D63] text-white font-medium rounded hover:bg-[#364a4f] transition duration-300 shadow-sm'
-									onClick={() => handleSelectPaymentMethod("VNPay")}>
+									onClick={() => handleSelectPaymentMethod("VNPay")}
+									disabled={loading}>
 									Pay with VNPay
 								</button>
 								<button
 									className='px-6 py-3 bg-white border border-[#435D63] text-[#435D63] font-medium rounded hover:bg-gray-50 transition duration-300'
-									onClick={() => handleSelectPaymentMethod("Cash")}>
+									onClick={() => handleSelectPaymentMethod("Cash")}
+									disabled={loading}>
 									Pay with Cash
 								</button>
 							</div>
@@ -342,7 +473,6 @@ const Booking = () => {
 							))}
 						</div>
 
-						{/* Progress line */}
 						<div className='flex w-full mt-4 mb-2'>
 							<div
 								className={`h-1 flex-1 rounded-full ${

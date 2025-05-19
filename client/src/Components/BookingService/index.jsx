@@ -1,14 +1,13 @@
 import React from "react";
-
 const BookingServiceList = React.lazy(() => import("./BookingServiceList"));
 
 const BookingService = ({ storeId, setSelectedServiceId, handleSetStep }) => {
 	const [localSelectedServiceId, setLocalSelectedServiceId] =
 		React.useState(null);
 
-	const handleServiceSelection = (serviceId) => {
+	const handleServiceSelection = (serviceId, price) => {
 		setLocalSelectedServiceId(serviceId);
-		setSelectedServiceId(serviceId);
+		setSelectedServiceId(serviceId, price); // Pass both serviceId and price
 	};
 
 	return (
