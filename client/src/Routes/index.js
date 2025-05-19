@@ -17,7 +17,7 @@ const categoryOwner = lazy(() => import("../Pages/OwnerPages/categoryOwner"));
 const appointmentOwner = lazy(() =>
 	import("../Pages/OwnerPages/appointmentOwner")
 );
-const paymentOwner = lazy(()=>import("../Pages/OwnerPages/paymentOwner"))
+const paymentOwner = lazy(() => import("../Pages/OwnerPages/paymentOwner"));
 const orderOwner = lazy(() => import("../Pages/OwnerPages/orderOwner"));
 const reviewOwner = lazy(() => import("../Pages/OwnerPages/reviewOwner"));
 const statisticOwner = lazy(() =>
@@ -229,7 +229,7 @@ const routes = [
 	},
 	{
 		isPublic: false,
-		url: paths.paymentOwner,
+		url: paths.ownerpayments,
 		Layout: OwnerLayout,
 		Page: paymentOwner,
 		requiredRole: ["owner"],
