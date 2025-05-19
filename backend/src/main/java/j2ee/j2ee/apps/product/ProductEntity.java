@@ -1,14 +1,16 @@
 package j2ee.j2ee.apps.product;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import j2ee.j2ee.apps.category.CategoryEntity;
 import j2ee.j2ee.apps.store.StoreEntity;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.CascadeType;
 import lombok.Data;
 
 @Entity(name = "products")
@@ -23,7 +25,7 @@ public class ProductEntity {
 
     private String description;
 
-    private boolean is_sale;
+    private Boolean is_sale;
 
     private Double old_price;
 
@@ -37,11 +39,13 @@ public class ProductEntity {
 
     private String status;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id", referencedColumnName = "id")
+    @JsonIgnore
     private StoreEntity store;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", referencedColumnName = "id")
+    @JsonIgnore
     private CategoryEntity category;
 }

@@ -7,9 +7,14 @@ import java.util.Base64;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import j2ee.j2ee.apps.user.UserEntity;
 import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import lombok.Data;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity(name = "stores")
@@ -49,13 +54,13 @@ public class StoreEntity {
 
     // Getter to convert byte[] to Base64
     public String getImageBase64() {
-        if (image != null) {
+        if (image != null)
             return "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(image);
-        }
         return null;
     }
 
     @ManyToOne(cascade = CascadeType.REMOVE)
+    @OneToOne
     @JoinColumn(name = "owner_id", referencedColumnName = "id")
     private UserEntity owner;
 }

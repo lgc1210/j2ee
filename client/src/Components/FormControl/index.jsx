@@ -24,6 +24,7 @@ const FormControl = ({
 	value,
 	rows = 6, // Default rows for text area
 	options = [], // Options for select input
+	disabled = false
 }) => {
 	const defaultFormControlStyle =
 		"w-full h-full py-4 px-6 bg-transparent outline-none";
@@ -55,6 +56,7 @@ const FormControl = ({
 						className={`${defaultFormControlStyle} ${inputStyle}`}
 						onChange={onChange}
 						onBlur={onBlur}
+						disabled={disabled}
 						value={value}>
 						<option value={null} className='text-black/50'>
 							Select

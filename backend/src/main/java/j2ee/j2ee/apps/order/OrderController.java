@@ -6,11 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 @RequestMapping("/api/orders")
@@ -60,5 +57,41 @@ public class OrderController {
             @RequestParam("filter") String filter,
             @RequestParam(value = "specificFilter", required = false) String specificFilter) {
         return orderService.getOrderStatistics(filter, specificFilter);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<OrderEntity>> getAllOrders() {
+        List<OrderEntity> orders = orderService.getAllOrders();
+        return ResponseEntity.ok(orders);
+    }
+
+    @GetMapping("/store/{storeId}")
+    public ResponseEntity<List<OrderEntity>> getAllOrdersByStore(
+            @PathVariable("storeId") Long storeId) {
+        List<OrderEntity> orders = orderService.getAllOrdersOfStore(storeId);
+        return ResponseEntity.ok(orders);
+    }
+
+    @PostMapping
+    public ResponseEntity<OrderEntity> createOrder(@RequestBody CreateOrderRequest request) {
+        try {
+            var result = orderService.createOrder(request);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateOrderStatus(
+            @PathVariable Long id,
+            @RequestParam("status") String status) {
+        try {
+            OrderEntity updatedOrder = orderService.updateOrderStatus(id, status);
+            return ResponseEntity.ok(updatedOrder);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

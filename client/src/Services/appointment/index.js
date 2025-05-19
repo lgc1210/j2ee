@@ -3,6 +3,15 @@ import apiInstance from "../../Config/api";
 const baseURL = process.env.REACT_APP_API;
 
 class AppointmentService {
+
+	static updateAppointment = async (appointmentId, status, payment = null) => {
+		return await apiInstance.put(`${baseURL}/appointments/${appointmentId}?status=${status}`, payment);
+	}
+
+	static getByStoreId = async (storeId) => {
+		return await apiInstance.get(`${baseURL}/appointments/store/${storeId}`);
+	}
+
 	// Fetch available time slots for a date, store, and service
 	static getAvailableTimeSlots = async (
 		storeId = 101,

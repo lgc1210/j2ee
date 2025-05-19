@@ -8,11 +8,17 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
+import j2ee.j2ee.apps.product.ProductRepository;
+import j2ee.j2ee.apps.store.StoreRepository;
+import j2ee.j2ee.apps.user.UserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.WeekFields;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -22,6 +28,14 @@ public class OrderService {
 
     @Autowired
     private OrderRepository orderRepository;
+    @Autowired
+    private OrderItemRepository orderItemRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private StoreRepository storeRepository;
+    @Autowired
+    private ProductRepository productRepository;
 
     public Page<OrderEntity> getAllByUserId(long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "created_at"));
@@ -104,5 +118,73 @@ public class OrderService {
     private long getYearlyOrders(String yearString) {
         int year = Integer.parseInt(yearString);
         return orderRepository.countByYear(year);
+    }
+
+    public List<OrderEntity> getAllOrders() {
+        return orderRepository.findAll();
+    }
+
+    public List<OrderEntity> getAllOrdersOfStore(Long storeId) {
+        return orderRepository.findAllByStoreId(storeId);
+    }
+
+    public OrderEntity createOrder(CreateOrderRequest request) {
+        System.out.println("Requested storeId: " + request);
+        var user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        var store = storeRepository.findById(request.getStoreId())
+                .orElseThrow(() -> new RuntimeException("Store not found"));
+
+        OrderEntity order = new OrderEntity();
+        order.setUser(user);
+        order.setStore(store);
+        order.setCreated_at(LocalDateTime.now());
+        order.setOrder_date(LocalDateTime.now());
+        order.setShipping_address(request.getShippingAddress());
+        order.setStatus("Pending");
+
+        List<OrderItem> items = new ArrayList<>();
+        double totalAmount = 0;
+
+        for (OrderItemRequest itemRequest : request.getItems()) {
+            var product = productRepository.findById(itemRequest.getProductId())
+                    .orElseThrow(() -> new RuntimeException("Product not found"));
+
+            if (product.getStock_quantity() < itemRequest.getQuantity() || !product.getIs_in_stock()) {
+                throw new RuntimeException("Not enough stock for product: " + product.getName());
+            }
+
+            if (!product.getIs_sale()) {
+                throw new RuntimeException("The product is no longer available for sale: " + product.getName());
+            }
+
+            product.setStock_quantity(product.getStock_quantity() - itemRequest.getQuantity());
+            productRepository.save(product);
+
+            OrderItem item = new OrderItem();
+            item.setOrder(order);
+            item.setProduct(product);
+            item.setQuantity(itemRequest.getQuantity());
+            item.setPrice(product.getPrice());
+
+            totalAmount += item.getPrice() * item.getQuantity();
+            items.add(item);
+        }
+
+        order.setTotal_amount(totalAmount);
+        order.setItems(items);
+
+        OrderEntity savedOrder = orderRepository.save(order);
+
+        return savedOrder;
+    }
+
+    public OrderEntity updateOrderStatus(Long orderId, String newStatus) {
+        OrderEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        order.setStatus(newStatus);
+        return orderRepository.save(order);
     }
 }

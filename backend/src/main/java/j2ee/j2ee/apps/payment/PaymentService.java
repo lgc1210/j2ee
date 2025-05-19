@@ -44,6 +44,13 @@ public class PaymentService {
     }
 
     public PaymentDTO createPayment(PaymentEntity payment) {
+        Optional<PaymentEntity> existingPayment = paymentRepository
+                .findByAppointmentId(payment.getAppointment().getId());
+
+        if (existingPayment.isPresent()) {
+            return toPaymentDTO(existingPayment.get());
+        }
+
         return toPaymentDTO(paymentRepository.save(payment));
     }
 

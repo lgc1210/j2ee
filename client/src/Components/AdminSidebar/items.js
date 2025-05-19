@@ -2,7 +2,7 @@ import paths from "../../Constants/paths";
 
 const items = [
 	{
-		path: paths.dashboard,
+		path: paths.statisticByAllTime,
 		name: "Dashboard",
 		requiredAuth: true,
 		requiredRole: ["admin"],
@@ -25,24 +25,24 @@ const items = [
 		requiredAuth: true,
 		requiredRole: ["admin"],
 	},
-	{
-		path: paths.contacts,
-		name: "Contacts",
-		requiredAuth: true,
-		requiredRole: ["admin"],
-	},
+	// {
+	// 	path: paths.contacts,
+	// 	name: "Contacts",
+	// 	requiredAuth: true,
+	// 	requiredRole: ["admin"],
+	// },
 	{
 		path: paths.roles,
 		name: "Roles",
 		requiredAuth: true,
 		requiredRole: ["admin"],
 	},
-	{
-		path: paths.statisticByAllTime,
-		name: "Statistic",
-		requiredAuth: true,
-		requiredRole: ["admin"],
-	},
+	// {
+	// 	path: paths.statisticByAllTime,
+	// 	name: "Statistic",
+	// 	requiredAuth: true,
+	// 	requiredRole: ["admin"],
+	// },
 ];
 
 export default items;

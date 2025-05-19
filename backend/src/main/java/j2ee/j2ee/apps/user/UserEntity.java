@@ -35,7 +35,7 @@ public class UserEntity {
     private LocalDate created_at;
 
     @LastModifiedDate
-    private LocalDate update_at;
+    private LocalDate updated_at;
 
     @ManyToOne
     @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)

@@ -31,7 +31,7 @@ public class UserService {
         dto.setEmail(user.getEmail());
         dto.setPhone(user.getPhone());
         dto.setCreatedAt(user.getCreated_at());
-        dto.setUpdatedAt(user.getUpdate_at());
+        dto.setUpdatedAt(user.getUpdated_at());
         dto.setRole(user.getRole());
         dto.setStatus(user.getStatus());
 
