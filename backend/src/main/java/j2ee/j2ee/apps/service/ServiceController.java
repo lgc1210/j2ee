@@ -76,7 +76,6 @@ public class ServiceController {
             System.err.println("Internal Server Error: " + e.getMessage());
             return ResponseEntity.internalServerError().build();
         }
-
     }
 
     @PostMapping

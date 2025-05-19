@@ -31,9 +31,9 @@ public class AppointmentEntity {
 
     private String status;
 
-    private LocalDateTime created_at;
+    private LocalDateTime created_at = LocalDateTime.now();
 
-    private LocalDateTime updated_at;
+    private LocalDateTime updated_at = LocalDateTime.now();
 
     @ManyToOne
     @JoinColumn(name = "store_id", nullable = false)
