@@ -231,11 +231,11 @@ const Booking = () => {
 			case 4:
 				return (
 					<div className='container mx-auto py-16 px-4 md:px-0 max-w-3xl'>
-						<div className='bg-white shadow-md rounded-lg p-8 border-t-4 border-green-500'>
-							<div className='w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-8'>
+						<div className='bg-white shadow-md rounded-lg p-8 border-t-4 border-[#435D63]'>
+							<div className='w-20 h-20 bg-[#435D63]/5 border border-[#435D63]/20 rounded-full flex items-center justify-center mx-auto mb-8'>
 								<svg
 									xmlns='http://www.w3.org/2000/svg'
-									className='h-10 w-10 text-green-600'
+									className='h-10 w-10 text-[#435D63]'
 									fill='none'
 									viewBox='0 0 24 24'
 									stroke='currentColor'>
