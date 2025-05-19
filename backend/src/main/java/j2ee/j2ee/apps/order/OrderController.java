@@ -2,9 +2,9 @@ package j2ee.j2ee.apps.order;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -19,8 +19,7 @@ public class OrderController {
 
     // Get orders pagination by user id
     @GetMapping("/users/{user_id}")
-    public ResponseEntity<Object> getAllByUserId(@PathVariable("user_id") long userId, @RequestParam("page") int page,
-            @RequestParam("size") int size) {
+    public ResponseEntity<Object> getAllByUserId(@PathVariable("user_id") long userId, @RequestParam("page") int page, @RequestParam("size") int size) {
         try {
             Page<OrderEntity> pageOrders = this.orderService.getAllByUserId(userId, page, size);
             if (pageOrders.isEmpty()) {
@@ -53,9 +52,7 @@ public class OrderController {
     }
 
     @GetMapping("/filter_orders")
-    public Map<String, Long> getOrderStats(
-            @RequestParam("filter") String filter,
-            @RequestParam(value = "specificFilter", required = false) String specificFilter) {
+    public Map<String, Long> getOrderStats(@RequestParam("filter") String filter, @RequestParam(value = "specificFilter", required = false) String specificFilter) {
         return orderService.getOrderStatistics(filter, specificFilter);
     }
 
@@ -65,12 +62,11 @@ public class OrderController {
         return ResponseEntity.ok(orders);
     }
 
-    @GetMapping("/store/{storeId}")
-    public ResponseEntity<List<OrderEntity>> getAllOrdersByStore(
-            @PathVariable("storeId") Long storeId) {
-        List<OrderEntity> orders = orderService.getAllOrdersOfStore(storeId);
-        return ResponseEntity.ok(orders);
-    }
+//    @GetMapping("/store/{storeId}")
+//    public ResponseEntity<List<OrderEntity>> getAllOrdersByStore(@PathVariable("storeId") Long storeId) {
+//        List<OrderEntity> orders = orderService.getAllOrdersOfStore(storeId);
+//        return ResponseEntity.ok(orders);
+//    }
 
     @PostMapping
     public ResponseEntity<OrderEntity> createOrder(@RequestBody CreateOrderRequest request) {
@@ -84,9 +80,7 @@ public class OrderController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateOrderStatus(
-            @PathVariable Long id,
-            @RequestParam("status") String status) {
+    public ResponseEntity<?> updateOrderStatus(@PathVariable Long id, @RequestParam("status") String status) {
         try {
             OrderEntity updatedOrder = orderService.updateOrderStatus(id, status);
             return ResponseEntity.ok(updatedOrder);

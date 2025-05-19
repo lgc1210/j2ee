@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../Contexts/Auth";
 import AddressService from "../../Services/address";
 import { useCart } from "../../Contexts/Cart";
 import { toVND } from "../../Utils/vietnamCurrency";
+import OrderService from "../../Services/order"; // Add this import
+import { isEmail, isEmpty, isPhone } from "../../Utils/validation";
+import paths from "../../Constants/paths";
+import { showToast } from "../../Components/Toast";
 
 const Checkout = () => {
 	const [formData, setFormData] = useState({
@@ -16,10 +20,11 @@ const Checkout = () => {
 		ward: "",
 		paymentMethod: "",
 		selectedAddress: "",
+		note: "",
 	});
 	const [errors, setErrors] = useState({});
 	const [addressOption, setAddressOption] = useState("manual");
-	const [activePayment, setActivePayment] = useState("card");
+	const [activePayment, setActivePayment] = useState("cash");
 	const [addressList, setAddressList] = useState({
 		addresses: [],
 		totalPages: 0,
@@ -29,8 +34,10 @@ const Checkout = () => {
 	const [provinces, setProvinces] = useState([]);
 	const [districts, setDistricts] = useState([]);
 	const [wards, setWards] = useState([]);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 	const { user } = useAuth();
-	const { cart, totalPrice } = useCart();
+	const { cart, totalPrice, clearCart } = useCart();
+	const navigate = useNavigate();
 
 	const SHIPPING_FEE = 40000;
 
@@ -84,9 +91,7 @@ const Checkout = () => {
 			}
 		};
 
-		if (user?.id) {
-			fetchAddressList();
-		}
+		user?.id && fetchAddressList();
 		fetchProvinces();
 	}, [user?.id]);
 
@@ -157,40 +162,40 @@ const Checkout = () => {
 		const newErrors = {};
 
 		// Contact Information
-		if (!formData.email) {
+		if (isEmpty(formData.email)) {
 			newErrors.email = "Email is required";
-		} else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+		} else if (!isEmail(formData.email)) {
 			newErrors.email = "Invalid email format";
 		}
-		if (!formData.name) {
+		if (isEmpty(formData.name)) {
 			newErrors.name = "Full name is required";
 		}
-		if (!formData.phone) {
+		if (isEmpty(formData.phone)) {
 			newErrors.phone = "Phone number is required";
-		} else if (!/^\d{10}$/.test(formData.phone)) {
+		} else if (!isPhone(formData.phone)) {
 			newErrors.phone = "Phone number must be 10 digits";
 		}
 
 		// Shipping Information
 		if (addressOption === "manual") {
-			if (!formData.address) {
+			if (isEmpty(formData.address)) {
 				newErrors.address = "Address is required";
 			}
-			if (!formData.province) {
+			if (isEmpty(formData.province)) {
 				newErrors.province = "Province is required";
 			}
-			if (!formData.district) {
+			if (isEmpty(formData.district)) {
 				newErrors.district = "District is required";
 			}
-			if (!formData.ward) {
+			if (isEmpty(formData.ward)) {
 				newErrors.ward = "Ward is required";
 			}
-		} else if (addressOption === "saved" && !formData.selectedAddress) {
+		} else if (addressOption === "saved" && isEmpty(formData.selectedAddress)) {
 			newErrors.selectedAddress = "Please select an address";
 		}
 
 		// Payment Method
-		if (!formData.paymentMethod) {
+		if (isEmpty(formData.paymentMethod)) {
 			newErrors.paymentMethod = "Please select a payment method";
 		}
 
@@ -220,18 +225,77 @@ const Checkout = () => {
 	};
 
 	// Handle form submission
-	const handleSubmit = (e) => {
+	const handleSubmit = async (e) => {
 		e.preventDefault();
-		if (validateForm()) {
-			const finalAddress = `${formData.address}, ${formData.ward}, ${formData.district}, ${formData.province}`;
-			const orderData = {
-				...formData,
-				finalAddress,
+
+		// Check if cart is empty
+		if (!cart || cart.length === 0) {
+			alert("Your cart is empty");
+			return;
+		}
+
+		// Validate form
+		if (!validateForm()) return;
+
+		setIsSubmitting(true);
+
+		try {
+			// Get store ID from the first cart item
+			// This assumes all items are from the same store
+
+			// Construct shipping address
+			const shippingAddress =
+				addressOption === "manual"
+					? `${formData.address}, ${formData.ward}, ${formData.district}, ${formData.province}`
+					: formData.address;
+
+			// Build order request based on CreateOrderRequest backend model
+			const orderRequest = {
+				userId: user?.id,
+				name: formData.name,
+				email: formData.email,
+				phone: formData.phone,
+				shippingAddress: shippingAddress,
+				paymentMethod: formData.paymentMethod, // FIXED: Changed from paymentMethod to formData.paymentMethod
+				totalAmount: totalPrice,
+				note: formData.note || "",
+				items: cart.map((item) => ({
+					productId: item.product.id,
+					quantity: item.quantity,
+					price: item.product.price,
+				})),
 			};
-			console.log("Order submitted:", orderData);
-			// Add order processing logic here
+
+			// Send order to API
+			const response = await OrderService.createOrder(orderRequest);
+
+			if (response.status === 200 || response.status === 201) {
+				// Clear cart after successful order
+				clearCart();
+				// Redirect to order confirmation or orders page
+				navigate(paths.profileOrders);
+				showToast("Order Placed");
+			}
+		} catch (error) {
+			console.error("Order submission failed:", error);
+			setErrors((prev) => ({
+				...prev,
+				submit:
+					error.response?.data?.message ||
+					"Failed to place order. Please try again.",
+			}));
+		} finally {
+			setIsSubmitting(false);
 		}
 	};
+
+	// Set payment method when active payment changes
+	useEffect(() => {
+		setFormData((prev) => ({
+			...prev,
+			paymentMethod: activePayment,
+		}));
+	}, [activePayment]);
 
 	return (
 		<div className='min-h-screen bg-gray-50 flex items-center justify-center p-4 md:p-8'>
@@ -244,6 +308,12 @@ const Checkout = () => {
 						Back to cart
 					</Link>
 					<h1 className='text-3xl font-bold text-gray-800 mb-8'>Checkout</h1>
+
+					{errors.submit && (
+						<div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4'>
+							{errors.submit}
+						</div>
+					)}
 
 					<form onSubmit={handleSubmit} className='space-y-8'>
 						{/* Contact Information */}
@@ -503,6 +573,23 @@ const Checkout = () => {
 									)}
 								</div>
 							)}
+
+							<div className='mt-4'>
+								<label
+									className='block text-sm text-gray-600 mb-1'
+									htmlFor='note'>
+									Additional Notes (Optional)
+								</label>
+								<textarea
+									id='note'
+									name='note'
+									value={formData.note}
+									onChange={handleChange}
+									rows='3'
+									className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#799aa1]'
+									placeholder='Special delivery instructions, order notes, etc.'
+								/>
+							</div>
 						</div>
 
 						{/* Payment Methods */}
@@ -510,8 +597,8 @@ const Checkout = () => {
 							<h2 className='text-xl font-semibold text-gray-700 mb-4'>
 								Payment Method
 							</h2>
-							<div className='grid grid-cols-3 gap-4 mb-6'>
-								{["cash", "paypal", "apple"].map((method) => (
+							<div className='grid grid-cols-2 gap-4 mb-6'>
+								{["cash", "VNPay"].map((method) => (
 									<button
 										key={method}
 										type='button'
@@ -529,7 +616,6 @@ const Checkout = () => {
 											setErrors((prev) => ({ ...prev, paymentMethod: "" }));
 										}}>
 										{method.charAt(0).toUpperCase() + method.slice(1)}{" "}
-										{method === "cash" ? "On Delivery" : "Pay"}
 									</button>
 								))}
 							</div>
@@ -541,17 +627,18 @@ const Checkout = () => {
 							<div className='text-center py-4 text-gray-600'>
 								{activePayment === "cash" &&
 									"You'll pay after receiving your purchase."}
-								{activePayment === "paypal" &&
-									"You'll be redirected to PayPal to complete your payment."}
-								{activePayment === "apple" &&
-									"You'll be redirected to Apple Pay to complete your payment."}
+								{activePayment === "VNPay" &&
+									"You'll be redirected to VNPay to complete your payment."}
 							</div>
 						</div>
 
 						<button
 							type='submit'
-							className='w-full py-4 px-6 bg-[#799aa1] text-white font-semibold rounded-lg hover:bg-[#6a8a91] transition-colors'>
-							Complete Order
+							disabled={isSubmitting}
+							className={`w-full py-4 px-6 ${
+								isSubmitting ? "bg-gray-400" : "bg-[#799aa1] hover:bg-[#6a8a91]"
+							} text-white font-semibold rounded-lg transition-colors`}>
+							{isSubmitting ? "Processing..." : "Complete Order"}
 						</button>
 
 						<div className='flex items-center justify-center gap-2 text-gray-500 text-sm mt-4'>

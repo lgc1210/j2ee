@@ -23,6 +23,8 @@ const Cart = () => {
 		});
 	};
 
+	console.log("CART: ", cart);
+
 	const moveOnToCheckout = () => {
 		if (!isAuthenticated) return;
 		navigate(paths.checkout);

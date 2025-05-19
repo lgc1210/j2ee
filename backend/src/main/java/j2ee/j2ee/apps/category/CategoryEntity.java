@@ -1,22 +1,19 @@
 package j2ee.j2ee.apps.category;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import j2ee.j2ee.apps.store.StoreEntity;
-
-import java.time.LocalDateTime;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
+import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity(name = "categories")
 @Data
+@EntityListeners(AuditingEntityListener.class)
 public class CategoryEntity {
 
     @Id
@@ -25,24 +22,16 @@ public class CategoryEntity {
 
     private String name;
 
-    private LocalDateTime created_at;
+    @CreatedDate
+    @Column(updatable = false)
+    private LocalDate created_at;
 
-    private LocalDateTime updated_at;
+    @LastModifiedDate
+    private LocalDate updated_at;
 
     private LocalDateTime deleted_at;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id", referencedColumnName = "id", nullable = false)
     private StoreEntity store;
-
-    @PrePersist
-    protected void onCreate() {
-        created_at = LocalDateTime.now();
-        updated_at = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updated_at = LocalDateTime.now();
-    }
 }

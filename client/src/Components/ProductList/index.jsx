@@ -15,6 +15,8 @@ const ProductList = () => {
 		}
 	};
 
+	console.log("Product list: ", productList);
+
 	return (
 		<Suspense
 			fallback={

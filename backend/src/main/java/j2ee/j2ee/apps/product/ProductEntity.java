@@ -1,7 +1,7 @@
 package j2ee.j2ee.apps.product;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import j2ee.j2ee.apps.category.CategoryEntity;
 import j2ee.j2ee.apps.store.StoreEntity;
 import jakarta.persistence.Entity;

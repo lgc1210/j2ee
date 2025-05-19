@@ -2,6 +2,11 @@ package j2ee.j2ee.apps.order;
 
 import java.util.List;
 import java.util.Optional;
+
+import j2ee.j2ee.apps.cart.CartEntity;
+import j2ee.j2ee.apps.cart.CartRepository;
+import j2ee.j2ee.apps.product.ProductEntity;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,6 +20,8 @@ import j2ee.j2ee.apps.user.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.WeekFields;
@@ -36,6 +43,8 @@ public class OrderService {
     private StoreRepository storeRepository;
     @Autowired
     private ProductRepository productRepository;
+    @Autowired
+    private CartRepository cartRepository;
 
     public Page<OrderEntity> getAllByUserId(long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "created_at"));
@@ -92,9 +101,7 @@ public class OrderService {
         int week = Integer.parseInt(parts[1]);
 
         WeekFields weekFields = WeekFields.of(Locale.getDefault());
-        LocalDate startOfWeek = LocalDate.ofYearDay(year, 1)
-                .with(weekFields.weekOfYear(), week)
-                .with(weekFields.dayOfWeek(), 1);
+        LocalDate startOfWeek = LocalDate.ofYearDay(year, 1).with(weekFields.weekOfYear(), week).with(weekFields.dayOfWeek(), 1);
         LocalDateTime startDateTime = startOfWeek.atStartOfDay();
         LocalDateTime endDateTime = startOfWeek.plusDays(6).atTime(23, 59, 59);
 
@@ -128,61 +135,52 @@ public class OrderService {
         return orderRepository.findAllByStoreId(storeId);
     }
 
+    @Transactional
     public OrderEntity createOrder(CreateOrderRequest request) {
-        System.out.println("Requested storeId: " + request);
-        var user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        var store = storeRepository.findById(request.getStoreId())
-                .orElseThrow(() -> new RuntimeException("Store not found"));
+        var user = userRepository.findById(request.getUserId()).orElseThrow(() -> new RuntimeException("User not found"));
 
         OrderEntity order = new OrderEntity();
+        order.setStatus("Pending");
+        order.setTotal_amount(request.getTotalAmount());
         order.setUser(user);
-        order.setStore(store);
-        order.setCreated_at(LocalDateTime.now());
-        order.setOrder_date(LocalDateTime.now());
+        order.setName(request.getName());
+        order.setEmail(request.getEmail());
+        order.setPhone(request.getPhone());
         order.setShipping_address(request.getShippingAddress());
-        order.setStatus("Waiting for approval");
+        order.setPayment_method(request.getPaymentMethod());
+        order.setNote(request.getNote());
+        order.setStore(null);
+
+        OrderEntity createdOrder = orderRepository.save(order);
 
         List<OrderItem> items = new ArrayList<>();
-        double totalAmount = 0;
-
-        for (OrderItemRequest itemRequest : request.getItems()) {
-            var product = productRepository.findById(itemRequest.getProductId())
-                    .orElseThrow(() -> new RuntimeException("Product not found"));
-
-            if (product.getStock_quantity() < itemRequest.getQuantity() || !product.getIs_in_stock()) {
-                throw new RuntimeException("Not enough stock for product: " + product.getName());
+        request.getItems().forEach((item) -> {
+            Optional<ProductEntity> optionalProduct = productRepository.findById(item.getProductId());
+            if (optionalProduct.isEmpty()) {
+                return;
             }
+            ProductEntity product = optionalProduct.get();
+            OrderItem orderItem = new OrderItem();
+            orderItem.setProduct(product);
+            orderItem.setOrder(createdOrder);
+            orderItem.setQuantity(item.getQuantity());
+            orderItem.setPrice(product.getPrice());
 
-            if (!product.getIs_sale()) {
-                throw new RuntimeException("The product is no longer available for sale: " + product.getName());
-            }
+            OrderItem savedItem = orderItemRepository.save(orderItem);
 
-            product.setStock_quantity(product.getStock_quantity() - itemRequest.getQuantity());
-            productRepository.save(product);
+            items.add(savedItem);
+        });
 
-            OrderItem item = new OrderItem();
-            item.setOrder(order);
-            item.setProduct(product);
-            item.setQuantity(itemRequest.getQuantity());
-            item.setPrice(product.getPrice());
-
-            totalAmount += item.getPrice() * item.getQuantity();
-            items.add(item);
-        }
-
-        order.setTotal_amount(totalAmount);
         order.setItems(items);
 
-        OrderEntity savedOrder = orderRepository.save(order);
+        Optional<CartEntity> optionalCart = cartRepository.findByUserId(user.getId());
+        if (!optionalCart.isEmpty()) cartRepository.delete(optionalCart.get());
 
-        return savedOrder;
+        return createdOrder;
     }
 
     public OrderEntity updateOrderStatus(Long orderId, String newStatus) {
-        OrderEntity order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+        OrderEntity order = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
 
         order.setStatus(newStatus);
         return orderRepository.save(order);

@@ -66,7 +66,7 @@ public class StoreService {
         existingStore.setDescription(updatedStore.getDescription());
         existingStore.setAddress(updatedStore.getAddress());
         existingStore.setPhone(updatedStore.getPhone());
-//        existingStore.setImage(updatedStore.getImage());
+        // existingStore.setImage(updatedStore.getImage());
         existingStore.setOpen_time(updatedStore.getOpen_time());
         existingStore.setClose_time(updatedStore.getClose_time());
         existingStore.setStatus(updatedStore.getStatus());
@@ -76,9 +76,12 @@ public class StoreService {
     }
 
     private StoreDTO toDTO(StoreEntity entity) {
-        StoreDTO dto = StoreDTO.builder().id(entity.getId()).name(entity.getName()).description(entity.getDescription()).address(entity.getAddress()).phone(entity.getPhone())
-//                .image(entity.getImage())
-                .createdAt(formatDateTime(entity.getCreated_at())).updatedAt(formatDateTime(entity.getUpdated_at())).openTime(formatTime(entity.getOpen_time())).closeTime(formatTime(entity.getClose_time())).status(entity.getStatus()).build();
+        StoreDTO dto = StoreDTO.builder().id(entity.getId()).name(entity.getName()).description(entity.getDescription())
+                .address(entity.getAddress()).phone(entity.getPhone())
+                // .image(entity.getImage())
+                .createdAt(formatDateTime(entity.getCreated_at())).updatedAt(formatDateTime(entity.getUpdated_at()))
+                .openTime(formatTime(entity.getOpen_time())).closeTime(formatTime(entity.getClose_time()))
+                .status(entity.getStatus()).build();
 
         if (entity.getOwner() != null) {
             UserDTO ownerDTO = new UserDTO();
@@ -100,7 +103,7 @@ public class StoreService {
         entity.setDescription(dto.getDescription());
         entity.setAddress(dto.getAddress());
         entity.setPhone(dto.getPhone());
-//        entity.setImage(dto.getImage());
+        // entity.setImage(dto.getImage());
         entity.setCreated_at(parseDateTime(dto.getCreatedAt(), LocalDateTime.now()));
         entity.setUpdated_at(parseDateTime(dto.getUpdatedAt(), LocalDateTime.now()));
         entity.setOpen_time(parseTime(dto.getOpenTime()));
@@ -110,7 +113,8 @@ public class StoreService {
         if (dto.getOwnerId() != null) {
             Long ownerId = dto.getOwnerId().getId();
             if (ownerId != null) {
-                UserEntity owner = userRepository.findById(ownerId).orElseThrow(() -> new RuntimeException("Không tìm thấy user với ID: " + ownerId));
+                UserEntity owner = userRepository.findById(ownerId)
+                        .orElseThrow(() -> new RuntimeException("Không tìm thấy user với ID: " + ownerId));
                 entity.setOwner(owner);
             }
         }
@@ -156,12 +160,14 @@ public class StoreService {
     }
 
     public StoreDTO getStoreById(Long id) {
-        return storeRepository.findById(id).map(this::toDTO).orElseThrow(() -> new RuntimeException("Không tìm thấy store với ID: " + id));
+        return storeRepository.findById(id).map(this::toDTO)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy store với ID: " + id));
     }
 
     @Transactional
     public StoreEntity updateStoreOwner(Long id, StoreEntity storeData) {
-        StoreEntity entity = storeRepository.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy store với ID: " + id));
+        StoreEntity entity = storeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy store với ID: " + id));
 
         entity.setName(storeData.getName());
         entity.setDescription(storeData.getDescription());
@@ -177,7 +183,8 @@ public class StoreService {
         entity.setStatus(storeData.getStatus());
 
         if (storeData.getOwner() != null && storeData.getOwner().getId() != null) {
-            UserEntity owner = userRepository.findById(storeData.getOwner().getId()).orElseThrow(() -> new RuntimeException("Không tìm thấy user với ID: " + storeData.getOwner().getId()));
+            UserEntity owner = userRepository.findById(storeData.getOwner().getId()).orElseThrow(
+                    () -> new RuntimeException("Không tìm thấy user với ID: " + storeData.getOwner().getId()));
             entity.setOwner(owner);
         }
 
@@ -186,7 +193,8 @@ public class StoreService {
 
     @Transactional
     public Optional<StoreEntity> softDeleteById(Long id) {
-        StoreEntity entity = storeRepository.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy store với ID: " + id));
+        StoreEntity entity = storeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy store với ID: " + id));
         entity.setStatus("Inactive");
         return Optional.ofNullable(storeRepository.save(entity));
     }
@@ -195,8 +203,6 @@ public class StoreService {
     public void deleteMultipleStores(List<Long> ids) {
         storeRepository.deleteAllByIdIn(ids);
     }
-
-
 
     public void importStores(List<StoreEntity> stores) {
         LocalDateTime importTime = LocalDateTime.now();
