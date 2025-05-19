@@ -8,9 +8,9 @@ const ProfileLayout = lazy(() => import("../Layouts/Profile"));
 const OwnerLayout = lazy(() => import("../Layouts/Owner"));
 
 // Owner Pages
-const OwnerHome = lazy(() => import("../Pages/OwnerPages/homeOwner"));
 const storeOwner = lazy(() => import("../Pages/OwnerPages/storeOwner"));
 const productOwner = lazy(() => import("../Pages/OwnerPages/productOwner"));
+const discountsOwner = lazy(() => import("../Pages/OwnerPages/discountsOwner"));
 const employeeOwner = lazy(() => import("../Pages/OwnerPages/employeeOwner"));
 const serviceOwner = lazy(() => import("../Pages/OwnerPages/serviceOwner"));
 const categoryOwner = lazy(() => import("../Pages/OwnerPages/categoryOwner"));
@@ -209,9 +209,9 @@ const routes = [
 	//Owner Routes
 	{
 		isPublic: false,
-		url: paths.ownerhome,
+		url: paths.ownerdiscounts,
 		Layout: OwnerLayout,
-		Page: OwnerHome,
+		Page: discountsOwner,
 		requiredRole: ["owner"],
 	},
 	{

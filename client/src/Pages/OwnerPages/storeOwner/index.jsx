@@ -4,16 +4,22 @@ import axios from "axios";
 import StoreService from "../../../Services/store";
 import { showToast } from "../../../Components/Toast/index.jsx";
 import { FaRegEdit } from "react-icons/fa";
+import { FaCalendarAlt } from "react-icons/fa";
 
-
-const Loading = React.lazy(() => import("../../../Components/Loading/index.jsx"));
+const Loading = React.lazy(() =>
+  import("../../../Components/Loading/index.jsx")
+);
 const Form = React.lazy(() => import("./Form/index.jsx"));
+const FormHoliday = React.lazy(() => import("./FormHoliday/index.jsx"));
 const StoreOwner = () => {
   const [storeData, setStoreData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editStore, setEditStore] = useState(null);
   const [selectedRow, setSelectedRow] = useState(null);
+  const [showHolidayForm, setShowHolidayForm] = useState(false);
+  const [selectedStoreForHoliday, setSelectedStoreForHoliday] = useState(null);
+
   useEffect(() => {
     const fetchStores = async () => {
       try {
@@ -30,44 +36,50 @@ const StoreOwner = () => {
     fetchStores();
   }, []);
 
-  useEffect(() => {
-   
-  });
+  useEffect(() => {});
 
   const handleEdit = (store) => {
     setEditStore(store);
-		setShowForm(true);
+    setShowForm(true);
+  };
+
+  const handleShowHolidayForm = (store) => {
+    setSelectedStoreForHoliday(store);
+    setShowHolidayForm(true);
   };
 
   const handleRowsSelected = ({ selectedRow }) => {
-		setSelectedRow(selectedRow);
-	};
+    setSelectedRow(selectedRow);
+  };
 
   const handleRowClicked = (row) => {
     setSelectedRow(row);
-};
+  };
   const handleFormSubmit = async (newStoreData) => {
-      try {
-        if (editStore) {
-          const response = await StoreService.updateStore(editStore.id, newStoreData);
-          setStoreData(
-            storeData.map((store) =>
-              store.id === editStore.id ? response.data : store
-            )
-          );
-          showToast("Cập nhật thành công", "success");
-          console.log("Cập nhật thành công:", response.data);
-          console.log("Dữ liệu sau khi cập nhật:", storeData);
-        } 
-      } catch (error) {
-        console.error("Lỗi khi lưu:", error);
-        const errorMessage =
-          typeof error === "string"
-            ? error
-            : error.message || "Lỗi không xác định";
-        showToast(`Lỗi khi lưu: ${errorMessage}`, "error");
+    try {
+      if (editStore) {
+        const response = await StoreService.updateStore(
+          editStore.id,
+          newStoreData
+        );
+        setStoreData(
+          storeData.map((store) =>
+            store.id === editStore.id ? response.data : store
+          )
+        );
+        showToast("Cập nhật thành công", "success");
+        console.log("Cập nhật thành công:", response.data);
+        console.log("Dữ liệu sau khi cập nhật:", storeData);
       }
-    };
+    } catch (error) {
+      console.error("Lỗi khi lưu:", error);
+      const errorMessage =
+        typeof error === "string"
+          ? error
+          : error.message || "Lỗi không xác định";
+      showToast(`Lỗi khi lưu: ${errorMessage}`, "error");
+    }
+  };
 
   const columns = [
     {
@@ -100,7 +112,7 @@ const StoreOwner = () => {
       selector: (row) => row.description,
       sortable: true,
     },
-    
+
     {
       name: "Actions",
       center: true,
@@ -111,6 +123,11 @@ const StoreOwner = () => {
             size={18}
             onClick={() => handleEdit(row)}
           />
+          <FaCalendarAlt
+            className="cursor-pointer text-white-500"
+            size={18}
+            onClick={() => handleShowHolidayForm(row)}
+          />
         </div>
       ),
       ignoreRowClick: true,
@@ -119,35 +136,44 @@ const StoreOwner = () => {
 
   return (
     <>
-     <div>
-      <DataTable
-        columns={columns}
-        data={storeData}
-        pagination
-        onRowClicked={handleRowClicked}
-        highlightOnHover
-        striped
-      />
-    </div>
-    
-    <Form
-				toggle={showForm}
-				setToggle={() => {
-					setShowForm(false);
-					setEditStore(null);
-				}}
-				initialData={editStore}
-				onSubmit={handleFormSubmit}
-				isDisabled={false}
-			/>
+      <div>
+        <DataTable
+          columns={columns}
+          data={storeData}
+          pagination
+          onRowClicked={handleRowClicked}
+          highlightOnHover
+          striped
+        />
+      </div>
 
-			<Form
-				toggle={!!selectedRow}
-				setToggle={() => setSelectedRow(null)}
-				initialData={selectedRow}
-				onSubmit={() => {}}
-				isDisabled={true}
-			/>
+      <Form
+        toggle={showForm}
+        setToggle={() => {
+          setShowForm(false);
+          setEditStore(null);
+        }}
+        initialData={editStore}
+        onSubmit={handleFormSubmit}
+        isDisabled={false}
+      />
+
+      <Form
+        toggle={!!selectedRow}
+        setToggle={() => setSelectedRow(null)}
+        initialData={selectedRow}
+        onSubmit={() => {}}
+        isDisabled={true}
+      />
+
+      <FormHoliday
+        open={showHolidayForm}
+        onClose={() => setShowHolidayForm(false)}
+        store={selectedStoreForHoliday}
+        onSubmit={(store, date) => {
+          showToast(`Đã lưu ngày nghỉ ${date} cho ${store.name}`, "success");
+        }}
+      />
     </>
   );
 };

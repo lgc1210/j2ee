@@ -43,6 +43,32 @@ class StoreService {
 		});
 	};
 
+	//Holiday
+	static getHolidaybyStore = async () => {
+		return await apiInstance.get(`${baseURL}/dayoffs/ListHolidays`, {
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
+	};
+
+	static createHoliday = async (payload) => {
+		return await apiInstance.post(`${baseURL}/dayoffs`, payload, {
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
+	};
+
+	 static deleteHoliday = async (holidayId) => {
+    return await apiInstance.delete(`${baseURL}/dayoffs/${holidayId}`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  };
+
+
 	// // Xóa một Store
 	// deleteStore = async (storeId) => {
 	// 	return await apiInstance.delete(`${baseURL}/stores/${storeId}`, {

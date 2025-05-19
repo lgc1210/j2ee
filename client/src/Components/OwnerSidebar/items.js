@@ -2,12 +2,6 @@ import paths from "../../Constants/paths";
 
 const items = [
   {
-    path: paths.ownerhome,
-    name: "Home",
-    requiredAuth: true,
-    requiredRole: ["owner"],
-  },
-  {
     path: paths.ownerstore,
     name: "Store",
     requiredAuth: true,
@@ -16,6 +10,12 @@ const items = [
   {
     path: paths.ownerproducts,
     name: "Products",
+    requiredAuth: true,
+    requiredRole: ["owner"],
+  },
+  {
+    path: paths.ownerdiscounts,
+    name: "Discounts",
     requiredAuth: true,
     requiredRole: ["owner"],
   },

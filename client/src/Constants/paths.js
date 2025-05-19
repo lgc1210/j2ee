@@ -1,7 +1,7 @@
 const paths = {
 	// Owner Paths
-	ownerhome: "/owner/home",
 	ownerstore: "/owner/store",
+	ownerdiscounts: "/owner/discounts",
 	owneremployees: "/owner/employees",
 	ownerservices: "/owner/services",
 	ownerproducts: "/owner/products",
