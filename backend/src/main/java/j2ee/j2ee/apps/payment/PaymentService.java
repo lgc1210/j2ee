@@ -48,7 +48,7 @@ public class PaymentService {
                 .findByAppointmentId(payment.getAppointment().getId());
 
         if (existingPayment.isPresent()) {
-            return null;
+            return toPaymentDTO(existingPayment.get());
         }
 
         return toPaymentDTO(paymentRepository.save(payment));
