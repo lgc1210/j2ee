@@ -142,7 +142,7 @@ public class OrderService {
         order.setCreated_at(LocalDateTime.now());
         order.setOrder_date(LocalDateTime.now());
         order.setShipping_address(request.getShippingAddress());
-        order.setStatus("Pending");
+        order.setStatus("Waiting for approval");
 
         List<OrderItem> items = new ArrayList<>();
         double totalAmount = 0;

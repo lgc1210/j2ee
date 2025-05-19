@@ -10,6 +10,7 @@ const paths = {
 	ownerorders: "/owner/orders",
 	ownerreviews: "/owner/reviews",
 	ownerstatistic: "/owner/statistic",
+	ownerpayments: "/owner/payments",
 
 	// Customer Paths
 	home: "/",

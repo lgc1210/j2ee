@@ -39,9 +39,15 @@ const items = [
   },
   {
     path: paths.ownerorders,
-    name: "Order",
+    name: "Orders",
     requiredAuth: true,
     requiredRole: ["owner"],
+  },
+  {
+    path: paths.ownerpayments,
+    name: "Payments",
+    requiredAuth: true,
+    requiredRole: ["owner"]
   },
   {
     path: paths.ownerservices,

@@ -32,4 +32,10 @@ public class PaymentController {
     public PaymentDTO createPayment(@RequestBody PaymentEntity payment) {
         return paymentService.createPayment(payment);
     }
+
+    @GetMapping("/store/{storeId}")
+    public ResponseEntity<List<PaymentEntity>> getPaymentsByStoreId(@PathVariable Long storeId) {
+        List<PaymentEntity> payments = paymentService.getPaymentsByStoreId(storeId);
+        return ResponseEntity.ok(payments);
+    }
 }

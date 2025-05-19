@@ -27,8 +27,6 @@ public class PaymentEntity {
 
     private double price;
 
-    private String status;
-
     private LocalDateTime payment_date;
 
     @ManyToOne

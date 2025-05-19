@@ -13,6 +13,26 @@ class OrderService {
             }
         );
     };
+
+    getOrdersByStore = async (storeId) => {
+        return await apiInstance.get(
+            `${baseURL}/orders/store/${storeId}`,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            })
+    }
+
+    updateOrderStatus = async (orderId, status) => {
+        return await apiInstance.put(
+            `${baseURL}/orders/${orderId}?status=${status}`,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            })
+    }
 }
 
 export default new OrderService();
