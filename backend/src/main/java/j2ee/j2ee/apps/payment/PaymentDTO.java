@@ -20,7 +20,6 @@ public class PaymentDTO {
     private AppointmentEntity appointment;
     private String paymentMethod;
     private double price;
-    private String status;
     private LocalDateTime paymentDate;
     private UserDTO staff;
 }

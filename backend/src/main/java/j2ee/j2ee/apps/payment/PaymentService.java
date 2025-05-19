@@ -24,7 +24,6 @@ public class PaymentService {
         dto.setAppointment(payment.getAppointment());
         dto.setPaymentMethod(payment.getPayment_method());
         dto.setPrice(payment.getPrice());
-        dto.setStatus(payment.getStatus());
         dto.setPaymentDate(payment.getPayment_date());
         dto.setStaff(userService.toUserDTO(payment.getStaff()));
 
@@ -54,4 +53,7 @@ public class PaymentService {
         return toPaymentDTO(paymentRepository.save(payment));
     }
 
+    public List<PaymentEntity> getPaymentsByStoreId(Long storeId) {
+        return paymentRepository.findByStoreId(storeId);
+    }
 }
