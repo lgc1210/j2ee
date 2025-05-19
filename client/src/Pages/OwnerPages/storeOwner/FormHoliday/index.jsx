@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Calendar, ConfigProvider, Tooltip } from "antd"; // Thêm Tooltip ở đây
+import { Calendar, ConfigProvider, Tooltip } from "antd";
 import "antd/dist/reset.css";
 import StoreService from "../../../../Services/store";
 import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import { showToast } from "../../../../Components/Toast";
 dayjs.extend(isSameOrAfter);
 const FormHoliday = ({ open, onClose, store, onSubmit }) => {
-  const [holidays, setHolidays] = useState([]); // [{id, date, description}]
+  const [holidays, setHolidays] = useState([]); 
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [description, setDescription] = useState("");
 
@@ -48,6 +49,7 @@ const FormHoliday = ({ open, onClose, store, onSubmit }) => {
     try {
       await StoreService.deleteHoliday(holidayId);
       setHolidays((prev) => prev.filter((h) => h.id !== holidayId));
+      showToast("Xóa ngày nghỉ thành công", "success");
     } catch (e) {
       console.error("Lỗi khi xóa ngày nghỉ:", e?.response?.data || e);
     }
@@ -90,7 +92,7 @@ const FormHoliday = ({ open, onClose, store, onSubmit }) => {
       </div>
     );
 
-    // Nếu là ngày nghỉ thì bọc Tooltip, có nút xóa
+    
     return isHoliday ? (
       <Tooltip
         title={

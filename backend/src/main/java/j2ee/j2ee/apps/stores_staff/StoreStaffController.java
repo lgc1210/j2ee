@@ -1,4 +1,4 @@
-package j2ee.j2ee.apps.staff;
+package j2ee.j2ee.apps.stores_staff;
 
 import java.util.HashMap;
 import java.util.Optional;
@@ -20,15 +20,15 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/staff")
-public class StaffController {
+public class StoreStaffController {
 
     @Autowired
     private UserService userService;
     @Autowired
-    private StaffService staffService;
+    private StoreStaffService staffService;
 
     @GetMapping("/ListStaff")
-    public ResponseEntity<List<StaffEntity>> getAllByLoggedInUser(Authentication authentication) {
+    public ResponseEntity<List<StoreStaffEntity>> getAllByLoggedInUser(Authentication authentication) {
         try {
             // Lấy thông tin username từ Authentication
             String username = authentication.getPrincipal().toString();
@@ -60,7 +60,7 @@ public class StaffController {
     }
 
     @PostMapping("/createWithUser")
-    public ResponseEntity<?> createStaffWithUser(@RequestBody StaffEntity staffEntity) {
+    public ResponseEntity<?> createStaffWithUser(@RequestBody StoreStaffEntity staffEntity) {
         try {
             UserEntity staffUser = staffEntity.getStaff();
             if (staffUser == null) {
@@ -69,7 +69,7 @@ public class StaffController {
             
             UserEntity createdUser = userService.create(staffUser);
             staffEntity.setStaff(createdUser);
-            StaffEntity createdStaff = staffService.createStaff(staffEntity);
+            StoreStaffEntity createdStaff = staffService.createStaff(staffEntity);
 
             return ResponseEntity.ok(createdStaff);
         } catch (DataIntegrityViolationException e) {
@@ -83,11 +83,11 @@ public class StaffController {
     }
 
     @PutMapping("/{staffId}")
-    public ResponseEntity<StaffEntity> updateStaff(
+    public ResponseEntity<StoreStaffEntity> updateStaff(
             @PathVariable Long staffId,
-            @RequestBody StaffEntity staffEntity) {
+            @RequestBody StoreStaffEntity staffEntity) {
         try {
-            StaffEntity updatedStaff = staffService.updateStaff(staffId, staffEntity);
+            StoreStaffEntity updatedStaff = staffService.updateStaff(staffId, staffEntity);
             if (updatedStaff == null) {
                 return ResponseEntity.notFound().build();
             }
